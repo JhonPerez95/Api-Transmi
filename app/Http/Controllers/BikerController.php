@@ -22,10 +22,11 @@ class BikerController extends Controller
     private $client;
 
 
-    public function __construct(){
-        if(Route::getCurrentRoute()){
+    public function __construct()
+    {
+        if (Route::getCurrentRoute()) {
             $route = Route::getCurrentRoute()->uri();
-            $this->client = ( preg_match("/api\//",$route)) ? "app" : "web";
+            $this->client = (preg_match("/api\//", $route)) ? "app" : "web";
         }
     }
 
@@ -42,8 +43,14 @@ class BikerController extends Controller
                 ->join('type_documents', 'bikers.type_documents_id', '=', 'type_documents.id')
                 ->join('genders', 'bikers.genders_id', '=', 'genders.id')
                 ->join('jobs', 'bikers.jobs_id', '=', 'jobs.id')
-                ->select('bikers.*', 'type_documents.name as type', 'genders.name as gender', 'jobs.name as job', 
-                'bikers.neighborhoods_id as neighborhood' ,DB::raw('SUBSTRING(bikers.levels_id, 9,9) AS levels_id'))
+                ->select(
+                    'bikers.*',
+                    'type_documents.name as type',
+                    'genders.name as gender',
+                    'jobs.name as job',
+                    'bikers.neighborhoods_id as neighborhood',
+                    DB::raw('SUBSTRING(bikers.levels_id, 9,9) AS levels_id')
+                )
                 ->get();
 
             $type = DB::table('type_documents')
@@ -58,13 +65,13 @@ class BikerController extends Controller
                 ->select('jobs.name as text', 'jobs.id as value')
                 ->where('jobs.active', '=', 1)
                 ->get();
-            $level =[
-                ["value"=> "1", "text"=> "Estrato 1"],
-                ["value"=> "2", "text"=> "Estrato 2"],
-                ["value"=> "3", "text"=> "Estrato 3"],
-                ["value"=> "4", "text"=> "Estrato 4"],
-                ["value"=> "5", "text"=> "Estrato 5"],
-                ["value"=> "6", "text"=> "Estrato 6"],
+            $level = [
+                ["value" => "1", "text" => "Estrato 1"],
+                ["value" => "2", "text" => "Estrato 2"],
+                ["value" => "3", "text" => "Estrato 3"],
+                ["value" => "4", "text" => "Estrato 4"],
+                ["value" => "5", "text" => "Estrato 5"],
+                ["value" => "6", "text" => "Estrato 6"],
             ];
 
             $parkings = DB::table('parkings')
@@ -88,7 +95,7 @@ class BikerController extends Controller
                 'response' => [
                     'users' => $data,
                     'indexes' => [
-                        'type' => $type, 'gender' => $gender, 'job' => $job,'level' => $level, 'active' => $active, 'parkings'=>$parkings
+                        'type' => $type, 'gender' => $gender, 'job' => $job, 'level' => $level, 'active' => $active, 'parkings' => $parkings
                     ]
                 ]
             ],
@@ -113,48 +120,52 @@ class BikerController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-    private function photoValidation($request , $updating = false)
+    private function photoValidation($request, $updating = false)
     {
         $phValid = [];
 
         if (!$request->hasFile('photo')) {
 
             // While updating, resending the image won't be required
-            if(!$updating){ $phValid[] = 'El campo fotografía es requerido'; }
-
+            if (!$updating) {
+                $phValid[] = 'El campo fotografía es requerido';
+            }
         } else {
             $ph = $request->file('photo');
-            
-            $arrayingImage =(gettype($ph) != 'array')? [$ph] : $ph;  
+
+            $arrayingImage = (gettype($ph) != 'array') ? [$ph] : $ph;
             $extensiones = ["jpg", "png", "jpeg"];
 
-            if(count($arrayingImage)>1){
+            if (count($arrayingImage) > 1) {
                 $phValid[] = 'Se ha recibido más de una imágen para el ciclista';;
                 return $phValid;
             }
-                
-            if (!$ph->isValid()) { $phValid[] = 'El campo fotografía es inválido'; }
+
+            if (!$ph->isValid()) {
+                $phValid[] = 'El campo fotografía es inválido';
+            }
 
             if (!in_array($ph->getClientOriginalExtension(), $extensiones)) {
                 $phValid[] = 'El campo fotografía recibe imágenes de formato jpg, jpeg y png.';
             }
 
-            if ($ph->getSize() > 10000000) { $phValid[] = 'El campo fotografía tiene un tamaño máximo de 10MB'; }
-
+            if ($ph->getSize() > 10000000) {
+                $phValid[] = 'El campo fotografía tiene un tamaño máximo de 10MB';
+            }
         }
 
         return $phValid;
     }
 
     public function store(Request $request)
-    {   
+    {
 
         log::info("==TRACE== biker@STORE");
         log::info($request->all());
 
         $validateImage = true;
-        if($request->debug){
-            return response()->json(['message'=>'Internal Error', 'response'=>['data'=>['raw'=>$request->all(), 'json'=>json_encode($request->all())],'errors'=>[]]],500);
+        if ($request->debug) {
+            return response()->json(['message' => 'Internal Error', 'response' => ['data' => ['raw' => $request->all(), 'json' => json_encode($request->all())], 'errors' => []]], 500);
         }
 
         $validation = [
@@ -238,10 +249,10 @@ class BikerController extends Controller
         ];
 
         try {
-            
+
             $validator = Validator::make($request->all(), $validation['rules'], $validation['messages']);
-            
-            if($validateImage){
+
+            if ($validateImage) {
                 // Photo validation
                 $phtValidation = $this->photoValidation($request);
 
@@ -257,24 +268,29 @@ class BikerController extends Controller
                 if (!$statusResponse) {
                     return response()->json(['message' => 'Internal Error', 'response' => ["errors" => ["Error en la manipulación de archivos."]]], 500);
                 }
-
-            }else{
+            } else {
                 if ($validator->fails()) {
                     return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $validator->errors()->all()]], 400);
                 }
             }
-            
+
             $vef = VerificationCode::validate($request->confirmation, $request->phone);
 
-            if(!$vef){
-                return response()->json(['message' => 'Bad Request', 'response' => ['errors'=>['El código de verificación no acerta las credenciales con las que fue registrado.']]], 400);
+            if (!$vef) {
+                return response()->json(['message' => 'Bad Request', 'response' => ['errors' => ['El código de verificación no acerta las credenciales con las que fue registrado.']]], 400);
             }
 
-            $counter = Parameter::where(['name'=>'biker_counter'])->first();
-            $code = 'CP' . substr("00000". ($counter->value + 1),-5,5);
-            
+            $counter = Parameter::where(['name' => 'biker_counter'])->first();
+            $code = 'CP' . substr("00000" . ($counter->value + 1), -5, 5);
+
+            Cloudder::upload($request->file('photo'));
+            $publicId = Cloudder::getPublicId();
+            $urlImg =  Cloudder::secureShow($publicId); 
+            // $publicId = '232323';
+            // $urlImg =  'Cloudder::secureShow($publicId)';
+
             $biker = Biker::create([
-                
+
                 'name' => $request->name,
                 'last_name' => $request->lastName,
                 'type_documents_id' => $request->type,
@@ -292,6 +308,8 @@ class BikerController extends Controller
                 'register' => $request->register,
                 'active' => $request->active,
                 'auth' => $request->auth,
+                'url_img' => $urlImg,
+                'id_img' => $publicId,
             ]);
 
             //? Usefull while deving, maybe not so much on production, can't harm tho'
@@ -300,21 +318,14 @@ class BikerController extends Controller
 
             $counter->value = $counter->value + 1;
             $counter->save();
-            $urlImg= '';
-            if ($validateImage) { //? photo upload
-                Cloudder::upload($request->file('photo'));
-                $publicId = Cloudder::getPublicId();
-                $urlImg =  Cloudder::secureShow($publicId);
-            }
-            
-            $smsResponse = $biker->notifySignup($request->parkings_id);
-            return response()->json(['message' => 'User Created', 'response' => ["data" => $biker,"urlImg" => $urlImg, "errors" => []],], 201);
 
+
+            $smsResponse = $biker->notifySignup($request->parkings_id);
+            return response()->json(['message' => 'User Created', 'response' => ["data" => $biker, "errors" => []],], 201);
         } catch (QueryException $th) {
             Log::emergency($th);
             return response()->json(['message' => 'Internal Error', 'response' => ["errors" => [$th->getMessage()]]], 500);
         }
-       
     }
 
     /**
@@ -325,53 +336,64 @@ class BikerController extends Controller
      */
     public function show($id)
     {
-        
+
         try {
 
-            $biker = ($this->client == 'web') ?  Biker::find($id) : Biker::where(['document'=>$id])->first();
-            if(!$biker){
-                return response()->json(['message'=>'Not Found', 'response'=>['errors'=>['Registro de ciclista no encontrado']]],404);
+            $biker = ($this->client == 'web') ?  Biker::find($id) : Biker::where(['document' => $id])->first();
+            if (!$biker) {
+                return response()->json(['message' => 'Not Found', 'response' => ['errors' => ['Registro de ciclista no encontrado']]], 404);
             }
             $query = $this->client == 'web' ?  'bikers.id' : 'bikers.document';
             $data = DB::table('bikers')
-                ->where($query,$id)
+                ->where($query, $id)
                 ->join('type_documents', 'bikers.type_documents_id', '=', 'type_documents.id')
                 ->join('genders', 'bikers.genders_id', '=', 'genders.id')
                 ->join('jobs', 'bikers.jobs_id', '=', 'jobs.id')
-                ->select('bikers.*', 'type_documents.name as type', 'genders.name as gender', 'jobs.name as job', 
-                    'bikers.neighborhoods_id as neighborhood', DB::raw('SUBSTRING(bikers.levels_id, 9,9) AS levels_id'))
+                ->select(
+                    'bikers.*',
+                    'type_documents.name as type',
+                    'genders.name as gender',
+                    'jobs.name as job',
+                    'bikers.neighborhoods_id as neighborhood',
+                    DB::raw('SUBSTRING(bikers.levels_id, 9,9) AS levels_id')
+                )
                 ->first();
 
             $appUrl = config('app.url');
-            
-            //?Check if localhost
-            $appUrl = ($appUrl[ strlen($appUrl) -1 ] == '/' ) ? $appUrl : "$appUrl:8000/";
 
-            $bikerPhotos = Storage::allFiles("public/bikers/biker{$biker->id}");            
-            $data->photo = (count($bikerPhotos)) ? $appUrl . preg_replace('/public/','storage',$bikerPhotos[0]) : null ;
+            //?Check if localhost
+            $appUrl = ($appUrl[strlen($appUrl) - 1] == '/') ? $appUrl : "$appUrl:8000/";
+
+            $bikerPhotos = Storage::allFiles("public/bikers/biker{$biker->id}");
+            $data->photo = (count($bikerPhotos)) ? $appUrl . preg_replace('/public/', 'storage', $bikerPhotos[0]) : null;
 
             $_bicies = DB::table('bicies')
-                ->where('bikers_id',$biker->id)
+                ->where('bikers_id', $biker->id)
                 ->select('bicies.*')
                 ->get();
             $bicies = array();
 
 
-            foreach($_bicies as $bicy){
+            foreach ($_bicies as $bicy) {
 
                 $existingPhotos = Storage::allFiles("public/bicies/bicy{$bicy->id}");
 
-                $frontPhoto = array_filter($existingPhotos, function($el){ return preg_match('/front_/',$el); });
-                $bicy->image_front = ( count($frontPhoto) )? $appUrl .  preg_replace('/public/','storage', array_values($frontPhoto)[0])  : null;
-                
-                $backPhoto = array_filter($existingPhotos, function($el){ return preg_match('/back_/',$el); });
-                $bicy->image_back = ( count($backPhoto) )? $appUrl .  preg_replace('/public/','storage', array_values($backPhoto)[0])  : null;
+                $frontPhoto = array_filter($existingPhotos, function ($el) {
+                    return preg_match('/front_/', $el);
+                });
+                $bicy->image_front = (count($frontPhoto)) ? $appUrl .  preg_replace('/public/', 'storage', array_values($frontPhoto)[0])  : null;
 
-                $sidePhoto = array_filter($existingPhotos, function($el){ return preg_match('/side_/',$el); });
-                $bicy->image_side = ( count($sidePhoto) )? $appUrl .  preg_replace('/public/','storage', array_values($sidePhoto)[0])  : null;
+                $backPhoto = array_filter($existingPhotos, function ($el) {
+                    return preg_match('/back_/', $el);
+                });
+                $bicy->image_back = (count($backPhoto)) ? $appUrl .  preg_replace('/public/', 'storage', array_values($backPhoto)[0])  : null;
+
+                $sidePhoto = array_filter($existingPhotos, function ($el) {
+                    return preg_match('/side_/', $el);
+                });
+                $bicy->image_side = (count($sidePhoto)) ? $appUrl .  preg_replace('/public/', 'storage', array_values($sidePhoto)[0])  : null;
 
                 $bicies[] = $bicy;
-
             }
 
             $type = DB::table('type_documents')
@@ -398,21 +420,22 @@ class BikerController extends Controller
             ];
 
             return response()->json(
-            [
-                'message' => "Sucess",
-                'response' => [
-                    'data' => $data,
-                    'bicies' => $bicies,
-                    'indexes' => [
-                        'type' => $type, 'gender' => $gender, 'job' => $job, 'level' => $level, 'active' => $active
+                [
+                    'message' => "Sucess",
+                    'response' => [
+                        'data' => $data,
+                        'bicies' => $bicies,
+                        'indexes' => [
+                            'type' => $type, 'gender' => $gender, 'job' => $job, 'level' => $level, 'active' => $active
+                        ]
                     ]
-                ]
-            ], 200 );
+                ],
+                200
+            );
         } catch (QueryException $th) {
             Log::emergency($th);
-            return response()->json(['message'=>'Internal Error', 'response'=>['errors'=>[$th->getMessage()]]],500);
+            return response()->json(['message' => 'Internal Error', 'response' => ['errors' => [$th->getMessage()]]], 500);
         }
-        
     }
 
     /**
@@ -454,7 +477,7 @@ class BikerController extends Controller
             $emailRules = ($data->email == $request->input('email')) ?  'required|email|min:8|max:60' : 'required|email|min:8|max:60|unique:bikers';
             $documentRules = ($data->document == $request->input('document')) ?  'required|min:5|max:30' : 'required|min:5|max:30|unique:bikers';
             $confirmationRules = ($data->phone == $request->input('phone')) ?  '' : 'required|exists:verification_codes,code';
-             
+
             $validation = [
                 "rules" => [
                     'name' => 'required|min:4|max:100',
@@ -475,7 +498,7 @@ class BikerController extends Controller
                     'gender' =>     'required|exists:genders,id',
                 ],
                 "messages" => [
-                    
+
                     'document.required' => 'El campo documento es requerido',
                     'document.unique' => 'El documento ingresado ya existe.',
                     'document.max' => 'El campo documento debe tener máximo 30 caracteres',
@@ -540,7 +563,7 @@ class BikerController extends Controller
             $validator = Validator::make($request->all(), $validation['rules'], $validation['messages']);
 
 
-            if($validateImage){
+            if ($validateImage) {
                 // photo validation
                 $phtValidation = $this->photoValidation($request, true);
 
@@ -551,24 +574,24 @@ class BikerController extends Controller
                         return response()->json(['response' => ['errors' => $phtValidation], 'message' => 'Bad Request'], 400);
                     }
                 }
-                
+
                 if ($request->hasFile('photo')) {
-                    $statusResponse = Storage::disk('local')->putFileAs('testingUpload', $request->file('photo'),'testing.png');
-                    if(!$statusResponse){
-                        return response()->json(['message' => 'Internal Error', 'response'=>["errors"=>["Error en la manipulación de archivos."]] ],500);
+                    $statusResponse = Storage::disk('local')->putFileAs('testingUpload', $request->file('photo'), 'testing.png');
+                    if (!$statusResponse) {
+                        return response()->json(['message' => 'Internal Error', 'response' => ["errors" => ["Error en la manipulación de archivos."]]], 500);
                     }
                 }
-            }else{
+            } else {
                 if ($validator->fails()) {
                     return response()->json(['response' => ['errors' => $validator->errors()->all()], 'message' => 'Bad Request'], 400);
                 }
             }
 
             // Verification code, validated above, deleted here
-            if($data->phone != $request->input('phone')) {
+            if ($data->phone != $request->input('phone')) {
                 $vef = VerificationCode::validate($request->confirmation);
-                if(!$vef){
-                    return response()->json(['message' => 'Bad Request', 'response' => ['errors'=>['El código de verificación no acerta las credenciales con las que fue registrado.']]], 400);
+                if (!$vef) {
+                    return response()->json(['message' => 'Bad Request', 'response' => ['errors' => ['El código de verificación no acerta las credenciales con las que fue registrado.']]], 400);
                 }
             }
 
@@ -590,13 +613,13 @@ class BikerController extends Controller
             $data->auth = $request->auth;
             $data->save();
 
-            
+
             // Check & delete which existing images were not send back
-            if($validateImage && $request->hasFile('photo') ){
-                Storage::delete( Storage::allFiles("public/bikers/biker{$id}"));
+            if ($validateImage && $request->hasFile('photo')) {
+                Storage::delete(Storage::allFiles("public/bikers/biker{$id}"));
                 $statusResponse = Storage::disk('local')->putFile("public/bikers/biker{$id}", $request->file('photo'));
             }
-            
+
             return response()->json(['message' => 'User Updated', 'response' => ["errors" => []]], 200);
         } catch (QueryException $th) {
             Log::emergency($th);
@@ -627,73 +650,82 @@ class BikerController extends Controller
             $data->save();
             Storage::deleteDirectory("public/bikers/biker$id");
 
-            return response()->json(['message' => 'Success',  'response' => ['data'=>['Ciclista Anulado'],'errors' => []]], 200);
+            return response()->json(['message' => 'Success',  'response' => ['data' => ['Ciclista Anulado'], 'errors' => []]], 200);
         } catch (QueryException $th) {
             Log::emergency($th);
             return response()->json(['message' => 'Internal Error', 'response' => ['errors' => [$th->getMessage()]]], 500);
         }
     }
 
-    public function unblockBiker($id){
+    public function unblockBiker($id)
+    {
 
-        try{
+        try {
 
             $biker = Biker::find($id);
-            if(!$biker){
-                return response()->json(['message'=>'Not Found', 'response'=>['errors'=>['Usuario ciclista no encontrado']]],404);
+            if (!$biker) {
+                return response()->json(['message' => 'Not Found', 'response' => ['errors' => ['Usuario ciclista no encontrado']]], 404);
             }
             $biker->unblockAndNotify();
-            
+
             return response()->json(['message' => 'Success', 'response' => ["errors" => []]], 200);
-        }catch (QueryException $th) {
+        } catch (QueryException $th) {
             Log::emergency($th);
             return response()->json(['message' => 'Internal Error', 'response' => ["errors" => [$th->getMessage()]]], 500);
         }
-
     }
 
-    public function checkActiveness(){
-        
-        try{
+    public function checkActiveness()
+    {
+
+        try {
             $currentDate = date('Y-m-d H:i:s');
             $currentYear = date('Y');
             $limitYear = intval($currentYear) - 2;
-            $limitDate = preg_replace("/$currentYear/",$limitYear,$currentDate);
+            $limitDate = preg_replace("/$currentYear/", $limitYear, $currentDate);
 
             $bikers = DB::table('bikers')
                 ->where("bikers.updated_at", "<", $limitDate)
                 ->where("bikers.active", "!=", "3")
-                ->join('visits','bikers.id','visits.bikers_id')
+                ->join('visits', 'bikers.id', 'visits.bikers_id')
                 ->groupBy('bikers.id')
-                ->select('bikers.id',DB::raw('max(visits.updated_at) as lastAction'), DB::raw("max(visits.updated_at) < '$limitDate' as inactive"))
+                ->select('bikers.id', DB::raw('max(visits.updated_at) as lastAction'), DB::raw("max(visits.updated_at) < '$limitDate' as inactive"))
                 ->get()->toArray();
 
-            $toBeBlockedBikers = array_values(array_filter($bikers, function($biker){ if($biker->inactive){return true; }}));
-            $toBeBlockedBikers_ids = array_map(function($biker){return $biker->id;},$toBeBlockedBikers);
+            $toBeBlockedBikers = array_values(array_filter($bikers, function ($biker) {
+                if ($biker->inactive) {
+                    return true;
+                }
+            }));
+            $toBeBlockedBikers_ids = array_map(function ($biker) {
+                return $biker->id;
+            }, $toBeBlockedBikers);
 
             $smsResponses = Biker::notifyBeingBlocked($toBeBlockedBikers_ids);
             return response()->json([
-                'message'=> 'sucess',
-                'response'=>[
-                    'data'=>[
+                'message' => 'sucess',
+                'response' => [
+                    'data' => [
                         'bikers' => $toBeBlockedBikers,
                         'smsResponses' => $smsResponses
                     ],
-                    'errors'=>[]
+                    'errors' => []
                 ]
-            ],200);
-        }catch (QueryException $th) {
+            ], 200);
+        } catch (QueryException $th) {
             Log::emergency($th);
             return response()->json(['message' => 'Internal Error', 'response' => ["errors" => [$th->getMessage()]]], 500);
         }
     }
 
 
-    public function getVerificationCode(Request $request, $phone){
+    public function getVerificationCode(Request $request, $phone)
+    {
         return Biker::getVerificationCode($phone);
     }
 
-    public function massiveStore( Request $request ){
+    public function massiveStore(Request $request)
+    {
 
         $validation = [
             "rules" => [
@@ -777,10 +809,12 @@ class BikerController extends Controller
 
         $bikers = [];
         $errors = [];
-        foreach(file($request->file('csv')) as $i => $line){
-            if($i == 0){continue;} //? Titles Line
+        foreach (file($request->file('csv')) as $i => $line) {
+            if ($i == 0) {
+                continue;
+            } //? Titles Line
             $info = explode(',', $line);
-            if(!count($info)){
+            if (!count($info)) {
                 $errors[] = "El contenido es inválido para la línea '$line'";
             }
             $biker = [
@@ -801,35 +835,34 @@ class BikerController extends Controller
                 'active' => 1,
                 'register' => date('Y-m-d'),
             ];
-            
+
 
             $validator = Validator::make($biker, $validation['rules'], $validation['messages']);
             if ($validator->fails()) {
                 $_errors = [];
                 foreach ($validator->errors()->all() as $value) {
                     // $_errors[] = "$value , mientras validando la línea " . ($i +1) . " , '$line' ";
-                    $_errors[] = "$value , mientras validando la línea " . ($i +1);
+                    $_errors[] = "$value , mientras validando la línea " . ($i + 1);
                 }
-                $errors = array_merge( $errors,  $_errors ); 
+                $errors = array_merge($errors,  $_errors);
             }
 
             $bikers[] = $biker;
-
         }
 
-        if(count($errors)){
-            return response()->json(['message'=>'Bad Request', 'response'=>['errors'=>$errors]],200);
+        if (count($errors)) {
+            return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $errors]], 200);
         }
 
         $storeErrors = [];
-        $Bikers =[];
+        $Bikers = [];
         $Line = 0;
         DB::beginTransaction();
-        try{
-            foreach($bikers as $i => $biker){
+        try {
+            foreach ($bikers as $i => $biker) {
                 $Line = $i;
-                $counter = Parameter::where(['name'=>'biker_counter'])->first();
-                $code = 'CP' . substr("00000". ($counter->value + 1),-5,5);
+                $counter = Parameter::where(['name' => 'biker_counter'])->first();
+                $code = 'CP' . substr("00000" . ($counter->value + 1), -5, 5);
                 $biker['code'] = $code;
                 $Biker = Biker::create($biker);
                 $counter->value = $counter->value + 1;
@@ -837,32 +870,32 @@ class BikerController extends Controller
                 $Bikers[] = $Biker;
             }
             DB::commit();
-        }catch(QueryException $e){
+        } catch (QueryException $e) {
             $code = $e->getCode();
             $str = $e->getMessage();
 
             log::info("== TRACING ERROR CODE == {$code} ");
 
-            if($code == 1062 || $code == 23000){
+            if ($code == 1062 || $code == 23000) {
                 preg_match("/Duplicate entry '(.*?)' for key '(.*?)'/", $str, $matches);
                 $storeErrors[] = "Valor({$matches[1]}) duplicado para el campo '{$matches[2]}', en la línea $Line";
-            }else{
+            } else {
                 $storeErrors[] = $str;
             }
         }
-        if(count($storeErrors)){
+        if (count($storeErrors)) {
             DB::rollback();
         }
-            
-        
 
-        return response()->json(['message'=>'Success', 'response'=>['data'=>[ 'bikers'=>$Bikers ], 'indexes'=>[], 'errors'=>['storeErrors'=>$storeErrors]]],200);
 
+
+        return response()->json(['message' => 'Success', 'response' => ['data' => ['bikers' => $Bikers], 'indexes' => [], 'errors' => ['storeErrors' => $storeErrors]]], 200);
     }
 
 
 
-    public function massiveRawTextMessage( Request $request){
+    public function massiveRawTextMessage(Request $request)
+    {
 
         $validation = [
             "rules" => [
@@ -876,8 +909,8 @@ class BikerController extends Controller
         ];
 
         try {
-            
-            $validator = Validator::make($request->all(), $validation['rules'], $validation['messages']);            
+
+            $validator = Validator::make($request->all(), $validation['rules'], $validation['messages']);
             if ($validator->fails()) {
                 return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $validator->errors()->all()]], 400);
             }
@@ -885,33 +918,29 @@ class BikerController extends Controller
             $logs = [];
             $errors = [];
             $succeses = [];
-            $bikers = explode(',',$request->bikers);
+            $bikers = explode(',', $request->bikers);
             foreach ($bikers as $key => $bikerId) {
 
                 $Biker = Biker::find($bikerId);
-                if(!$Biker){
-                    $errors[] = ['id'=>$bikerId, 'message'=>'No encontrado'];
+                if (!$Biker) {
+                    $errors[] = ['id' => $bikerId, 'message' => 'No encontrado'];
                 }
-                
+
                 $resp = $Biker->sendRawTextMessage($request->message);
                 $logs[] = $resp;
-                if(preg_match('/OK/',$resp)){
-                    $succeses[] = ['id'=>$bikerId, 'message'=>$resp];
-                }else{
-                    $errors[] = ['id'=>$bikerId, 'message'=>$resp];
+                if (preg_match('/OK/', $resp)) {
+                    $succeses[] = ['id' => $bikerId, 'message' => $resp];
+                } else {
+                    $errors[] = ['id' => $bikerId, 'message' => $resp];
                 }
             }
 
-            return response()->json(['message' => 'User Created', 'response' => ["data" => $succeses, "errors" => $errors, 'logs'=>$logs],], 201);
-
+            return response()->json(['message' => 'User Created', 'response' => ["data" => $succeses, "errors" => $errors, 'logs' => $logs],], 201);
         } catch (QueryException $th) {
             Log::emergency($th);
             return response()->json(['message' => 'Internal Error', 'response' => ["errors" => [$th->getMessage()]]], 500);
         }
 
-        return response()->json(['message'=>'Success', 'response'=>['data'=>['massiv','data'=>$request->all()], 'indexes'=>[], 'errors'=>[]]],200);
-
+        return response()->json(['message' => 'Success', 'response' => ['data' => ['massiv', 'data' => $request->all()], 'indexes' => [], 'errors' => []]], 200);
     }
-
-
 }

@@ -24,6 +24,8 @@ class CreateBikersTable extends Migration
             $table->unsignedBigInteger('parkings_id');    
             $table->string('phone');
             $table->string('email');
+            $table->string('url_img');
+            $table->string('id_img');
             $table->string('confirmation')->nullable(true);
             $table->unsignedBigInteger('jobs_id');
             $table->string('neighborhoods_id');

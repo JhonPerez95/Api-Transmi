@@ -33,6 +33,8 @@ class BikerSeeder extends Seeder
             'active' => '1',
             'code' => 'CP00001',
             'auth' => '2',
+            'url_img' => 'https://res.cloudinary.com/jhontt95/image/upload/c_fit,h_150,w_150/igkywvrdzo93sxp3vkq8.png',
+            'id_img' => 'igkywvrdzo93sxp3vkq8'
         ]);
         $henry = Biker::create([
             'name' => 'Henry',
@@ -51,6 +53,8 @@ class BikerSeeder extends Seeder
             'active' => '1',
             'code' => 'CP00002',
             'auth' => '1',
+            'url_img' => 'https://res.cloudinary.com/jhontt95/image/upload/c_fit,h_150,w_150/igkywvrdzo93sxp3vkq8.png',
+            'id_img' => 'igkywvrdzo93sxp3vkq8'
         ]);
         $camilo = Biker::create([
             'name' => 'Camilo',
@@ -69,6 +73,8 @@ class BikerSeeder extends Seeder
             'code' => 'CP00003',
             'active' => '1',
             'auth' => '1',
+            'url_img' => 'https://res.cloudinary.com/jhontt95/image/upload/c_fit,h_150,w_150/igkywvrdzo93sxp3vkq8.png',
+            'id_img' => 'igkywvrdzo93sxp3vkq8'
         ]);
 
 
@@ -92,6 +98,8 @@ class BikerSeeder extends Seeder
             'code' => 'CP00004',
             'active' => '1',
             'auth' => '1',
+            'url_img' => 'https://res.cloudinary.com/jhontt95/image/upload/c_fit,h_150,w_150/igkywvrdzo93sxp3vkq8.png',
+            'id_img' => 'igkywvrdzo93sxp3vkq8'
         ]);
 
         $carlos = Biker::create([
@@ -111,6 +119,8 @@ class BikerSeeder extends Seeder
             'code' => 'CP00005',
             'active' => '1',
             'auth' => '1',
+            'url_img' => 'https://res.cloudinary.com/jhontt95/image/upload/c_fit,h_150,w_150/igkywvrdzo93sxp3vkq8.png',
+            'id_img' => 'igkywvrdzo93sxp3vkq8'
         ]);
 
         $jose = Biker::create([
@@ -130,6 +140,8 @@ class BikerSeeder extends Seeder
             'code' => 'CP00006',
             'active' => '1',
             'auth' => '1',
+            'url_img' => 'https://res.cloudinary.com/jhontt95/image/upload/c_fit,h_150,w_150/igkywvrdzo93sxp3vkq8.png',
+            'id_img' => 'igkywvrdzo93sxp3vkq8'
         ]);
 
 
@@ -151,11 +163,8 @@ class BikerSeeder extends Seeder
             'parkings_id' => '1',
             'active' => '1',
             'auth' => '1',
+            'url_img' => 'https://res.cloudinary.com/jhontt95/image/upload/c_fit,h_150,w_150/igkywvrdzo93sxp3vkq8.png',
+            'id_img' => 'igkywvrdzo93sxp3vkq8'
         ]);
-
-
-
-
-        
     }
 }
