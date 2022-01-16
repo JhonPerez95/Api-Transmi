@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Route;
+use Cloudder;
 
 use App\Models\VerificationCode;
 
@@ -123,6 +124,7 @@ class BikerController extends Controller
 
         } else {
             $ph = $request->file('photo');
+            
             $arrayingImage =(gettype($ph) != 'array')? [$ph] : $ph;  
             $extensiones = ["jpg", "png", "jpeg"];
 
@@ -263,6 +265,7 @@ class BikerController extends Controller
             }
             
             $vef = VerificationCode::validate($request->confirmation, $request->phone);
+
             if(!$vef){
                 return response()->json(['message' => 'Bad Request', 'response' => ['errors'=>['El código de verificación no acerta las credenciales con las que fue registrado.']]], 400);
             }
@@ -271,6 +274,7 @@ class BikerController extends Controller
             $code = 'CP' . substr("00000". ($counter->value + 1),-5,5);
             
             $biker = Biker::create([
+                
                 'name' => $request->name,
                 'last_name' => $request->lastName,
                 'type_documents_id' => $request->type,
@@ -291,18 +295,20 @@ class BikerController extends Controller
             ]);
 
             //? Usefull while deving, maybe not so much on production, can't harm tho'
-            $existingPhotos = Storage::allFiles("public/bikers/biker{$biker->id}");
-            Storage::delete($existingPhotos);
+            // $existingPhotos = Storage::allFiles("public/bikers/biker{$biker->id}");
+            // Storage::delete($existingPhotos);
 
             $counter->value = $counter->value + 1;
             $counter->save();
-
-            if($validateImage){ //? photo upload
-                $statusResponse = Storage::disk('local')->put("public/bikers/biker{$biker['id']}", $request->file('photo'));
+            $urlImg= '';
+            if ($validateImage) { //? photo upload
+                Cloudder::upload($request->file('photo'));
+                $publicId = Cloudder::getPublicId();
+                $urlImg =  Cloudder::secureShow($publicId);
             }
             
             $smsResponse = $biker->notifySignup($request->parkings_id);
-            return response()->json(['message' => 'User Created', 'response' => ["data" => $biker, "errors" => []],], 201);
+            return response()->json(['message' => 'User Created', 'response' => ["data" => $biker,"urlImg" => $urlImg, "errors" => []],], 201);
 
         } catch (QueryException $th) {
             Log::emergency($th);
@@ -587,7 +593,6 @@ class BikerController extends Controller
             
             // Check & delete which existing images were not send back
             if($validateImage && $request->hasFile('photo') ){
-
                 Storage::delete( Storage::allFiles("public/bikers/biker{$id}"));
                 $statusResponse = Storage::disk('local')->putFile("public/bikers/biker{$id}", $request->file('photo'));
             }
