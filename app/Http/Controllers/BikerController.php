@@ -264,10 +264,10 @@ class BikerController extends Controller
                     }
                 }
 
-                $statusResponse = Storage::disk('local')->putFileAs('testingUpload', $request->file('photo'), 'testing.png');
-                if (!$statusResponse) {
-                    return response()->json(['message' => 'Internal Error', 'response' => ["errors" => ["Error en la manipulación de archivos."]]], 500);
-                }
+                // $statusResponse = Storage::disk('local')->putFileAs('testingUpload', $request->file('photo'), 'testing.png');
+                // if (!$statusResponse) {
+                //     return response()->json(['message' => 'Internal Error', 'response' => ["errors" => ["Error en la manipulación de archivos."]]], 500);
+                // }
             } else {
                 if ($validator->fails()) {
                     return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $validator->errors()->all()]], 400);
