@@ -26,6 +26,9 @@
           <div v-if="props.row.auth == 1">Si</div>
           <div v-else>No</div>
         </span>
+          <span v-else-if="props.column.field === 'url_img'">
+          <img :src=" props.formattedRow[props.column.field] " min-width="70" height="70" />
+        </span>
         <span v-else-if="props.column.field === 'delete'">
           <button v-on:click="editData(props.row.id)" class="btn btn-warning">
             Editar
@@ -502,6 +505,10 @@
           {
             label: "Autorizado",
             field: "auth",
+          },   
+          {
+            label: "Foto",
+            field: "url_img",
           },
           {
             label: "Acciones",
