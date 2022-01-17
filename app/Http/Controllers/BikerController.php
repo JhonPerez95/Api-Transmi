@@ -164,10 +164,10 @@ class BikerController extends Controller
         log::info($request->all());
 
         $validateImage = true;
-        if ($request->debug) {
-            return response()->json(['message' => 'Internal Error', 'response' => ['data' => ['raw' => $request->all(), 'json' => json_encode($request->all())], 'errors' => []]], 500);
-        }
-
+        // if ($request->debug) {
+        //     return response()->json(['message' => 'Internal Error', 'response' => ['data' => ['raw' => $request->all(), 'json' => json_encode($request->all())], 'errors' => []]], 500);
+        // }
+        // echo($request);
         $validation = [
             "rules" => [
                 'name' => 'required|min:2|max:100',
@@ -255,6 +255,7 @@ class BikerController extends Controller
             if ($validateImage) {
                 // Photo validation
                 $phtValidation = $this->photoValidation($request);
+               
 
                 if ($validator->fails()) {
                     return response()->json(['message' => 'Bad Request', 'response' => ['errors' => array_merge($validator->errors()->all(), $phtValidation)]], 400);
@@ -282,15 +283,12 @@ class BikerController extends Controller
 
             $counter = Parameter::where(['name' => 'biker_counter'])->first();
             $code = 'CP' . substr("00000" . ($counter->value + 1), -5, 5);
-
+           
             Cloudder::upload($request->file('photo'));
             $publicId = Cloudder::getPublicId();
-            $urlImg =  Cloudder::secureShow($publicId); 
-            // $publicId = '232323';
-            // $urlImg =  'Cloudder::secureShow($publicId)';
+            $urlImg =  Cloudder::secureShow($publicId);
 
             $biker = Biker::create([
-
                 'name' => $request->name,
                 'last_name' => $request->lastName,
                 'type_documents_id' => $request->type,
@@ -312,13 +310,8 @@ class BikerController extends Controller
                 'id_img' => $publicId,
             ]);
 
-            //? Usefull while deving, maybe not so much on production, can't harm tho'
-            // $existingPhotos = Storage::allFiles("public/bikers/biker{$biker->id}");
-            // Storage::delete($existingPhotos);
-
             $counter->value = $counter->value + 1;
             $counter->save();
-
 
             $smsResponse = $biker->notifySignup($request->parkings_id);
             return response()->json(['message' => 'User Created', 'response' => ["data" => $biker, "errors" => []],], 201);
