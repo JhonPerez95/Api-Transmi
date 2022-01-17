@@ -127,38 +127,34 @@ class BicyController extends Controller
     {
         $phValid = [];
 
-        $images = ['image_front', 'image_back', 'image_side'];
+        if (!$request->hasFile('photo')) {
 
-        $imageCount = 0;
-
-        foreach($images as $image){
-
-            if ( $request->hasFile($image) ) {
-                $ph = $request->file($image);
-                $imageCount++;
-
-                $arrayingImage =(gettype($ph) != 'array')? [$ph] : $ph;  
-                $extensiones = ["jpg", "png", "jpeg"];
-
-                if(count($arrayingImage)>1){
-                    $phValid[] = "Se ha recibido más de una imágen '$image' para la bicicleta";
-                    return $phValid;
-                }
-                    
-                if (!$ph->isValid()) { $phValid[] = "El campo fotografía($image) es inválido"; }
-
-                if (!in_array($ph->getClientOriginalExtension(), $extensiones)) {
-                    $phValid[] = "El campo fotografía($image) recibe imágenes de formato jpg, jpeg y png.";
-                }
-
-                if ($ph->getSize() > 10000000) { $phValid[] = "El campo fotografía($image) tiene un tamaño máximo de 10MB"; }
-
+            // While updating, resending the image won't be required
+            if (!$updating) {
+                $phValid[] = 'El campo fotografía es requerido';
             }
-            
-        }
+        } else {
+            $ph = $request->file('photo');
 
-        if(!$imageCount){
-            if(!$updating){ $phValid[] = 'El registro de fotografías es requerido'; }
+            $arrayingImage = (gettype($ph) != 'array') ? [$ph] : $ph;
+            $extensiones = ["jpg", "png", "jpeg"];
+
+            if (count($arrayingImage) > 1) {
+                $phValid[] = 'Se ha recibido más de una imágen para el ciclista';;
+                return $phValid;
+            }
+
+            if (!$ph->isValid()) {
+                $phValid[] = 'El campo fotografía es inválido';
+            }
+
+            if (!in_array($ph->getClientOriginalExtension(), $extensiones)) {
+                $phValid[] = 'El campo fotografía recibe imágenes de formato jpg, jpeg y png.';
+            }
+
+            if ($ph->getSize() > 10000000) {
+                $phValid[] = 'El campo fotografía tiene un tamaño máximo de 10MB';
+            }
         }
 
         return $phValid;
