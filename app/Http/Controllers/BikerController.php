@@ -244,7 +244,6 @@ class BikerController extends Controller
 
                 'gender.required' => 'El campo género es requerido',
                 'gender.exists' => 'El campo género no acerta ningún registro existente',
-
             ]
         ];
 
@@ -284,9 +283,13 @@ class BikerController extends Controller
             $counter = Parameter::where(['name' => 'biker_counter'])->first();
             $code = 'CP' . substr("00000" . ($counter->value + 1), -5, 5);
            
-            Cloudder::upload($request->file('photo'));
-            $publicId = Cloudder::getPublicId();
-            $urlImg =  Cloudder::secureShow($publicId);
+            // Cloudder::upload($request->file('photo'));
+            // $publicId = Cloudder::getPublicId();
+            // $urlImg =  Cloudder::secureShow($publicId); 
+            $urlImg  = 'https://res.cloudinary.com/jhontt95/image/upload/c_fit,h_150,w_150/igkywvrdzo93sxp3vkq8.png';
+            $publicId =  'igkywvrdzo93sxp3vkq8';
+
+            print_r($request->file('photo'));
 
             $biker = Biker::create([
                 'name' => $request->name,
