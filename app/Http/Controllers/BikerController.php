@@ -164,10 +164,10 @@ class BikerController extends Controller
         log::info($request->all());
 
         $validateImage = true;
-        // if ($request->debug) {
-        //     return response()->json(['message' => 'Internal Error', 'response' => ['data' => ['raw' => $request->all(), 'json' => json_encode($request->all())], 'errors' => []]], 500);
-        // }
-        // echo($request);
+        if ($request->debug) {
+            return response()->json(['message' => 'Internal Error', 'response' => ['data' => ['raw' => $request->all(), 'json' => json_encode($request->all())], 'errors' => []]], 500);
+        }
+
         $validation = [
             "rules" => [
                 'name' => 'required|min:2|max:100',
@@ -254,7 +254,7 @@ class BikerController extends Controller
             if ($validateImage) {
                 // Photo validation
                 $phtValidation = $this->photoValidation($request);
-               
+
 
                 if ($validator->fails()) {
                     return response()->json(['message' => 'Bad Request', 'response' => ['errors' => array_merge($validator->errors()->all(), $phtValidation)]], 400);
@@ -264,10 +264,10 @@ class BikerController extends Controller
                     }
                 }
 
-                // $statusResponse = Storage::disk('local')->putFileAs('testingUpload', $request->file('photo'), 'testing.png');
-                // if (!$statusResponse) {
-                //     return response()->json(['message' => 'Internal Error', 'response' => ["errors" => ["Error en la manipulación de archivos."]]], 500);
-                // }
+                $statusResponse = Storage::disk('local')->putFileAs('testingUpload', $request->file('photo'), 'testing.png');
+                if (!$statusResponse) {
+                    return response()->json(['message' => 'Internal Error', 'response' => ["errors" => ["Error en la manipulación de archivos."]]], 500);
+                }
             } else {
                 if ($validator->fails()) {
                     return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $validator->errors()->all()]], 400);
@@ -282,14 +282,18 @@ class BikerController extends Controller
 
             $counter = Parameter::where(['name' => 'biker_counter'])->first();
             $code = 'CP' . substr("00000" . ($counter->value + 1), -5, 5);
-           
-            // Cloudder::upload($request->file('photo'));
-            // $publicId = Cloudder::getPublicId();
-            // $urlImg =  Cloudder::secureShow($publicId); 
-            $urlImg  = 'https://res.cloudinary.com/jhontt95/image/upload/c_fit,h_150,w_150/igkywvrdzo93sxp3vkq8.png';
-            $publicId =  'igkywvrdzo93sxp3vkq8';
 
-            print_r($request->file('photo'));
+            $ph = $request->file('photo');
+
+            // print_r($ph);
+            // print_r("********** \n");
+            // print_r($ph->getPathInfo()."\n");
+            // print_r($ph->getPathname()."\n");
+            // print_r($ph->getPath()."\n");
+            $phName = $ph->getPathname();
+            Cloudder::upload($phName);
+            $publicId = Cloudder::getPublicId();
+            $urlImg =  Cloudder::secureShow($publicId);
 
             $biker = Biker::create([
                 'name' => $request->name,
