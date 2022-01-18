@@ -293,14 +293,21 @@ class BikerController extends Controller
             // $phName = $ph->getPathname();
 
 
-            Cloudder::upload($ph, null,  array(
-                "folder" => "transmi",  "overwrite" => FALSE,
-                "resource_type" => "image", "responsive" => TRUE, "transformation" => array("quality" => "70", "width" => "250", "height" => "250", "crop" => "scale")
-            ));
+            try {
+                print_r("Img a Guardar:  \n");
+                print_r($ph . "\n");
 
-            print_r("Se guardo correctamente la imagen \n");
-            $publicId = Cloudder::getPublicId();
-            $urlImg =  Cloudder::secureShow($publicId);
+                Cloudder::upload($ph, null,  array(
+                    "folder" => "transmi",  "overwrite" => FALSE,
+                    "resource_type" => "image", "responsive" => TRUE, "transformation" => array("quality" => "70", "width" => "250", "height" => "250", "crop" => "scale")
+                ));
+
+                print_r("Se guardo correctamente la imagen \n");
+                $publicId = Cloudder::getPublicId();
+                $urlImg =  Cloudder::secureShow($publicId);
+            } catch (\Throwable $th) {
+                return response()->json(['message' => 'Bad Request', 'response' => ["response" => "Gustavo hpta", 'error' => $th]], 500);
+            }
 
 
             $biker = Biker::create([
