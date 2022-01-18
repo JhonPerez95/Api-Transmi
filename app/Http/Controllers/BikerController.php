@@ -285,26 +285,14 @@ class BikerController extends Controller
 
             $ph = $request->file('photo')->getRealPath();
 
-            // print_r($ph);
-            // print_r("********** \n");
-            // print_r($ph->getPathInfo()."\n");
-            // print_r($ph->getPathname()."\n");
-            // print_r($ph->getPath()."\n");
-            // $phName = $ph->getPathname();
-            print_r("Request Photo:  \n");
-            print_r($request->file('photo'));
-            print_r("\n");
+          
 
             try {
-                print_r("Img a Guardar:  \n");
-                print_r($ph . "\n");
-
                 Cloudder::upload($ph, null,  array(
                     "folder" => "transmi",  "overwrite" => FALSE,
                     "resource_type" => "image", "responsive" => TRUE, "transformation" => array("quality" => "70", "width" => "250", "height" => "250", "crop" => "scale")
                 ));
 
-                print_r("Se guardo correctamente la imagen \n");
                 $publicId = Cloudder::getPublicId();
                 $urlImg =  Cloudder::secureShow($publicId);
             } catch (\Throwable $th) {
@@ -337,8 +325,8 @@ class BikerController extends Controller
             $counter->value = $counter->value + 1;
             $counter->save();
 
-            $smsResponse = $biker->notifySignup($request->parkings_id);
-            return response()->json(['message' => 'User Created', 'response' => ["data" => $biker, "errors" => []],], 201);
+            $biker->notifySignup($request->parkings_id);
+            return response()->json(['message' => 'User Created', 'response' => ["data" => $biker, "errors" => []],], 200);
         } catch (QueryException $th) {
             Log::emergency($th);
             return response()->json(['message' => 'Internal Error', 'response' => ["errors" => [$th->getMessage()]]], 500);
