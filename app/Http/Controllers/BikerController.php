@@ -285,7 +285,7 @@ class BikerController extends Controller
 
             $ph = $request->file('photo')->getRealPath();
 
-          
+
 
             try {
                 Cloudder::upload($ph, null,  array(
@@ -296,7 +296,7 @@ class BikerController extends Controller
                 $publicId = Cloudder::getPublicId();
                 $urlImg =  Cloudder::secureShow($publicId);
             } catch (\Throwable $th) {
-                return response()->json(['message' => 'Bad Request', 'response' => ["response" => "Gustavo hpta", 'error' => $th]], 500);
+                return response()->json(['message' => 'Bad Request', 'response' => ['error' => $th]], 500);
             }
 
 
