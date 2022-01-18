@@ -283,17 +283,25 @@ class BikerController extends Controller
             $counter = Parameter::where(['name' => 'biker_counter'])->first();
             $code = 'CP' . substr("00000" . ($counter->value + 1), -5, 5);
 
-            $ph = $request->file('photo');
+            $ph = $request->file('photo')->getRealPath();
 
             // print_r($ph);
             // print_r("********** \n");
             // print_r($ph->getPathInfo()."\n");
             // print_r($ph->getPathname()."\n");
             // print_r($ph->getPath()."\n");
-            $phName = $ph->getPathname();
-            Cloudder::upload($phName);
+            // $phName = $ph->getPathname();
+
+
+            Cloudder::upload($ph, null,  array(
+                "folder" => "transmi",  "overwrite" => FALSE,
+                "resource_type" => "image", "responsive" => TRUE, "transformation" => array("quality" => "70", "width" => "250", "height" => "250", "crop" => "scale")
+            ));
+
+            print_r("Se guardo correctamente la imagen \n");
             $publicId = Cloudder::getPublicId();
             $urlImg =  Cloudder::secureShow($publicId);
+
 
             $biker = Biker::create([
                 'name' => $request->name,
