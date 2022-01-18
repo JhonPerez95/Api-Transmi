@@ -291,7 +291,9 @@ class BikerController extends Controller
             // print_r($ph->getPathname()."\n");
             // print_r($ph->getPath()."\n");
             // $phName = $ph->getPathname();
-
+            print_r("Request Photo:  \n");
+            print_r($request->file('photo'));
+            print_r("\n");
 
             try {
                 print_r("Img a Guardar:  \n");
