@@ -27,7 +27,9 @@
           <div v-else>No</div>
         </span>
           <span v-else-if="props.column.field === 'url_img'">
+          <a :href=" props.formattedRow[props.column.field] " target="_blank" rel="noopener noreferrer">
           <img :src=" props.formattedRow[props.column.field] " min-width="70" height="70" />
+          </a>
         </span>
         <span v-else-if="props.column.field === 'delete'">
           <button v-on:click="editData(props.row.id)" class="btn btn-warning">
