@@ -326,8 +326,7 @@ class BikerController extends Controller
             $counter->value = $counter->value + 1;
             $counter->save();
 
-            // $biker->notifySignup($request->parkings_id);
-            // return response()->json(['message' => 'User Created', 'response' => ["errors" => []],], 200);
+            $biker->notifySignup($request->parkings_id);
             return response()->json(['message' => 'User Created', 'response' => ["data" => $biker, "errors" => []],], 200);
         } catch (QueryException $th) {
             Log::emergency($th);
