@@ -15,6 +15,8 @@ use Cloudder;
 
 use App\Models\VerificationCode;
 
+use function PHPUnit\Framework\objectEquals;
+
 class BikerController extends Controller
 {
 
@@ -284,19 +286,18 @@ class BikerController extends Controller
             $code = 'CP' . substr("00000" . ($counter->value + 1), -5, 5);
 
             $ph = $request->file('photo')->getRealPath();
-
+            
+      
 
 
             try {
-                Cloudder::upload($ph, null,  array(
-                    "folder" => "transmi",  "overwrite" => FALSE,
-                    "resource_type" => "image", "responsive" => TRUE, "transformation" => array("quality" => "70", "width" => "250", "height" => "250", "crop" => "scale")
-                ));
-
+                 Cloudder::upload($ph, null,  array("folder" => "biker"));
                 $publicId = Cloudder::getPublicId();
-                $urlImg =  Cloudder::secureShow($publicId);
+                $url =  Cloudder::secureShow($publicId);
+                $urlImg =   str_replace('_150', '_520', $url);
+
             } catch (\Throwable $th) {
-                return response()->json(['message' => 'Bad Request', 'response' => ['error' => $th]], 500);
+                return response()->json(['message' => 'Bad Request', 'response' => ['req' => $request, 'error' => $th]], 500);
             }
 
 
@@ -325,7 +326,8 @@ class BikerController extends Controller
             $counter->value = $counter->value + 1;
             $counter->save();
 
-            $biker->notifySignup($request->parkings_id);
+            // $biker->notifySignup($request->parkings_id);
+            // return response()->json(['message' => 'User Created', 'response' => ["errors" => []],], 200);
             return response()->json(['message' => 'User Created', 'response' => ["data" => $biker, "errors" => []],], 200);
         } catch (QueryException $th) {
             Log::emergency($th);
