@@ -65,7 +65,7 @@ class Biker extends Model
         extract($opt);
 
         $currentTime = date('H:i');
-        $content = "Su código de confirmación de registro Cicloparqueaderos de TransMilenio es: {$code}. Hora {$currentTime}";
+        $content = "Su código de confirmación de registro en Cicloparqueaderos de TransMilenio es: {$code}. Hora {$currentTime}";
 
         $content = "Señor(a) {$parent->name}, con el siguiente código podrá autorizar al menor {$biker->name} {$biker->last_name} para que se registre en el sistema de cicloparqueaderos de TransMilenio y los datos del menor sean tratados de conformidad con la política de tratamiento que podrá consultar en la página www.transmilenio.gov.co. 
 Código: {$code} Hora: {$currentTime}";

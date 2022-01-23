@@ -267,10 +267,10 @@ class BikerController extends Controller
                     }
                 }
 
-                $statusResponse = Storage::disk('local')->putFileAs('testingUpload', $request->file('photo'), 'testing.png');
-                if (!$statusResponse) {
-                    return response()->json(['message' => 'Internal Error', 'response' => ["errors" => ["Error en la manipulación de archivos."]]], 500);
-                }
+                // $statusResponse = Storage::disk('local')->putFileAs('testingUpload', $request->file('photo'), 'testing.png');
+                // if (!$statusResponse) {
+                //     return response()->json(['message' => 'Internal Error', 'response' => ["errors" => ["Error en la manipulación de archivos."]]], 500);
+                // }
             } else {
                 if ($validator->fails()) {
                     return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $validator->errors()->all()]], 400);
@@ -287,15 +287,12 @@ class BikerController extends Controller
             $code = 'CP' . substr("00000" . ($counter->value + 1), -5, 5);
 
             $ph = $request->file('photo')->getRealPath();
-            
-
 
             try {
-                 Cloudder::upload($ph, null,  array("folder" => "biker"));
+                Cloudder::upload($ph, null,  array("folder" => "biker"));
                 $publicId = Cloudder::getPublicId();
                 $url =  Cloudder::secureShow($publicId);
                 $urlImg =   str_replace('_150', '_520', $url);
-
             } catch (\Throwable $th) {
                 return response()->json(['message' => 'Bad Request', 'response' => ['req' => $request, 'error' => $th]], 500);
             }
@@ -523,6 +520,7 @@ class BikerController extends Controller
 
                     'phone.required' => 'El campo telefono es requerido',
                     'phone.digits_between' => 'El campo telefono debe tener un mínimo de 7 y un máximo de 10 caracteres numericos',
+                    'phone.unique' => 'El telefono ingresado ya existe.',
 
                     'document.required' => 'El campo documento es requerido',
                     'document.unique' => 'El documento ingresado ya existe.',
@@ -581,12 +579,12 @@ class BikerController extends Controller
                     }
                 }
 
-                if ($request->hasFile('photo')) {
-                    $statusResponse = Storage::disk('local')->putFileAs('testingUpload', $request->file('photo'), 'testing.png');
-                    if (!$statusResponse) {
-                        return response()->json(['message' => 'Internal Error', 'response' => ["errors" => ["Error en la manipulación de archivos."]]], 500);
-                    }
-                }
+                // if ($request->hasFile('photo')) {
+                //     $statusResponse = Storage::disk('local')->putFileAs('testingUpload', $request->file('photo'), 'testing.png');
+                //     if (!$statusResponse) {
+                //         return response()->json(['message' => 'Internal Error', 'response' => ["errors" => ["Error en la manipulación de archivos."]]], 500);
+                //     }
+                // }
             } else {
                 if ($validator->fails()) {
                     return response()->json(['response' => ['errors' => $validator->errors()->all()], 'message' => 'Bad Request'], 400);
@@ -601,30 +599,63 @@ class BikerController extends Controller
                 }
             }
 
-            $data->name = $request->name;
-            $data->last_name = $request->lastName;
-            $data->type_documents_id = $request->type;
-            $data->document = $request->document;
-            $data->birth = $request->birth;
-            $data->parkings_id = $request->parkings_id;
-            $data->genders_id = $request->gender;
-            $data->phone = $request->phone;
-            $data->email = $request->email;
-            $data->confirmation = $request->confirmation;
-            $data->jobs_id = $request->job;
-            $data->neighborhoods_id = $request->neighborhood;
-            $data->levels_id = "Estrato {$request->level}";
-            $data->register = $request->register;
-            $data->active = $request->active;
-            $data->auth = $request->auth;
-            $data->save();
+            $ph = $request->file('photo')->getRealPath();
+            if ($ph) {
+                try {
+                    Cloudder::upload($ph, null,  array("folder" => "biker"));
+                    $publicId = Cloudder::getPublicId();
+                    $url =  Cloudder::secureShow($publicId);
+                    $urlImg =   str_replace('_150', '_520', $url);
+                } catch (\Throwable $th) {
+                    return response()->json(['message' => 'Bad Request', 'response' => ['req' => $request, 'error' => $th]], 500);
+                }
+
+                $data->name = $request->name;
+                $data->last_name = $request->lastName;
+                $data->type_documents_id = $request->type;
+                $data->document = $request->document;
+                $data->birth = $request->birth;
+                $data->parkings_id = $request->parkings_id;
+                $data->genders_id = $request->gender;
+                $data->phone = $request->phone;
+                $data->email = $request->email;
+                $data->confirmation = $request->confirmation;
+                $data->jobs_id = $request->job;
+                $data->neighborhoods_id = $request->neighborhood;
+                $data->levels_id = "Estrato {$request->level}";
+                $data->register = $request->register;
+                $data->active = $request->active;
+                $data->auth = $request->auth;
+                $data->url_img = $urlImg;
+                $data->id_img = $publicId;
+                $data->save();
+            } else {
+
+                $data->name = $request->name;
+                $data->last_name = $request->lastName;
+                $data->type_documents_id = $request->type;
+                $data->document = $request->document;
+                $data->birth = $request->birth;
+                $data->parkings_id = $request->parkings_id;
+                $data->genders_id = $request->gender;
+                $data->phone = $request->phone;
+                $data->email = $request->email;
+                $data->confirmation = $request->confirmation;
+                $data->jobs_id = $request->job;
+                $data->neighborhoods_id = $request->neighborhood;
+                $data->levels_id = "Estrato {$request->level}";
+                $data->register = $request->register;
+                $data->active = $request->active;
+                $data->auth = $request->auth;
+                $data->save();
+            }
 
 
             // Check & delete which existing images were not send back
-            if ($validateImage && $request->hasFile('photo')) {
-                Storage::delete(Storage::allFiles("public/bikers/biker{$id}"));
-                $statusResponse = Storage::disk('local')->putFile("public/bikers/biker{$id}", $request->file('photo'));
-            }
+            // if ($validateImage && $request->hasFile('photo')) {
+            //     Storage::delete(Storage::allFiles("public/bikers/biker{$id}"));
+            //     $statusResponse = Storage::disk('local')->putFile("public/bikers/biker{$id}", $request->file('photo'));
+            // }
 
             return response()->json(['message' => 'User Updated', 'response' => ["errors" => []]], 200);
         } catch (QueryException $th) {
