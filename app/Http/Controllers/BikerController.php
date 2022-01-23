@@ -480,7 +480,9 @@ class BikerController extends Controller
             $emailRules = ($data->email == $request->input('email')) ?  'required|email|min:8|max:60' : 'required|email|min:8|max:60|unique:bikers';
             $documentRules = ($data->document == $request->input('document')) ?  'required|min:5|max:30' : 'required|min:5|max:30|unique:bikers';
             $confirmationRules = ($data->phone == $request->input('phone')) ?  '' : 'required|exists:verification_codes,code';
-
+            if ($request->file('photo')) {
+                print_r("Viene foto");
+            }
             $validation = [
                 "rules" => [
                     'name' => 'required|min:4|max:100',
@@ -567,7 +569,7 @@ class BikerController extends Controller
             $validator = Validator::make($request->all(), $validation['rules'], $validation['messages']);
 
 
-            if ($validateImage) {
+            if ($validateImage && $request->file('photo')) {
                 // photo validation
                 $phtValidation = $this->photoValidation($request, true);
 
@@ -578,13 +580,6 @@ class BikerController extends Controller
                         return response()->json(['response' => ['errors' => $phtValidation], 'message' => 'Bad Request'], 400);
                     }
                 }
-
-                // if ($request->hasFile('photo')) {
-                //     $statusResponse = Storage::disk('local')->putFileAs('testingUpload', $request->file('photo'), 'testing.png');
-                //     if (!$statusResponse) {
-                //         return response()->json(['message' => 'Internal Error', 'response' => ["errors" => ["Error en la manipulación de archivos."]]], 500);
-                //     }
-                // }
             } else {
                 if ($validator->fails()) {
                     return response()->json(['response' => ['errors' => $validator->errors()->all()], 'message' => 'Bad Request'], 400);
@@ -599,9 +594,11 @@ class BikerController extends Controller
                 }
             }
 
-            $ph = $request->file('photo')->getRealPath();
-            if ($ph) {
+            if ($request->file('photo')) {
+                $ph = $request->file('photo')->getRealPath();
                 try {
+                    // Cloudder::delete($publicId, array $options)
+
                     Cloudder::upload($ph, null,  array("folder" => "biker"));
                     $publicId = Cloudder::getPublicId();
                     $url =  Cloudder::secureShow($publicId);
@@ -628,7 +625,7 @@ class BikerController extends Controller
                 $data->auth = $request->auth;
                 $data->url_img = $urlImg;
                 $data->id_img = $publicId;
-                $data->save();
+                $data->update();
             } else {
 
                 $data->name = $request->name;
@@ -647,15 +644,8 @@ class BikerController extends Controller
                 $data->register = $request->register;
                 $data->active = $request->active;
                 $data->auth = $request->auth;
-                $data->save();
+                $data->update();
             }
-
-
-            // Check & delete which existing images were not send back
-            // if ($validateImage && $request->hasFile('photo')) {
-            //     Storage::delete(Storage::allFiles("public/bikers/biker{$id}"));
-            //     $statusResponse = Storage::disk('local')->putFile("public/bikers/biker{$id}", $request->file('photo'));
-            // }
 
             return response()->json(['message' => 'User Updated', 'response' => ["errors" => []]], 200);
         } catch (QueryException $th) {
