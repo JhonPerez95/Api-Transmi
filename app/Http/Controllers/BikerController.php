@@ -177,7 +177,7 @@ class BikerController extends Controller
                 'type' =>  'required|exists:type_documents,id',
                 'document' => 'required|min:5|max:30|unique:bikers',
                 'birth' =>  'required|date',
-                'phone' => 'required|digits_between:7,10',
+                'phone' => 'required|digits_between:7,10|unique:bikers',
                 'email' => 'required|email|min:8|max:60|unique:bikers',
                 'confirmation' =>   'required|exists:verification_codes,code',
                 'job' =>    'required|exists:jobs,id',
@@ -203,6 +203,7 @@ class BikerController extends Controller
 
                 'phone.required' => 'El campo telefono es requerido',
                 'phone.digits_between' => 'El campo telefono debe tener un mínimo de 7 y un máximo de 10 caracteres numericos',
+                'phone.unique' => 'El telefono ingresado ya existe.',
 
                 'document.required' => 'El campo documento es requerido',
                 'document.unique' => 'El documento ingresado ya existe.',
@@ -287,7 +288,6 @@ class BikerController extends Controller
 
             $ph = $request->file('photo')->getRealPath();
             
-      
 
 
             try {

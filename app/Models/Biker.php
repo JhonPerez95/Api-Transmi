@@ -103,7 +103,8 @@ Hora: {$currentTime}";
         $currentTime = date('H:i');
         $parking = Parking::find($parkings_id);
 
-        $content = "Usted ha sido registrado con éxito al sistema de cicloparqueaderos TransMilenio, cicloparqueadero {$parking->name}. Hora {$currentTime}" ;
+        $content = "Usted ha sido registrado con éxito al sistema de cicloparqueaderos TransMilenio, cicloparqueadero {$parking->name}. Hora {$currentTime}"
+             ."\n Los datos personales suministrados tienen como finalidad realizar el registro para el uso e ingreso a las BiciEstaciones, como titular podrá ejercer sus derechos a través del canal: habeasdata@transmilenio.gov.co así como consultar la Política de Datos personales en la página web de la Entidad" ;
         return Biker::Notify(['phone'=> $this->phone, 'message'=>$content]);
     }
 
