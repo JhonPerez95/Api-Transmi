@@ -92,7 +92,7 @@ Hora: {$currentTime}";
         $code = $codeRequest['code'];
 
         $currentTime = date('H:i');
-        $content = "Su código de confirmación de registro Cicloparqueaderos de TransMilenio es: {$code}. Hora {$currentTime}";
+        $content = "Su código de confirmación de registro en Cicloparqueaderos de TransMilenio es: {$code}. Hora {$currentTime}";
         Biker::Notify(['phone'=>$phone, 'message'=>$content]);
         return response()->json(['message'=>'Success','response'=>['code'=>$code]]);
 
