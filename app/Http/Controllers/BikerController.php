@@ -480,9 +480,7 @@ class BikerController extends Controller
             $emailRules = ($data->email == $request->input('email')) ?  'required|email|min:8|max:60' : 'required|email|min:8|max:60|unique:bikers';
             $documentRules = ($data->document == $request->input('document')) ?  'required|min:5|max:30' : 'required|min:5|max:30|unique:bikers';
             $confirmationRules = ($data->phone == $request->input('phone')) ?  '' : 'required|exists:verification_codes,code';
-            if ($request->file('photo')) {
-                print_r("Viene foto");
-            }
+  
             $validation = [
                 "rules" => [
                     'name' => 'required|min:4|max:100',
@@ -596,8 +594,10 @@ class BikerController extends Controller
 
             if ($request->file('photo')) {
                 $ph = $request->file('photo')->getRealPath();
+                // $id_ph = $request->file('id_img');
                 try {
-                    // Cloudder::delete($publicId, array $options)
+                    // Cloudder::delete($id_ph);
+                    // Cloudder::destroyImage($id_ph);
 
                     Cloudder::upload($ph, null,  array("folder" => "biker"));
                     $publicId = Cloudder::getPublicId();
@@ -606,46 +606,32 @@ class BikerController extends Controller
                 } catch (\Throwable $th) {
                     return response()->json(['message' => 'Bad Request', 'response' => ['req' => $request, 'error' => $th]], 500);
                 }
-
-                $data->name = $request->name;
-                $data->last_name = $request->lastName;
-                $data->type_documents_id = $request->type;
-                $data->document = $request->document;
-                $data->birth = $request->birth;
-                $data->parkings_id = $request->parkings_id;
-                $data->genders_id = $request->gender;
-                $data->phone = $request->phone;
-                $data->email = $request->email;
-                $data->confirmation = $request->confirmation;
-                $data->jobs_id = $request->job;
-                $data->neighborhoods_id = $request->neighborhood;
-                $data->levels_id = "Estrato {$request->level}";
-                $data->register = $request->register;
-                $data->active = $request->active;
-                $data->auth = $request->auth;
-                $data->url_img = $urlImg;
-                $data->id_img = $publicId;
-                $data->update();
             } else {
-
-                $data->name = $request->name;
-                $data->last_name = $request->lastName;
-                $data->type_documents_id = $request->type;
-                $data->document = $request->document;
-                $data->birth = $request->birth;
-                $data->parkings_id = $request->parkings_id;
-                $data->genders_id = $request->gender;
-                $data->phone = $request->phone;
-                $data->email = $request->email;
-                $data->confirmation = $request->confirmation;
-                $data->jobs_id = $request->job;
-                $data->neighborhoods_id = $request->neighborhood;
-                $data->levels_id = "Estrato {$request->level}";
-                $data->register = $request->register;
-                $data->active = $request->active;
-                $data->auth = $request->auth;
-                $data->update();
+                $publicId = $data->id_img;
+                $urlImg = $data->url_img;
             }
+
+
+
+            $data->name = $request->name;
+            $data->last_name = $request->lastName;
+            $data->type_documents_id = $request->type;
+            $data->document = $request->document;
+            $data->birth = $request->birth;
+            $data->parkings_id = $request->parkings_id;
+            $data->genders_id = $request->gender;
+            $data->phone = $request->phone;
+            $data->email = $request->email;
+            $data->confirmation = $request->confirmation;
+            $data->jobs_id = $request->job;
+            $data->neighborhoods_id = $request->neighborhood;
+            $data->levels_id = "Estrato {$request->level}";
+            $data->register = $request->register;
+            $data->active = $request->active;
+            $data->auth = $request->auth;
+            $data->url_img = $urlImg;
+            $data->id_img = $publicId;
+            $data->update();
 
             return response()->json(['message' => 'User Updated', 'response' => ["errors" => []]], 200);
         } catch (QueryException $th) {
