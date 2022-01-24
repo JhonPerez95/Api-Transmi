@@ -477,19 +477,19 @@
             field: "birth",
           },
           {
-            label: "Genero",
+            label: "Genéro",
             field: "gender",
           },
           {
-            label: "Telefono",
+            label: "Teléfono",
             field: "phone",
           },
           {
-            label: "Correo",
+            label: "Correó",
             field: "email",
           },
           {
-            label: "Ocupacion",
+            label: "Ocupación",
             field: "job",
           },
           {

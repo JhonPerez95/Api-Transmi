@@ -53,6 +53,7 @@ class BikerController extends Controller
                     'bikers.neighborhoods_id as neighborhood',
                     DB::raw('SUBSTRING(bikers.levels_id, 9,9) AS levels_id')
                 )
+                ->whereRaw("phone != ''")
                 ->get();
 
             $type = DB::table('type_documents')
@@ -342,13 +343,15 @@ class BikerController extends Controller
 
         try {
 
-            $biker = ($this->client == 'web') ?  Biker::find($id) : Biker::where(['document' => $id])->first();
+            $biker = ($this->client == 'web')
+                ? Biker::find($id)->whereRaw("phone != ''")
+                : Biker::whereRaw("document = $id and phone != ''")->first();
             if (!$biker) {
                 return response()->json(['message' => 'Not Found', 'response' => ['errors' => ['Registro de ciclista no encontrado']]], 404);
             }
             $query = $this->client == 'web' ?  'bikers.id' : 'bikers.document';
             $data = DB::table('bikers')
-                ->where($query, $id)
+                ->where($query, $id,)
                 ->join('type_documents', 'bikers.type_documents_id', '=', 'type_documents.id')
                 ->join('genders', 'bikers.genders_id', '=', 'genders.id')
                 ->join('jobs', 'bikers.jobs_id', '=', 'jobs.id')
@@ -365,10 +368,10 @@ class BikerController extends Controller
             $appUrl = config('app.url');
 
             //?Check if localhost
-            $appUrl = ($appUrl[strlen($appUrl) - 1] == '/') ? $appUrl : "$appUrl:8000/";
+            // $appUrl = ($appUrl[strlen($appUrl) - 1] == '/') ? $appUrl : "$appUrl:8000/";
 
-            $bikerPhotos = Storage::allFiles("public/bikers/biker{$biker->id}");
-            $data->photo = (count($bikerPhotos)) ? $appUrl . preg_replace('/public/', 'storage', $bikerPhotos[0]) : null;
+            // $bikerPhotos = Storage::allFiles("public/bikers/biker{$biker->id}");
+            // $data->photo = (count($bikerPhotos)) ? $appUrl . preg_replace('/public/', 'storage', $bikerPhotos[0]) : null;
 
             $_bicies = DB::table('bicies')
                 ->where('bikers_id', $biker->id)
@@ -480,7 +483,7 @@ class BikerController extends Controller
             $emailRules = ($data->email == $request->input('email')) ?  'required|email|min:8|max:60' : 'required|email|min:8|max:60|unique:bikers';
             $documentRules = ($data->document == $request->input('document')) ?  'required|min:5|max:30' : 'required|min:5|max:30|unique:bikers';
             $confirmationRules = ($data->phone == $request->input('phone')) ?  '' : 'required|exists:verification_codes,code';
-  
+
             $validation = [
                 "rules" => [
                     'name' => 'required|min:4|max:100',
