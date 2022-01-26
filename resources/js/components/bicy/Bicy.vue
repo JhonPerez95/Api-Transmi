@@ -57,7 +57,7 @@
           
           
           <div class="form-group" data-content="Cicloparqueadero">
-            <label for="name">Cicloparqueadero</label>
+            <label for="name">Bici Estación</label>
             <ValidationProvider
               name="cicloparqueadero"
               rules="required"
@@ -421,7 +421,7 @@ export default {
           field: "_id"
         },
         {
-          label: "Cicloparqueadero",
+          label: "Bici Estación",
           field: "parking",
         },
         {

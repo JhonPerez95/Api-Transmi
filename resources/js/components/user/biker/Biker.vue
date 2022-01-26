@@ -477,7 +477,7 @@
             field: "birth",
           },
           {
-            label: "Genéro",
+            label: "Género",
             field: "gender",
           },
           {
@@ -485,7 +485,7 @@
             field: "phone",
           },
           {
-            label: "Correó",
+            label: "Correo",
             field: "email",
           },
           {

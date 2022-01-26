@@ -5,7 +5,7 @@
       <div class="col-4">
         <table class="table table-striped">
           <thead>
-            <th>Cicloparqueadero</th>
+            <th>Bici Estación</th>
             <th>Código Alfa</th>
             <th>Código Numérico</th>
           </thead>

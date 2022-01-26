@@ -202,7 +202,7 @@
 
           <div v-if="form.role_id == 4">
             <div class="form-group col" data-content="Cicloparqueadero">
-              <label for="active">Cicloparqueadero</label>
+              <label for="active">Bici Estación</label>
               <ValidationProvider
                 rules="required"
                 name="cicloparqueadero"

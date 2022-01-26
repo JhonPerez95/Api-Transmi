@@ -180,7 +180,7 @@ export default {
           if (res.status == 200) {
             this.rows = res.data.response.data.map(el => {
               const parking = this.parkingsData.find(_el => _el.id == el.parking_id);
-              el.parking_name = parking ? parking.name : `Error : Cicloparqueadero(${el.parking_id}) no encontrado.`;
+              el.parking_name = parking ? parking.name : `Error : Bici Estación(${el.parking_id}) no encontrado.`;
               return el;
             }) ;
           }else{

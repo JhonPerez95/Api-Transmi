@@ -51,7 +51,7 @@
 
           <div class="row">
             <div class="form-group col" data-content="Cicloparqueadero">
-              <label for="name">Cicloparqueadero</label>
+              <label for="name">Bici Estación</label>
               <ValidationProvider
                 name="cicloparqueadero"
                 rules="required"
@@ -214,7 +214,7 @@ export default {
       },
       columns: [
         {
-          label: "Cicloparqueadero",
+          label: "Bici Estación",
           field: "parking",
         },
         {

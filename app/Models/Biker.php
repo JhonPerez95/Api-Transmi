@@ -31,7 +31,7 @@ class Biker extends Model
         $parking = Parking::find($parking_id);
         $visit = Visit::find($visit_id);
         $currentTime = date('H:i');
-        $content = "Usted ha ingresado al cicloparqueadero {$parking->name}. Recuerde que usted es el único responsable por la seguridad de su bicicleta asegúrela bien Hora {$currentTime}" ;
+        $content = "Usted ha sido registrado con éxito en las Bici Estaciones del Sistema TransMilenio, Bici Estación  {$parking->name}. Recuerde que usted es el único responsable por la seguridad de su bicicleta asegúrela bien Hora {$currentTime}" ;
         return Biker::Notify(['phone'=> $this->phone, 'message'=>$content]);
     }
 
@@ -47,7 +47,7 @@ class Biker extends Model
             $abandonNotification->save();
         }
         $currentTime = date('H:i');
-        $content = "Usted ha salido del cicloparqueadero {$parking->name} Hora {$currentTime}";
+        $content = "Usted ha salido de la Bici Estación {$parking->name} Hora {$currentTime}";
         return Biker::Notify(['phone'=> $this->phone, 'message'=>$content]);
 
     }
@@ -65,9 +65,9 @@ class Biker extends Model
         extract($opt);
 
         $currentTime = date('H:i');
-        $content = "Su código de confirmación de registro en Cicloparqueaderos de TransMilenio es: {$code}. Hora {$currentTime}";
+        $content = "Su código de confirmación de registro en la Bici Estación de TransMilenio es: {$code}. Hora {$currentTime}";
 
-        $content = "Señor(a) {$parent->name}, con el siguiente código podrá autorizar al menor {$biker->name} {$biker->last_name} para que se registre en el sistema de cicloparqueaderos de TransMilenio y los datos del menor sean tratados de conformidad con la política de tratamiento que podrá consultar en la página www.transmilenio.gov.co. 
+        $content = "Señor(a) {$parent->name}, con el siguiente código podrá autorizar al menor {$biker->name} {$biker->last_name} para que se registre en el sistema de Bici Estación de TransMilenio y los datos del menor sean tratados de conformidad con la política de tratamiento que podrá consultar en la página www.transmilenio.gov.co. 
 Código: {$code} Hora: {$currentTime}";
 
         Biker::Notify(['phone'=>$phone, 'message'=>$content]);
@@ -79,7 +79,7 @@ Código: {$code} Hora: {$currentTime}";
         $currentTime = date('H:i');
         extract($opt); // $parent , $biker
         $phone = $parent->phone;
-        $content = "Señor(a) {$parent->name}, el menor {$biker->name} {$biker->last_name} ha quedado autorizado para que se registre con sus datos personales en el Sistema de Cicloparqueaderos de TransMilenio.
+        $content = "Señor(a) {$parent->name}, el menor {$biker->name} {$biker->last_name} ha quedado autorizado para que se registre con sus datos personales en el Sistema de Bici Estación de TransMilenio.
 Hora: {$currentTime}";
         Biker::Notify(['phone'=>$phone, 'message'=>$content]);
         return response()->json(['message'=>'Success','response'=>[]]);
@@ -92,7 +92,7 @@ Hora: {$currentTime}";
         $code = $codeRequest['code'];
 
         $currentTime = date('H:i');
-        $content = "Su código de confirmación de registro en Cicloparqueaderos de TransMilenio es: {$code}. Hora {$currentTime}";
+        $content = "Su código de confirmación de registro en la Bici Estación de TransMilenio es: {$code}. Hora {$currentTime}";
         Biker::Notify(['phone'=>$phone, 'message'=>$content]);
         return response()->json(['message'=>'Success','response'=>['code'=>$code]]);
 
@@ -103,8 +103,8 @@ Hora: {$currentTime}";
         $currentTime = date('H:i');
         $parking = Parking::find($parkings_id);
 
-        $content = "Usted ha sido registrado con éxito al sistema de cicloparqueaderos TransMilenio, cicloparqueadero {$parking->name}. Hora {$currentTime}"
-             ."\n Los datos personales suministrados tienen como finalidad realizar el registro para el uso e ingreso a las BiciEstaciones, como titular podrá ejercer sus derechos a través del canal: habeasdata@transmilenio.gov.co así como consultar la Política de Datos personales en la página web de la Entidad" ;
+        $content = "Usted ha sido registrado con éxito en las Bici Estaciones del Sistema TransMilenio, Bici Estación {$parking->name}. Hora {$currentTime}"
+             ."\n  Los datos personales suministrados tienen como finalidad realizar el registro para el uso e ingreso a las Bici Estaciones, como titular podrá ejercer sus derechos a través del canal: habeasdata@transmilenio.gov.co así como consultar la Política de Datos personales en la página web de la Entidad https://www.transmilenio.gov.co/publicaciones/149179/politica-de-tratamiento-de-datos-habeas-data/." ;
         return Biker::Notify(['phone'=> $this->phone, 'message'=>$content]);
     }
 
@@ -117,7 +117,7 @@ Hora: {$currentTime}";
         ->select('bicies.*','parkings.name as parking')
         ->first();
         
-        $content = "Usted ha registrado con éxito la bicicleta {$bicy->brand} color {$bicy->color} en el Sistema de Cicloparqueaderos de TransMilenio, cicloparqueadero {$bicy->parking} código de Registro {$bicy->code}$bicy_id. Hora {$currentTime}";
+        $content = "Usted ha registrado con éxito la bicicleta {$bicy->brand} color {$bicy->color} en el Sistema de Bici Estaciones de TransMilenio, Bici Estación {$bicy->parking} código de Registro {$bicy->code}$bicy_id. Hora {$currentTime}";
         return Biker::Notify(['phone'=> $this->phone, 'message'=>$content]);
     }
     public function notifyBicyUpdate($bicy_id){
@@ -125,7 +125,7 @@ Hora: {$currentTime}";
         ->join('parkings','parkings_id','parkings.id')
         ->select('bicies.*','parkings.name as parking')
         ->first();
-        $content = "Usted ha actualizado con éxito la bicicleta {$bicy->brand} color {$bicy->color} en el Sistema de Cicloparqueaderos de TransMilenio, parqueadero {$bicy->parking}. Código de Registro {$bicy->code}{$bicy->id}.";
+        $content = "Usted ha actualizado con éxito la bicicleta {$bicy->brand} color {$bicy->color} en el Sistema de Bici Estaciones de TransMilenio, Bici Estación {$bicy->parking}. Código de Registro {$bicy->code}{$bicy->id}.";
         return Biker::Notify(['phone'=> $this->phone, 'message'=>$content]);
     }
     
@@ -165,7 +165,7 @@ Hora: {$currentTime}";
         $creationDatetime = DateTime::createFromFormat('Y-m-d H:i:s', $parkingMaintenance->created_at);
         $creationTime = $creationDatetime->format('H:i');
 
-        $content = "Estimado usuario(a), por labores de mantenimiento, el cicloparqueadero {$parkingMaintenance->parking->name} estará cerrado desde las " . substr($parkingMaintenance->start_time,0,5) . " del día {$startDayName} {$startDay} de {$startMonthName} hasta las " . substr($parkingMaintenance->end_time,0,5) . " del día {$endDayName} {$endDay} de {$endMonthName}. Disculpe los inconvenientes que pueda ocasionar. Hora {$creationTime}";
+        $content = "Estimado usuario(a), por labores de mantenimiento, la Bici Estación {$parkingMaintenance->parking->name} estará cerrado desde las " . substr($parkingMaintenance->start_time,0,5) . " del día {$startDayName} {$startDay} de {$startMonthName} hasta las " . substr($parkingMaintenance->end_time,0,5) . " del día {$endDayName} {$endDay} de {$endMonthName}. Disculpe los inconvenientes que pueda ocasionar. Hora {$creationTime}";
         return Biker::notify(['phone'=>$this->phone, 'message'=>$content]);
     }
 
@@ -193,7 +193,7 @@ Hora: {$currentTime}";
     }    
     public function _notifyParkingAvailable($parkingMaintenance){
         $currentTime = date('H:i');
-        $content = "Estimado usuario(a), el cicloparqueadero {$parkingMaintenance->parking->name} ya está disponible para su uso. Hora {$currentTime}";
+        $content = "Estimado usuario(a), la Bici Estación {$parkingMaintenance->parking->name} ya está disponible para su uso. Hora {$currentTime}";
         return Biker::notify(['phone'=>$this->phone, 'message'=>$content]);
     }
 
@@ -217,14 +217,14 @@ Hora: {$currentTime}";
     }
     public function _notifyBeingBlocked(){
         $currentTime = date('H:i');
-        $content = "Estimado usuario(a), teniendo en cuenta que la última vez que hizo uso de los cicloparqueaderos del sistema fue hace más de dos años, su usuario ha sido bloqueado. Hora {$currentTime}";
+        $content = "Estimado usuario(a), teniendo en cuenta que la última vez que hizo uso de la Bici Estación del sistema fue hace más de dos años, su usuario ha sido bloqueado. Hora {$currentTime}";
         $this->active = 3;
         $this->save();
         return Biker::Notify(['phone'=> $this->phone, 'message'=>$content]);
     }
     public function unblockAndNotify(){
         $currentTime = date('H:i');
-        $content = "Estimado usuario(a) el sistema de cicloparqueadero de TransMilenio ya está disponible para su uso. Hora {$currentTime}";
+        $content = "Estimado usuario(a) el sistema de la Bici Estación de TransMilenio ya está disponible para su uso. Hora {$currentTime}";
 
         $this->active = 1;
         $this->save();
@@ -235,7 +235,7 @@ Hora: {$currentTime}";
         $currentTime = date('H:i');
         $parking = Parking::find($parking_id);
 
-        $content = "Estimado usuario(a), su bicicleta cumplió más de 30 días continuos dentro del cicloparqueadero {$parking->name}. Debe retirarla dentro de los siguientes 7 días calendario. Hora {$currentTime}.";
+        $content = "Estimado usuario(a), su bicicleta cumplió más de 30 días continuos dentro de la Bici Estación {$parking->name}. Debe retirarla dentro de los siguientes 7 días calendario. Hora {$currentTime}.";
         $notification = BicyAbandonNotification::create(['bicies_id'=>$bici_id, 'active'=>"1"]);
         return Biker::Notify(['phone'=> $this->phone, 'message'=>$content]);
         return $content;
@@ -252,7 +252,7 @@ Hora: {$currentTime}";
         $notification->active = '0';
         $notification->save();
 
-        $content = "Estimado usuario(a), cumplido el plazo de 7 días calendario, su bicicleta  continúa en el cicloparqueadero {$parking->name}, por lo cual se procederá a gestionar su declaración de abandono ante el ICBF. Hora {$currentTime}.";
+        $content = "Estimado usuario(a), cumplido el plazo de 7 días calendario, su bicicleta  continúa en la Bici Estación {$parking->name}, por lo cual se procederá a gestionar su declaración de abandono ante el ICBF. Hora {$currentTime}.";
         return Biker::Notify(['phone'=> $this->phone, 'message'=>$content]);
         return $content;
     }

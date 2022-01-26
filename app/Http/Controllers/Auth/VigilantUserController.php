@@ -104,8 +104,8 @@ class VigilantUserController extends Controller
                 'password.min'=>'El campo contraseña debe tener mínimo 8 caracteres',
                 'password.max'=>'El campo contraseña debe tener máximo 16 caracteres',
 
-                'parkings_id.required'=>'El campo cicloparqueadero es requerido',
-                'parkings_id.exists'=>'El campo cicloparqueadero no acerta ningún registro existente',
+                'parkings_id.required'=>'El campo Bici Estación es requerido',
+                'parkings_id.exists'=>'El campo Bici Estación no acerta ningún registro existente',
 
                 'role_id.required'=>'El campo rol es requerido',
                 'role_id.in'=>'El campo rol permite valores Administrador(1), Vigilante(3), Consultor(4)',
@@ -173,8 +173,8 @@ class VigilantUserController extends Controller
 
                 'active.required'=>'El campo estado es requerido',
                 'active.in'=>'El campo estado recibe los valores Activo e Inactivo',
-                'parkings_id.required'=>'El campo cicloparqueadero es requerido',
-                'parkings_id.exists'=>'El campo cicloparqueadero no acerta ningún registro existente',
+                'parkings_id.required'=>'El campo Bici Estación es requerido',
+                'parkings_id.exists'=>'El campo Bici Estación no acerta ningún registro existente',
 
                 'role_id.required'=>'El campo rol es requerido',
                 'role_id.in'=>'El campo rol permite valores Administrador(1), Vigilante(3), Consultor(4)',

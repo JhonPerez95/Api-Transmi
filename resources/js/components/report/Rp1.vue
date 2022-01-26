@@ -123,7 +123,7 @@ export default {
       parkingsData : [],
       columns : [
         {
-          label : "Cicloparqueadero",
+          label : "Bici Estación",
           field : "parking_id",
         },
         {
@@ -168,7 +168,7 @@ export default {
             this.parkingsData = res.data.indexes.parkings;
             this.rows = res.data.response.data.map(el => {
               const parking = this.parkingsData.find(_el => _el.id == el.parking_id);
-              el.parking_id = parking ? parking.name : `Error : Cicloparqueadero(${el.parking_id}) no encontrado.`;
+              el.parking_id = parking ? parking.name : `Error : Bici Estación(${el.parking_id}) no encontrado.`;
               return el;
             }) ;
           }else{

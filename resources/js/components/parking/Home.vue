@@ -9,7 +9,7 @@
         active-nav-item-class="font-weight-bold text-danger"
         content-class="mt-3"
       >
-        <b-tab title="Cicloparqueaderos" active>
+        <b-tab title="Bici Estaciónes" active>
           <div v-if="tabComponent == 0">
             <ParkingComponent />
           </div>

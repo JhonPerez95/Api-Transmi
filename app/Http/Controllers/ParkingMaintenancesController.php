@@ -69,8 +69,8 @@ class ParkingMaintenancesController extends Controller
                 'end_time.required' => 'El campo hora de finalización es requerido',
                 'start_time.date_format' => 'El campo hora de finalización es de tipo hora (00:00)',
 
-                'parkings_id.required' => 'El campo cicloparqueadero es requerido',
-                'parkings_id.exists' => 'El campo cicloparqueadero  no acerta ningún registro existente',
+                'parkings_id.required' => 'El campo Bici Estación es requerido',
+                'parkings_id.exists' => 'El campo Bici Estación  no acerta ningún registro existente',
 
                 'finished.in'=>'El campo mantenimiento finalizado recibe los valores Sí y No'
 

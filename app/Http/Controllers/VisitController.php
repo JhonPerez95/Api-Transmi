@@ -220,7 +220,7 @@ class VisitController extends Controller
             if(gettype($request->visits) != 'array'){ return response()->json(['message'=>'Bad Request', 'response'=>['errors'=>['El cuerpo de la petición no contempla un formato apropiado, este debe ser el de una lista de visitas.']]],400);}
 
             $Parking = Parking::find($parkingId);
-            if(!$Parking){return response()->json(['message'=>'Not Found', 'response'=>['errors'=>['Registro de cicloparqueadero no encontrado']]],404);}
+            if(!$Parking){return response()->json(['message'=>'Not Found', 'response'=>['errors'=>['Registro de Bici Estación no encontrado']]],404);}
 
             $errors = [];
             $succeses = [];

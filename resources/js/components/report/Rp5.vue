@@ -53,7 +53,7 @@ export default {
         columns : [
             
             {
-            label : "Cicloparqueadero",
+            label : "Bici Estación",
             field : "parking_name",
             },
             {

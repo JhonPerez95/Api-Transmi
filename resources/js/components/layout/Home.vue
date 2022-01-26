@@ -29,7 +29,7 @@
       <li class="nav-item">
         <router-link class="nav-link collapsed" :to="{ name: 'parking' }">
           <i class="fas fa-fw fa-tachometer-alt"></i>
-          <span>Cicloparqueaderos</span>
+          <span>Bici Estación</span>
         </router-link>
       </li>
 

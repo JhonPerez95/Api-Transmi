@@ -2,7 +2,7 @@
   <div>
 
     <div class="my-3 mx-2 row">
-      <span for="selectParkings col-md-3 text-center w-100" style="font-weigh:bold">Cicloparqueadero</span>
+      <span for="selectParkings col-md-3 text-center w-100" style="font-weigh:bold">Bici Estación</span>
       <div class="col-md-8">
         <select id="selectParkings" class="form-control"  @change="loadBikers" v-model="selectedParking">
           <option v-for="(parking, key) in parkingsData" :key="key" :value="parking.value">{{parking.text}}</option>
@@ -258,7 +258,7 @@
         this.$api.get("web/data/biker").then((res) => {
           this.actualRows = res.data.response.users;
 
-          this.parkingsData = [{text: 'Seleccione un cicloparqueadero', value: ''}]
+          this.parkingsData = [{text: 'Seleccione una Bici Estación', value: ''}]
           res.data.response.indexes.parkings.forEach((element) => {
             this.parkingsData.push(element);
           });

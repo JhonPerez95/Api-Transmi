@@ -36,7 +36,7 @@
           
           <div :class="editing?'row':''">
             <div class="form-group col" data-content="Cicloparqueadero">
-              <label for="name">Cicloparqueadero</label>
+              <label for="name">Bici Estación</label>
               <ValidationProvider
                 name="cicloparqueadero"
                 rules="required"
@@ -138,7 +138,7 @@ export default {
       rows : [],
       columns : [
         {
-          label : "Cicloparqueadero",
+          label : "Bici Estación",
           field : "parking",
         },
         {

@@ -137,7 +137,7 @@ export default {
             field : "biker_document",
             },
             {
-            label : "CicloParqueadero",
+            label : "Bici Estación",
             field : "parking",
             },
             {

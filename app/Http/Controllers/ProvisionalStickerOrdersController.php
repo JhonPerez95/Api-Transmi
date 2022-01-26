@@ -52,8 +52,8 @@ class ProvisionalStickerOrdersController extends Controller
                 'quantity.required' => 'El campo cantidad es requerido',
                 'quantity.integer' => 'El campo cantidad es de tipo numérico',
 
-                'parkings_id.required' => 'El campo cicloparqueadero es requerido',
-                'parkings_id.exists' => 'El campo cicloparqueadero no acerta ningún registro existente',
+                'parkings_id.required' => 'El campo Bici Estación es requerido',
+                'parkings_id.exists' => 'El campo Bici Estación no acerta ningún registro existente',
             ]
         ];
 

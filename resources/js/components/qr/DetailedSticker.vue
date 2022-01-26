@@ -94,7 +94,7 @@ export default {
       rows : [],
       columns : [
         {
-          label : "Cicloparqueadero",
+          label : "Bici Estación",
           field : "parking",
         },
         {

@@ -171,7 +171,7 @@ class ParkingController extends Controller
             }
             $data = Parking::find($id);
             if (!$data) {
-                return response()->json(['message' => 'Not Found', 'response' => ['id' => $id, 'errors' => ['Cicloparqueadero No encontrado']]], 404);
+                return response()->json(['message' => 'Not Found', 'response' => ['id' => $id, 'errors' => ['Bici Estación No encontrado']]], 404);
             }
 
             $validation = [
@@ -247,7 +247,7 @@ class ParkingController extends Controller
         try {
             $data = Parking::find($id);
             if (!$data) {
-                return response()->json(['message' => "Not Found", 'response' => ['errors' => ["Cicloparqueadero no encontrado."]]], 404);
+                return response()->json(['message' => "Not Found", 'response' => ['errors' => ["Bici Estación no encontrado."]]], 404);
             }
             $data->delete();
             return response()->json(['message' => 'Parking Deleted',  'response' => ['errors' => []]], 200);
