@@ -597,14 +597,13 @@ class BikerController extends Controller
 
             if ($request->file('photo')) {
                 $ph = $request->file('photo')->getRealPath();
-                // $id_ph = $request->file('id_img');
-                // Cloudder::delete($id_ph);
-                // Cloudder::destroyImage($id_ph);
-
+                $id_ph = $data->id_img;
                 Cloudder::upload($ph, null,  array("folder" => "biker"));
                 $publicId = Cloudder::getPublicId();
                 $url =  Cloudder::secureShow($publicId);
                 $urlImg =   str_replace('_150', '_520', $url);
+                Cloudder::delete($id_ph);
+                Cloudder::destroyImage($id_ph);
             } else {
                 $publicId = $data->id_img;
                 $urlImg = $data->url_img;
@@ -955,4 +954,6 @@ class BikerController extends Controller
 
         return response()->json(['message' => 'Success', 'response' => ['data' => ['massiv', 'data' => $request->all()], 'indexes' => [], 'errors' => []]], 200);
     }
+
+    
 }
