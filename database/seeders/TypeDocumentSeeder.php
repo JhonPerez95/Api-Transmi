@@ -16,7 +16,7 @@ class TypeDocumentSeeder extends Seeder
     {
         $data = TypeDocument::create([
             'code'  => 'CC',
-            'name'  => 'Cedula de Ciudadania',
+            'name'  => 'Cédula de Ciudadanía',
             'users_id'  => 1
         ]);
         $data = TypeDocument::create([
