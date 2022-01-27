@@ -480,28 +480,28 @@ class BikerController extends Controller
                 return response()->json(['message' => 'Not Found', 'response' => ['id' => $id, 'errors' => ['Usuario No encontrado']]], 404);
             }
 
-            $emailRules = ($data->email == $request->input('email')) ?  'required|email|min:8|max:60' : 'required|email|min:8|max:60|unique:bikers';
-            $documentRules = ($data->document == $request->input('document')) ?  'required|min:5|max:30' : 'required|min:5|max:30|unique:bikers';
-            $confirmationRules = ($data->phone == $request->input('phone')) ?  '' : 'required|exists:verification_codes,code';
+            $emailRules = ($data->email == $request->input('email')) ?  'email|min:8|max:60' : 'email|min:8|max:60|unique:bikers';
+            $documentRules = ($data->document == $request->input('document')) ?  'min:5|max:30' : 'min:5|max:30|unique:bikers';
+            $confirmationRules = ($data->phone == $request->input('phone')) ?  '' : 'exists:verification_codes,code';
 
             $validation = [
                 "rules" => [
-                    'name' => 'required|min:4|max:100',
-                    'lastName' =>  'required|min:4|max:100',
+                    'name' => 'min:4|max:100',
+                    'lastName' =>  'min:4|max:100',
                     'document' => $documentRules,
-                    'type' =>  'required|exists:type_documents,id',
+                    'type' =>  'exists:type_documents,id',
                     'document' => 'min:5|max:30',
-                    'birth' =>  'required|date',
-                    'phone' => 'required|digits_between:7,10',
+                    'birth' =>  'date',
+                    'phone' => 'digits_between:7,10',
                     'email' => $emailRules,
                     'confirmation' =>   $confirmationRules,
-                    'job' =>    'required|exists:jobs,id',
-                    'neighborhood' =>   'required|min:2|max:160',
-                    'level' =>  'required|in:1,2,3,4,5,6',
-                    'register' =>   'required|date',
-                    'active' =>  'required|in:1,2,3',
-                    'auth' =>   'required|in:1,2',
-                    'gender' =>     'required|exists:genders,id',
+                    'job' =>    'exists:jobs,id',
+                    'neighborhood' =>   'min:2|max:160',
+                    'level' =>  'in:1,2,3,4,5,6',
+                    'register' =>   'date',
+                    'active' =>  'in:1,2,3',
+                    'auth' =>   'in:1,2',
+                    'gender' =>     'exists:genders,id',
                 ],
                 "messages" => [
 
@@ -588,47 +588,48 @@ class BikerController extends Controller
             }
 
             // Verification code, validated above, deleted here
-            if ($data->phone != $request->input('phone')) {
-                $vef = VerificationCode::validate($request->confirmation);
-                if (!$vef) {
-                    return response()->json(['message' => 'Bad Request', 'response' => ['errors' => ['El código de verificación no acerta las credenciales con las que fue registrado.']]], 400);
-                }
-            }
+            // if ($data->phone != $request->input('phone')) {
+            //     $vef = VerificationCode::validate($request->confirmation);
+            //     if (!$vef) {
+            //         return response()->json(['message' => 'Bad Request', 'response' => ['errors' => ['El código de verificación no acerta las credenciales con las que fue registrado.']]], 400);
+            //     }
+            // }
 
             if ($request->file('photo')) {
-                $ph = $request->file('photo')->getRealPath();
+                $ph     = $request->file('photo')->getRealPath();
                 $id_ph = $data->id_img;
                 try {
                     Cloudder::upload($ph, null,  array("folder" => "biker"));
                     $publicId = Cloudder::getPublicId();
                     $url =  Cloudder::secureShow($publicId);
                     $urlImg =   str_replace('_150', '_520', $url);
+
                     Cloudder::delete($id_ph);
                     Cloudder::destroyImage($id_ph);
                 } catch (\Throwable $th) {
                     return response()->json(['message' => 'Bad Request', 'response' => ['msg' => 'Error al actualizar la imagen', 'error' => $th]], 500);
                 }
             } else {
-                $publicId = $data->id_img;
-                $urlImg = $data->url_img;
+                $urlImg = $data->id_img;
+                $publicId = $data->url_img;
             }
 
-            $data->name = $request->name;
-            $data->last_name = $request->lastName;
-            $data->type_documents_id = $request->type;
-            $data->document = $request->document;
-            $data->birth = $request->birth;
-            $data->parkings_id = $request->parkings_id;
-            $data->genders_id = $request->gender;
-            $data->phone = $request->phone;
-            $data->email = $request->email;
-            $data->confirmation = $request->confirmation;
-            $data->jobs_id = $request->job;
-            $data->neighborhoods_id = $request->neighborhood;
-            $data->levels_id = "Estrato {$request->level}";
-            $data->register = $request->register;
-            $data->active = $request->active;
-            $data->auth = $request->auth;
+            $data->name = $request->name ?? $data->name;
+            $data->last_name = $request->lastName ?? $data->last_name;
+            $data->type_documents_id = $request->type ?? $data->type_documents_id;
+            $data->document = $request->document ?? $data->document;
+            $data->birth = $request->birth ?? $data->birth;
+            $data->parkings_id = $request->parkings_id ?? $data->parkings_id;
+            $data->genders_id = $request->gender ?? $data->genders_id;
+            $data->phone = $request->phone ?? $data->phone;
+            $data->email = $request->email ?? $data->email;
+            $data->confirmation = $request->confirmation ?? $data->confirmation;
+            $data->jobs_id = $request->job ?? $data->jobs_id;
+            $data->neighborhoods_id = $request->neighborhood ?? $data->neighborhoods_id;
+            $data->levels_id = $request->level ? "Estrato {$request->level}" : $data->levels_id;
+            $data->register = $request->register ?? $data->register;
+            $data->active = $request->active ?? $data->active;
+            $data->auth = $request->auth ?? $data->auth;
             $data->url_img = $urlImg;
             $data->id_img = $publicId;
             $data->update();
@@ -956,6 +957,4 @@ class BikerController extends Controller
 
         return response()->json(['message' => 'Success', 'response' => ['data' => ['massiv', 'data' => $request->all()], 'indexes' => [], 'errors' => []]], 200);
     }
-
-    
 }
