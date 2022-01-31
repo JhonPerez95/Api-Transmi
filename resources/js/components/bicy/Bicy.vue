@@ -28,6 +28,21 @@
           <div v-else-if="props.row.active == 2">Inactivo</div>
           <div v-else>Bloqueado</div>
         </span>
+        <span v-else-if="props.column.field === 'url_image_back'">
+          <a :href=" props.formattedRow[props.column.field] " target="_blank" rel="noopener noreferrer">
+          <img :src=" props.formattedRow[props.column.field] " min-width="70" height="70" />
+          </a>
+        </span>
+        <span v-else-if="props.column.field === 'url_image_front'">
+          <a :href=" props.formattedRow[props.column.field] " target="_blank" rel="noopener noreferrer">
+          <img :src=" props.formattedRow[props.column.field] " min-width="70" height="70" />
+          </a>
+        </span>
+        <span v-else-if="props.column.field === 'url_image_side'">
+          <a :href=" props.formattedRow[props.column.field] " target="_blank" rel="noopener noreferrer">
+          <img :src=" props.formattedRow[props.column.field] " min-width="70" height="70" />
+          </a>
+        </span>
         <span v-else-if="props.column.field === 'delete'">
           <button v-on:click="editData(props.row.id)" class="btn btn-warning">
             Editar
@@ -463,6 +478,18 @@ export default {
         {
           label: "Hora de Registro",
           field: "time",
+        },
+        {
+           label: "Foto 1",
+           field: "url_image_back",
+        },
+        {
+           label: "Foto 2",
+           field: "url_image_side",
+        },
+        {
+           label: "Foto 3",
+           field: "url_image_front",
         },
         {
           label: "Acciones",

@@ -655,14 +655,25 @@ class BikerController extends Controller
                 return response()->json(['message' => "Not Found", 'response' => ['errors' => ["Usuario no encontrado."]]], 404);
             }
 
+            // Eliminando imagen de Cloudinary
+            try {
+                Cloudder::delete($data->id_img);
+                Cloudder::destroyImage($data->id_img);
+            } catch (\Throwable $th) {
+                return response()->json(['message' => 'Bad Request', 'response' => ['msg' => 'Error a eliminar la imagen del ciclista', 'error' => $th]], 500);
+            }
+
+
+
             $data->email = '';
             $data->phone = '';
+            $data->url_img = '';
+            $data->id_img = '';
             $data->neighborhoods_id = '';
             $data->levels_id = 'Estrato 1';
             $data->jobs_id = '1';
 
             $data->save();
-            Storage::deleteDirectory("public/bikers/biker$id");
 
             return response()->json(['message' => 'Success',  'response' => ['data' => ['Ciclista Anulado'], 'errors' => []]], 200);
         } catch (QueryException $th) {
