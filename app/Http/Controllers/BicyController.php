@@ -14,14 +14,16 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Route;
+use Cloudder;
 
 class BicyController extends Controller
 {
 
-    public function __construct(){
-        if(Route::getCurrentRoute()){
+    public function __construct()
+    {
+        if (Route::getCurrentRoute()) {
             $route = Route::getCurrentRoute()->uri();
-            $this->client = ( preg_match("/api\//",$route)) ? "app" : "web";
+            $this->client = (preg_match("/api\//", $route)) ? "app" : "web";
         }
     }
 
@@ -82,37 +84,35 @@ class BicyController extends Controller
         $Parking = Parking::find($parking_id);
         $aumentar = 1;
 
-        while(true){
-            $code = $Parking->code . substr("0000". ($Parking->bike_count + $aumentar),-4,4);
+        while (true) {
+            $code = $Parking->code . substr("0000" . ($Parking->bike_count + $aumentar), -4, 4);
 
-            $exists = Bicy::where(['code'=>$code])->first();
+            $exists = Bicy::where(['code' => $code])->first();
 
-            if($exists){
+            if ($exists) {
                 $aumentar++;
-            }else{
+            } else {
                 break;
             }
-
         }
 
-        if($aumentar !== 1){
+        if ($aumentar !== 1) {
             $Parking->bike_count = $Parking->bike_count + $aumentar;
             $Parking->save();
         }
 
-        if($fromInside){
+        if ($fromInside) {
 
             // From inside does not add up
-            if($aumentar == 1 && !$avoidIncreasingCount){
+            if ($aumentar == 1 && !$avoidIncreasingCount) {
                 $Parking->bike_count = $Parking->bike_count + $aumentar;
                 $Parking->save();
             }
 
             return $code;
-        }else{
-            return response()->json(['message'=>'Success', 'response'=>['data'=>['consecutive'=>$code], 'indexes'=>[], 'errors'=>[]]],200);
+        } else {
+            return response()->json(['message' => 'Success', 'response' => ['data' => ['consecutive' => $code], 'indexes' => [], 'errors' => []]], 200);
         }
-
     }
 
     /**
@@ -123,20 +123,19 @@ class BicyController extends Controller
      */
 
 
-    private function photoValidation($request , $updating = false)
+    private function photoValidation($photo, $updating = false)
     {
         $phValid = [];
 
-        if (!$request->hasFile('photo')) {
+        if (!$photo) {
 
             // While updating, resending the image won't be required
             if (!$updating) {
                 $phValid[] = 'El campo fotografía es requerido';
             }
         } else {
-            $ph = $request->file('photo');
 
-            $arrayingImage = (gettype($ph) != 'array') ? [$ph] : $ph;
+            $arrayingImage = (gettype($photo) != 'array') ? [$photo] : $photo;
             $extensiones = ["jpg", "png", "jpeg"];
 
             if (count($arrayingImage) > 1) {
@@ -144,21 +143,38 @@ class BicyController extends Controller
                 return $phValid;
             }
 
-            if (!$ph->isValid()) {
+            if (!$photo->isValid()) {
                 $phValid[] = 'El campo fotografía es inválido';
             }
 
-            if (!in_array($ph->getClientOriginalExtension(), $extensiones)) {
+            if (!in_array($photo->getClientOriginalExtension(), $extensiones)) {
                 $phValid[] = 'El campo fotografía recibe imágenes de formato jpg, jpeg y png.';
             }
 
-            if ($ph->getSize() > 10000000) {
+            if ($photo->getSize() > 10000000) {
                 $phValid[] = 'El campo fotografía tiene un tamaño máximo de 10MB';
             }
         }
 
         return $phValid;
     }
+
+
+
+    private function savePhotoInCloud($photo)
+    {
+        try {
+            Cloudder::upload($photo, null,  array("folder" => "bicy"));
+            $publicId = Cloudder::getPublicId();
+            $url =  Cloudder::secureShow($publicId);
+            $urlImg =   str_replace('_150', '_520', $url);
+
+            return array($urlImg, $publicId);
+        } catch (\Throwable $th) {
+            return response()->json(['message' => 'Bad Request', 'response' => ['message' => 'Problema al guardar la imagen', 'error' => $th]], 500);
+        }
+    }
+
 
     public function store(Request $request)
     {
@@ -206,35 +222,45 @@ class BicyController extends Controller
 
             $validator = Validator::make($request->all(), $validation['rules'], $validation['messages']);
 
-            if(true){
+            if (true) {
                 // Photo validation
-                $phtValidation = $this->photoValidation($request);
+                $phtValidation = $this->photoValidation($request->file('image_back'));
+                $phtValidation2 = $this->photoValidation($request->file('image_side'));
+                $phtValidation3 = $this->photoValidation($request->file('image_front'));
                 if ($validator->fails()) {
-                    return response()->json(['response' => ['errors' => array_merge($validator->errors()->all(), $phtValidation)], 'message' => 'Bad Request'], 400);
+                    return response()->json(['response' => ['errors' => array_merge($validator->errors()->all(), $phtValidation, $phtValidation2, $phtValidation3)], 'message' => 'Bad Request'], 400);
                 } else {
                     if (count($phtValidation)) {
                         return response()->json(['response' => ['errors' => $phtValidation], 'message' => 'Bad Request'], 400);
                     }
                 }
 
-                $testingImage = $request->hasFile('image_front') ? $request->file('image_front') : ( $request->hasFile('image_back') ? $request->file('image_back') : $request->file('image_side') );
-                $statusResponse = Storage::disk('local')->putFileAs('testingUpload', $testingImage, 'testing.png');
-                if (!$statusResponse) {
-                    return response()->json(['message' => 'Internal Error', 'response' => ["errors" => ["Error en la manipulación de archivos."]]], 500);
-                }
+                // $testingImage = $request->hasFile('image_front') ? $request->file('image_front') : ( $request->hasFile('image_back') ? $request->file('image_back') : $request->file('image_side') );
+                // $statusResponse = Storage::disk('local')->putFileAs('testingUpload', $testingImage, 'testing.png');
+                // if (!$statusResponse) {
+                //     return response()->json(['message' => 'Internal Error', 'response' => ["errors" => ["Error en la manipulación de archivos."]]], 500);
+                // }
 
-            }else{
+            } else {
                 if ($validator->fails()) {
                     return response()->json(['response' => ['errors' => $validator->errors()->all()], 'message' => 'Bad Request'], 400);
                 }
             }
 
-            if(!$request->code){
-                $request->request->add(['code'=>$this->create($request->parkings_id, true, true)]);
+            if (!$request->code) {
+                $request->request->add(['code' => $this->create($request->parkings_id, true, true)]);
             }
 
 
-            
+
+            $image_back = $request->file('image_back')->getRealPath();
+            $image_side = $request->file('image_side')->getRealPath();
+            $image_front = $request->file('image_front')->getRealPath();
+
+            list($url_image_back, $id_image_back) = $this->savePhotoInCloud($image_back);
+            list($url_image_side, $id_image_side) = $this->savePhotoInCloud($image_side);
+            list($url_image_front, $id_image_front) = $this->savePhotoInCloud($image_front);
+
             $Bicy = Bicy::create([
                 'code' => $request->code,
                 'description' => ($request->description) ? $request->description : '',
@@ -245,7 +271,13 @@ class BicyController extends Controller
                 'tires' => $request->tires,
                 'type_bicies_id' => $request->type_bicies_id,
                 'parkings_id' => $request->parkings_id,
-                'active' => $request->active
+                'active' => $request->active,
+                'url_image_back' => $url_image_back,
+                'url_image_side' => $url_image_side,
+                'url_image_front' => $url_image_front,
+                'id_image_back' => $id_image_back,
+                'id_image_side' => $id_image_side,
+                'id_image_front' => $id_image_front
             ]);
 
             $Parking = Parking::find($request->parkings_id);
@@ -253,27 +285,27 @@ class BicyController extends Controller
             $Parking->save();
 
             //? Usefull while deving, maybe not so much on production, can't harm tho'
-            $existingPhotos = Storage::allFiles("public/bicies/bicy{$Bicy->id}");
-            Storage::delete($existingPhotos);
+            // $existingPhotos = Storage::allFiles("public/bicies/bicy{$Bicy->id}");
+            // Storage::delete($existingPhotos);
 
-            if($validateImage){
-                
-                if($request->hasFile('image_back')){
-                    $hash = sha1(date('H:i:s'));
-                    $statusResponse = Storage::disk('local')->putFileAs("public/bicies/bicy{$Bicy['id']}", $request->file('image_back') , "back_$hash.png");
-                }
-                if($request->hasFile('image_side')){
-                    $hash = sha1(date('H:i:s'));
-                    $statusResponse = Storage::disk('local')->putFileAs("public/bicies/bicy{$Bicy['id']}", $request->file('image_side') , "side_$hash.png");
-                }
-                if($request->hasFile('image_front')){
-                    $hash = sha1(date('H:i:s'));
-                    $statusResponse = Storage::disk('local')->putFileAs("public/bicies/bicy{$Bicy['id']}", $request->file('image_front') , "front_$hash.png");
-                }
+            // if($validateImage){
 
-            }
-            
-            if($Bicy){
+            //     if($request->hasFile('image_back')){
+            //         $hash = sha1(date('H:i:s'));
+            //         $statusResponse = Storage::disk('local')->putFileAs("public/bicies/bicy{$Bicy['id']}", $request->file('image_back') , "back_$hash.png");
+            //     }
+            //     if($request->hasFile('image_side')){
+            //         $hash = sha1(date('H:i:s'));
+            //         $statusResponse = Storage::disk('local')->putFileAs("public/bicies/bicy{$Bicy['id']}", $request->file('image_side') , "side_$hash.png");
+            //     }
+            //     if($request->hasFile('image_front')){
+            //         $hash = sha1(date('H:i:s'));
+            //         $statusResponse = Storage::disk('local')->putFileAs("public/bicies/bicy{$Bicy['id']}", $request->file('image_front') , "front_$hash.png");
+            //     }
+
+            // }
+
+            if ($Bicy) {
                 $smsResponse = $biker->notifyBicySignin($Bicy->id);
             }
 
@@ -284,12 +316,13 @@ class BicyController extends Controller
                 'active' => '1',
             ]);
 
-            return response()->json(['message' => 'Bicy Created', 'response' => ["data" => $Bicy]], 201);
+            return response()->json(['message' => 'Bicy Created', 'response' => ["data" => $Bicy]], 200);
         } catch (QueryException $th) {
             Log::emergency($th);
             return response()->json(['message' => 'Internal Error', 'response' => ["errors" => [$th->getMessage()]]], 500);
         }
     }
+
 
     /**
      * Display the specified resource.
@@ -299,59 +332,35 @@ class BicyController extends Controller
      */
     public function show($id, $detailed = false)
     {
-        if($this->client == 'app'){
-            $data = Bicy::where(['bicies.code'=>$id])
-            ->join('bikers','bikers.id','bicies.bikers_id')
-            ->select('bicies.*', 'bikers.document')
-            ->first();
-            
-        }else{
-            $data = Bicy::where(['bicies.id'=>$id])
-            ->join('bikers','bikers.id','bicies.bikers_id')
-            ->select('bicies.*', 'bikers.document')
-            ->first();
+        if ($this->client == 'app') {
+            $data = Bicy::where(['bicies.code' => $id])
+                ->join('bikers', 'bikers.id', 'bicies.bikers_id')
+                ->select('bicies.*', 'bikers.document')
+                ->first();
+        } else {
+            $data = Bicy::where(['bicies.id' => $id])
+                ->join('bikers', 'bikers.id', 'bicies.bikers_id')
+                ->select('bicies.*', 'bikers.document')
+                ->first();
         }
 
-        if(!$data){
-            return response()->json(['message'=>'Not Found', 'response'=>['errors'=>['Registro de bicicleta no encontrado']]],404);
+        if (!$data) {
+            return response()->json(['message' => 'Not Found', 'response' => ['errors' => ['Registro de bicicleta no encontrado']]], 404);
         }
         $id = $data->id;
 
-        $appUrl = config('app.url');
-        //?Check if localhost
-        $appUrl = ($appUrl[ strlen($appUrl) -1 ] == '/' ) ? $appUrl : "$appUrl:8000/";
 
-        $photos = Storage::allFiles("public/bicies/bicy{$id}");
-        foreach($photos as $idx => $_photo){
-            $photos[$idx] = $appUrl .  preg_replace('/public/','storage',$_photo);
-        }
-
-        $existingPhotos = Storage::allFiles("public/bicies/bicy{$id}");
-    
-        $frontPhoto = array_filter($existingPhotos, function($el){ return preg_match('/front_/',$el); });
-        $data->image_front = ( count($frontPhoto) )? $appUrl .  preg_replace('/public/','storage', array_values($frontPhoto)[0])  : null;
-        
-        $backPhoto = array_filter($existingPhotos, function($el){ return preg_match('/back_/',$el); });
-        $data->image_back = ( count($backPhoto) )? $appUrl .  preg_replace('/public/','storage', array_values($backPhoto)[0])  : null;
-
-        $sidePhoto = array_filter($existingPhotos, function($el){ return preg_match('/side_/',$el); });
-        $data->image_side = ( count($sidePhoto) )? $appUrl .  preg_replace('/public/','storage', array_values($sidePhoto)[0])  : null;
-
-        if($detailed){
+        if ($detailed) {
             $biker = $data->biker;
-            $bikerPhotos = Storage::allFiles("public/bikers/biker{$biker->id}");            
-            $biker->photo = (count($bikerPhotos)) ? $appUrl . preg_replace('/public/','storage',$bikerPhotos[0]) : null ;
-            return response()->json([ 'message' => "Sucess", 'response' => [ 'bicy' => $data, 'biker'=>$biker ] ],200);
-        }else{
-             return response()->json([ 'message' => "Sucess", 'response' => [ 'data' => $data, ] ],200);
+            return response()->json(['message' => "Sucess", 'response' => ['bicy' => $data, 'biker' => $biker]], 200);
+        } else {
+            return response()->json(['message' => "Sucess", 'response' => ['data' => $data,]], 200);
         }
-
-       
-
     }
 
-    public function detailedShow($id){
-        return $this->show($id,true);
+    public function detailedShow($id)
+    {
+        return $this->show($id, true);
     }
 
     /**
@@ -376,6 +385,22 @@ class BicyController extends Controller
             'bicies' => $data,
             'errors' => []
         ]], 200);
+    }
+
+    private function updatePhotoInCloud($photo, $id_photo)
+    {
+        try {
+            Cloudder::upload($photo, null,  array("folder" => "bicy"));
+            $publicId = Cloudder::getPublicId();
+            $url =  Cloudder::secureShow($publicId);
+            $urlImg =   str_replace('_150', '_520', $url);
+
+            Cloudder::delete($id_photo);
+            Cloudder::destroyImage($id_photo);
+            return array($urlImg, $publicId);
+        } catch (\Throwable $th) {
+            return response()->json(['message' => 'Bad Request', 'response' => ['message' => 'Problema al guardar la imagen', 'error' => $th]], 500);
+        }
     }
 
     /**
@@ -404,132 +429,99 @@ class BicyController extends Controller
             if (!$biker) {
                 return response()->json(['message' => 'Not Found', 'response' => ['errors' => ['Ciclista No encontrado']]], 400);
             }
-    
 
-            $codeRules = ($request->code != $data->code) ? 'required|min:1|max:20|unique:bicies' : 'required|min:1|max:20';
-            $serialRules = ($request->serial != $data->serial) ? 'required|unique:bicies' : 'required';
+
+            $codeRules = ($request->code != $data->code) ? 'min:1|max:20|unique:bicies' : 'min:1|max:20';
+            $serialRules = ($request->serial != $data->serial) ? '|unique:bicies' : '';
 
             $validation = [
                 "rules" => [
                     'code' => $codeRules,
-                    'document' => 'required',
-                    'brand' =>  'required',
-                    'color' => 'required',
-                    'tires' => 'required',
-                    'type_bicies_id' =>   'required|exists:type_bicies,id',
+                    'type_bicies_id' =>   'exists:type_bicies,id',
                     'serial' => $serialRules,
-                    'parkings_id' =>   'required|exists:parkings,id',
-                    'active' =>  'required|in:1,2,3',
+                    'parkings_id' =>   'exists:parkings,id',
+                    'active' =>  'in:1,2,3',
                 ],
                 "messages" => [
-                    'code.required' => 'El campo codigo es requerido',
                     'code.min' => 'El campo codigo debe tener mínimo 1 caracteres',
                     'code.max' => 'El campo codigo debe tener máximo 20 caracteres',
                     'code.unique' => 'El codigo ingresado ya existe.',
-                    'description.required' => 'El campo caracteristicas es requerido',
                     'description.min' => 'El campo caracteristicas debe tener mínimo 5 caracteres',
                     'description.max' => 'El campo caracteristicas debe tener máximo 200 caracteres',
-                    'document.required' => 'El campo documento es requerido',
-                    'brand.required' => 'El campo marca es requerido',
-                    'color.required' => 'El campo color es requerido',
-                    'tires.required' => 'El campo llanta es requerido',
-                    'parkings_id.required' => 'El campo Bici Estación es requerido',
                     'parkings_id.exists' => 'El campo Bici Estación no acerta ningún registro existente',
-                    'type_bicies_id.required' => 'El campo tipo es requerido',
                     'type_bicies_id.exists' => 'El campo tipo no acerta ningún registro existente',
-                    'serial.required' => 'El campo serial o código del marco es requerido',
                     'serial.unique' => 'El campo serial o código del marco ya existe',
-                    'active.required' => 'El campo estado de la bicicleta es requerido',
                     'active.in' => 'El campo estado de la bicicleta es recibe los valores Activo, Inactivo y Bloqueado',
                 ]
             ];
 
-            $validator = Validator::make($request->all(), $validation['rules'], $validation['messages']);            
-            if($validateImage){ // photo validation
+            $validator = Validator::make($request->all(), $validation['rules'], $validation['messages']);
+            if ($validateImage) { // photo validation
 
-                $phtValidation = $this->photoValidation($request, true);
+                $phtValidation = $this->photoValidation($request->file('image_back'), true);
+                $phtValidation2 = $this->photoValidation($request->file('image_side'), true);
+                $phtValidation3 = $this->photoValidation($request->file('image_front'), true);
 
                 if ($validator->fails()) {
-                    return response()->json(['response' => ['errors' => array_merge($validator->errors()->all(), $phtValidation)], 'message' => 'Bad Request'], 400);
+                    return response()->json(['response' => ['errors' => array_merge($validator->errors()->all(), $phtValidation, $phtValidation2 , $phtValidation3)], 'message' => 'Bad Request'], 400);
                 } else {
                     if (count($phtValidation)) {
                         return response()->json(['response' => ['errors' => $phtValidation], 'message' => 'Bad Request'], 400);
                     }
                 }
-
-                $testingImage = $request->hasFile('image_front') ? 
-                    $request->file('image_front') : 
-                    ( $request->hasFile('image_back') ? 
-                        $request->file('image_back') : 
-                        ( $request->hasFile('image_side') ? 
-                            $request->file('image_side') : 
-                            null ) );
-                
-                if($testingImage){
-
-                    $statusResponse = Storage::disk('local')->putFileAs('testingUpload', $testingImage,'testing.png');
-                    if(!$statusResponse){
-                        return response()->json(['message' => 'Internal Error', 'response'=>["errors"=>["Error en la manipulación de archivos."]] ],500);
-                    }
-
-                }else{
-                    $validateImage = false;
-                }
-
-            }else{
+            } else {
                 if ($validator->fails()) {
                     return response()->json(['response' => ['errors' => $validator->errors()->all()], 'message' => 'Bad Request'], 400);
                 }
             }
 
-            $data->code = $request->code;
-            $data->description = ($request->description) ? $request->description : '';
-            $data->brand = $request->brand;
-            $data->serial = $request->serial;
-            $data->bikers_id = $biker->id;
-            $data->color = $request->color;
-            $data->parkings_id = $request->parkings_id;
-            $data->tires = $request->tires;
-            $data->type_bicies_id = $request->type_bicies_id;
-            $data->active = $request->active;
-            $data->save();
-             
+
+            if (!$request->file('image_back')) {
+                $url_image_back =  $data->url_image_back;
+                $id_image_back = $data->id_image_back;
+            } else {
+                $image_back = $request->file('image_back')->getRealPath();
+                list($url_image_back, $id_image_back) = $this->updatePhotoInCloud($image_back, $data->id_image_back);
+            }
+
+            if (!$request->file('image_side')) {
+                $url_image_side =  $data->url_image_side;
+                $id_image_side = $data->id_image_side;
+            } else {
+                $image_side = $request->file('image_side')->getRealPath();
+                list($url_image_side, $id_image_side) = $this->updatePhotoInCloud($image_side, $data->id_image_side);
+            }
+
+            if (!$request->file('image_front')) {
+                $url_image_front =  $data->url_image_front;
+                $id_image_front = $data->id_image_front;
+            } else {
+                $image_front = $request->file('image_front')->getRealPath();
+                list($url_image_front, $id_image_front) = $this->updatePhotoInCloud($image_front, $data->id_image_front);
+            }
+
+            $data->code = $request->code ?? $data->code;
+            $data->description = $request->description ?? $data->description;
+            $data->brand = $request->brand ?? $data->brand;
+            $data->serial = $request->serial ?? $data->serial;
+            $data->bikers_id = $biker->id ?? $data->bikers_id;
+            $data->color = $request->color ?? $data->color;
+            $data->parkings_id = $request->parkings_id ?? $data->parkings_id;
+            $data->tires = $request->tires ?? $data->tires;
+            $data->type_bicies_id = $request->type_bicies_id ?? $data->type_bicies_id;
+            $data->active = $request->active ?? $data->active;
+            $data->url_image_back = $url_image_back;
+            $data->url_image_front = $url_image_front;
+            $data->url_image_side = $url_image_side;
+            $data->id_image_back = $id_image_back;
+            $data->id_image_front = $id_image_front;
+            $data->id_image_side = $id_image_side;
+            $data->update();
 
             $output = [];
 
-            // Check & replace images if new received
-            if($validateImage){
-                $existingPhotos = Storage::allFiles("public/bicies/bicy{$request->id}");
-                $hash = sha1(date('H:i:s'));
-                if( $request->hasFile('image_front') ){
-                    $previousPhoto = array_filter($existingPhotos, function($el){ return preg_match('/front_/',$el); });
-                    Storage::disk('local')->putFileAs("public/bicies/bicy{$data->id}", $request->file('image_front') , "front_$hash.png");
-                    if( count($previousPhoto) ){
-                        Storage::delete(array_values($previousPhoto));
-                    }
-                } 
-
-                if( $request->hasFile('image_back') ){
-                    $previousPhoto = array_filter($existingPhotos, function($el){ return preg_match('/back_/',$el); });
-                    Storage::disk('local')->putFileAs("public/bicies/bicy{$data->id}", $request->file('image_back') , "back_$hash.png");
-                    if( count($previousPhoto) ){
-                        Storage::delete(array_values($previousPhoto));
-                    }
-                } 
-
-                if( $request->hasFile('image_side') ){
-                    $previousPhoto = array_filter($existingPhotos, function($el){ return preg_match('/side_/',$el); });
-                    Storage::disk('local')->putFileAs("public/bicies/bicy{$data->id}", $request->file('image_side') , "side_$hash.png");
-                    if( count($previousPhoto) ){
-                        Storage::delete(array_values($previousPhoto));
-                    }
-                } 
-                
-            }
-
             $smsResponse = $biker->notifyBicyUpdate($data->id);
-            return response()->json(['message' => 'Bicy Updated', 'response' => ["data"=>$data,"errors" => []]], 200);
-
+            return response()->json(['message' => 'Bicy Updated', 'response' => ["data" => $data, "errors" => []]], 200);
         } catch (QueryException $th) {
             Log::emergency($th);
             return response()->json(['message' => 'Internal Error', 'response' => ["errors" => [$th->getMessage()]]], 500);
@@ -544,7 +536,7 @@ class BicyController extends Controller
      */
     public function destroy(Request $request, $id)
     {
-        return response()->json(['message'=>'Bad Request', 'response'=>['errors'=>['La eliminación de registros de bicicleta no es una funcionalidad del sistema.']]],400);
+        return response()->json(['message' => 'Bad Request', 'response' => ['errors' => ['La eliminación de registros de bicicleta no es una funcionalidad del sistema.']]], 400);
         try {
             $data = Bicy::find($id);
             if (!$data) {
@@ -555,7 +547,7 @@ class BicyController extends Controller
             //? Solution A, deactivate foreign key checks in order for it not to throw because of inventory or visits records
             Schema::disableForeignKeyConstraints();
 
-            $stickers = DetailedStickerOrder::where(['bicies_id'=>$data->id])->get();
+            $stickers = DetailedStickerOrder::where(['bicies_id' => $data->id])->get();
             foreach ($stickers as $sticker) { //? Stickers can be deleted
                 $sticker->delete();
             }
@@ -572,90 +564,91 @@ class BicyController extends Controller
         }
     }
 
-    public function checkBiciesExpirations(){
+    public function checkBiciesExpirations()
+    {
 
         $currentDate = date('Y-m-d H:i:s');
-        $limitDate = date('Y-m-d H:i:s', strtotime($currentDate. " - 30 days"));
+        $limitDate = date('Y-m-d H:i:s', strtotime($currentDate . " - 30 days"));
         $bicies = Bicy::where("bicies.updated_at", "<", $limitDate)
-            ->where('bicies.active',1)
-            ->join('visits','bicies.id','visits.bicies_id')
-            ->where('visits.duration','0') // If it's still inside
-            ->groupBy('bicies.id','bicies.bikers_id')
-            ->select('bicies.id','bicies.bikers_id',DB::raw('max(visits.updated_at) as lastAction'), DB::raw("max(visits.updated_at) < '$limitDate' as inactive"),'visits.parkings_id')
+            ->where('bicies.active', 1)
+            ->join('visits', 'bicies.id', 'visits.bicies_id')
+            ->where('visits.duration', '0') // If it's still inside
+            ->groupBy('bicies.id', 'bicies.bikers_id')
+            ->select('bicies.id', 'bicies.bikers_id', DB::raw('max(visits.updated_at) as lastAction'), DB::raw("max(visits.updated_at) < '$limitDate' as inactive"), 'visits.parkings_id')
             ->get();
 
-        //Actual processed bicies
-        $_bicies= array();
-        $smsResponses = [];
-        foreach($bicies as $bici){
-            $bici->biker;
-
-            // If it hasn't been already notified 
-            if(!$bici->abandonNotification()->where('active','1')->first()){
-                $smsResponses[] = $bici->biker->notifyBikeExpiration($bici->id, $bici->parkings_id);
-                $_bicies[] = $bici;
-            }            
-        }
-
-        return response()->json([ 'message'=> 'sucess', 'response'=>[ 'data'=>[ 'LIMIT DATE' => $limitDate,'BICIES'=> $_bicies, 'SMSRESPONSES'=> $smsResponses  ],  'errors'=>[] ] ],200);
-        
-    }
-
-    public function  checkAbandonedBicies(){
-        $currentDate = date('Y-m-d H:i:s');
-        $limitDate = date('Y-m-d H:i:s', strtotime($currentDate. " - 37 days"));
-        $notificationLimitDate = date('Y-m-d H:i:s', strtotime($currentDate. " - 7 days"));
-        $bicies = Bicy::where("bicies.updated_at", "<", $limitDate)
-            ->where('bicies.active',1)
-            ->join('visits','bicies.id','visits.bicies_id')
-            ->where('visits.duration','0') // If it's still inside
-            ->groupBy('bicies.id','bicies.bikers_id')
-            ->select('bicies.id','bicies.bikers_id',DB::raw('max(visits.updated_at) as lastAction'), DB::raw("max(visits.updated_at) < '$limitDate' as inactive"),'visits.parkings_id')
-            ->get();
-        
         //Actual processed bicies
         $_bicies = array();
         $smsResponses = [];
-        foreach($bicies as $bici){
+        foreach ($bicies as $bici) {
             $bici->biker;
-            // If it has been already notified 
-            if($bici->abandonNotification()->where('active','1')->where('created_at','<',$notificationLimitDate)->first()){
+
+            // If it hasn't been already notified 
+            if (!$bici->abandonNotification()->where('active', '1')->first()) {
+                $smsResponses[] = $bici->biker->notifyBikeExpiration($bici->id, $bici->parkings_id);
                 $_bicies[] = $bici;
-                $smsResponses[] = $bici->biker->notifyBikeAbandoning($bici->id, $bici->parkings_id);
-            }            
+            }
         }
 
-        return response()->json([ 'message'=> 'sucess', 'response'=>[ 'data'=>[ 'LIMIT DATE' => $limitDate,'BICIES'=> $_bicies, 'SMSRESPONSES'=> $smsResponses  ],  'errors'=>[] ] ],200);
-        
+        return response()->json(['message' => 'sucess', 'response' => ['data' => ['LIMIT DATE' => $limitDate, 'BICIES' => $_bicies, 'SMSRESPONSES' => $smsResponses],  'errors' => []]], 200);
     }
 
-    public function returnQRInfo(Request $request){
-        $ids = explode(',',$request->code);
+    public function  checkAbandonedBicies()
+    {
+        $currentDate = date('Y-m-d H:i:s');
+        $limitDate = date('Y-m-d H:i:s', strtotime($currentDate . " - 37 days"));
+        $notificationLimitDate = date('Y-m-d H:i:s', strtotime($currentDate . " - 7 days"));
+        $bicies = Bicy::where("bicies.updated_at", "<", $limitDate)
+            ->where('bicies.active', 1)
+            ->join('visits', 'bicies.id', 'visits.bicies_id')
+            ->where('visits.duration', '0') // If it's still inside
+            ->groupBy('bicies.id', 'bicies.bikers_id')
+            ->select('bicies.id', 'bicies.bikers_id', DB::raw('max(visits.updated_at) as lastAction'), DB::raw("max(visits.updated_at) < '$limitDate' as inactive"), 'visits.parkings_id')
+            ->get();
+
+        //Actual processed bicies
+        $_bicies = array();
+        $smsResponses = [];
+        foreach ($bicies as $bici) {
+            $bici->biker;
+            // If it has been already notified 
+            if ($bici->abandonNotification()->where('active', '1')->where('created_at', '<', $notificationLimitDate)->first()) {
+                $_bicies[] = $bici;
+                $smsResponses[] = $bici->biker->notifyBikeAbandoning($bici->id, $bici->parkings_id);
+            }
+        }
+
+        return response()->json(['message' => 'sucess', 'response' => ['data' => ['LIMIT DATE' => $limitDate, 'BICIES' => $_bicies, 'SMSRESPONSES' => $smsResponses],  'errors' => []]], 200);
+    }
+
+    public function returnQRInfo(Request $request)
+    {
+        $ids = explode(',', $request->code);
 
         $bicies = DB::table('bicies')
             ->join('bikers', 'bicies.bikers_id', '=', 'bikers.id')
             ->join('type_documents', 'bikers.type_documents_id', '=', 'type_documents.id')
 
-            ->select('bicies.id','bicies.code', 'type_documents.code as document_type', 'bikers.document as document')
-            
-            ->whereIn('bicies.id',  $ids)
-        ->get();
+            ->select('bicies.id', 'bicies.code', 'type_documents.code as document_type', 'bikers.document as document')
 
-        if(!$bicies->count()){
-            return response()->json(['message'=>'Not Found', 'response'=>['errors'=>['No se ha encontrado ninguna bicicleta bajo la información provista.']]],404);
+            ->whereIn('bicies.id',  $ids)
+            ->get();
+
+        if (!$bicies->count()) {
+            return response()->json(['message' => 'Not Found', 'response' => ['errors' => ['No se ha encontrado ninguna bicicleta bajo la información provista.']]], 404);
         }
 
         $data = array();
-        foreach($bicies as $bicy){
+        foreach ($bicies as $bicy) {
             $data[$bicy->id] = $bicy;
         }
 
 
-        return response()->json(['message'=>'Success', 'response'=>['data'=>$data,'errors'=>[]]],200);
-
+        return response()->json(['message' => 'Success', 'response' => ['data' => $data, 'errors' => []]], 200);
     }
 
-     public function massiveStore( Request $request ){
+    public function massiveStore(Request $request)
+    {
 
         $validation = [
             "rules" => [
@@ -689,10 +682,12 @@ class BicyController extends Controller
 
         $bicies = [];
         $errors = [];
-        foreach(file($request->file('csv')) as $i => $line){
-            if($i == 0){continue;} //? Titles Line
+        foreach (file($request->file('csv')) as $i => $line) {
+            if ($i == 0) {
+                continue;
+            } //? Titles Line
             $info = explode(',', $line);
-            if(!count($info)){
+            if (!count($info)) {
                 $errors[] = "El contenido es inválido para la línea '$line'";
             }
             $bicy = [
@@ -704,24 +699,23 @@ class BicyController extends Controller
                 'type_bicies_id' => $info[5],
                 'active' => 1,
             ];
-            
+
 
             $validator = Validator::make($bicy, $validation['rules'], $validation['messages']);
             if ($validator->fails()) {
                 $_errors = [];
                 foreach ($validator->errors()->all() as $value) {
                     // $_errors[] = "$value , mientras validando la línea " . ($i +1) . " , '$line' ";
-                    $_errors[] = "$value , mientras validando la línea " . ($i +1);
+                    $_errors[] = "$value , mientras validando la línea " . ($i + 1);
                 }
-                $errors = array_merge( $errors,  $_errors ); 
+                $errors = array_merge($errors,  $_errors);
             }
 
             $bicies[] = $bicy;
-
         }
 
-        if(count($errors)){
-            return response()->json(['message'=>'Bad Request', 'response'=>['errors'=>$errors]],200);
+        if (count($errors)) {
+            return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $errors]], 200);
         }
 
         $storeErrors = [];
@@ -729,55 +723,47 @@ class BicyController extends Controller
         $Bikers = [];
         $Line = 0;
         DB::beginTransaction();
-        try{
+        try {
 
-            foreach($bicies as $i => $bicy){
+            foreach ($bicies as $i => $bicy) {
                 $Line = $i;
 
                 $code = $this->create($bicy['parkings_id'], true);
-                if(!$code){
-                    $storeErrors[] = 'No se ha conseguido asignar el código consecutivo a la bicicleta'; 
+                if (!$code) {
+                    $storeErrors[] = 'No se ha conseguido asignar el código consecutivo a la bicicleta';
                     continue;
                 }
 
                 $bicy['code'] = $code;
 
-                if(! array_key_exists($bicy['document'], $Bikers)){
-                    $Biker[$bicy['document']] = Biker::where(['document'=>$bicy['document']])->first();
+                if (!array_key_exists($bicy['document'], $Bikers)) {
+                    $Biker[$bicy['document']] = Biker::where(['document' => $bicy['document']])->first();
                 }
-                
+
                 $bicy['bikers_id'] = $Biker[$bicy['document']]->id;
                 $Bicy = Bicy::create($bicy);
                 $Bicies[] = $Bicy;
             }
-
-            
-
-        }catch(QueryException $e){
+        } catch (QueryException $e) {
 
             $code = $e->getCode();
             $str = $e->getMessage();
-            if($code == 1062 || $code == 23000){
+            if ($code == 1062 || $code == 23000) {
                 preg_match("/Duplicate entry '(.*?)' for key '(.*?)'/", $str, $matches);
                 $storeErrors[] = "Valor({$matches[1]}) duplicado para el campo '{$matches[2]}', en la línea $Line";
-            }else{
+            } else {
                 $storeErrors[] = $str;
             }
-
         }
 
-        if(count($storeErrors)){
+        if (count($storeErrors)) {
             DB::rollback();
-        }else{
+        } else {
             DB::commit();
         }
-            
-        
 
-        return response()->json(['message'=>'Success', 'response'=>['data'=>[ 'bicies'=>$Bicies ], 'indexes'=>[], 'errors'=>['storeErrors'=>$storeErrors]]],200);
 
+
+        return response()->json(['message' => 'Success', 'response' => ['data' => ['bicies' => $Bicies], 'indexes' => [], 'errors' => ['storeErrors' => $storeErrors]]], 200);
     }
-
-
-
 }

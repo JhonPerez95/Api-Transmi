@@ -21,14 +21,21 @@ class Bicy extends Model
         'type_bicies_id',
         'serial',
         'code',
-        'active'
+        'active',
+        'url_image_back',
+        'url_image_side',
+        'url_image_front',
+        'id_image_back',
+        'id_image_side',
+        'id_image_front',
     ];
 
-    public function biker(){
-        return $this->hasOne(Biker::class, 'id','bikers_id');
+    public function biker()
+    {
+        return $this->hasOne(Biker::class, 'id', 'bikers_id');
     }
-    public function abandonNotification(){
-        return $this->hasMany(BicyAbandonNotification::class, 'bicies_id' , 'id');
+    public function abandonNotification()
+    {
+        return $this->hasMany(BicyAbandonNotification::class, 'bicies_id', 'id');
     }
-
 }
