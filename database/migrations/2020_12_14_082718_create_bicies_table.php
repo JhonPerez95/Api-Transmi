@@ -27,6 +27,12 @@ class CreateBiciesTable extends Migration
             $table->foreign('parkings_id')->references('id')->on('parkings');
             $table->foreign('bikers_id')->references('id')->on('bikers');
             $table->foreign('type_bicies_id')->references('id')->on('type_bicies');
+            $table->string('url_image_back');
+            $table->string('url_image_side');
+            $table->string('url_image_front');
+            $table->string('id_image_back');
+            $table->string('id_image_side');
+            $table->string('id_image_front');
             $table->timestamps();
         });
     }
