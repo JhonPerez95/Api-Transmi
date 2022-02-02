@@ -104,6 +104,7 @@ Route::middleware(['auth:sanctum',PermissionsChecker::class])->group(function ()
         Route::resource('biker', BikerController::class);
         Route::post('biker/{id}', [BikerController::class,'update']);
         Route::get('biker/verificationCode/{phone}', [BikerController::class,'getVerificationCode'] );        
+        Route::get('biker-export', [BikerController::class,'export'] );        
         Route::post('biker/parentVerificationCode/{id}', [ParentsController::class,'getParentVerificationCode']);
         Route::put('biker/{id}/unblock', [BikerController::class,'unblockBiker']);
 

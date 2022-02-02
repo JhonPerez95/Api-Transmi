@@ -187,6 +187,7 @@ class RolePermissionsSeed extends Seeder
             $bikersStore = Permission::create(['name' => 'BikerController@store']);
             $bikersUpdate = Permission::create(['name' => 'BikerController@update']);
             $bikersDestroy = Permission::create(['name' => 'BikerController@destroy']);
+            $bikerExport = Permission::create(['name' => 'BikerController@export']);
             $bikersMassiveStore = Permission::create(['name' => 'BikerController@massiveStore']);
             $bikersUnblock = Permission::create(['name' => 'BikerController@unblockBiker']);
             $bikerGetCode = Permission::create(['name' => 'BikerController@getVerificationCode']);
@@ -307,6 +308,7 @@ class RolePermissionsSeed extends Seeder
             $detailedStickerOrderDestroy,
 
             $bikersDestroy, 
+            $bikerExport,
             $bikersIndex, 
             $bikersShow, 
             $bikersStore, 
@@ -493,6 +495,7 @@ class RolePermissionsSeed extends Seeder
             $bikersUpdate, 
             $bikerGetCode,
             $bikersDestroy,
+            $bikerExport,
 
             $bikerAuthIndex,
             $bikerAuthStore,

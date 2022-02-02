@@ -106,6 +106,13 @@ class BikerController extends Controller
         );
     }
 
+
+    public function export()
+    {
+        print_r('entro a export');
+        return response()->json(['message' => 'exported'], 200);
+    }
+
     /**
      * Show the form for creating a new resource.
      *

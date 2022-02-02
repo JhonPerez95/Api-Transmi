@@ -99,6 +99,7 @@ Route::group(['prefix' => 'web'], function () {
             Route::resource('biker', BikerController::class);
             Route::post('biker/{id}', [BikerController::class,'update']);
             Route::post('bikerMassive', [BikerController::class,'massiveStore']);
+            Route::get('biker-excel', [BikerController::class,'export']);
             Route::get('biker/verificationCode/{phone}', [BikerController::class,'getVerificationCode'] );        
             Route::post('biker/parentVerificationCode/{id}', [ParentsController::class,'getParentVerificationCode']);
             Route::put('biker/{id}/unblock', [BikerController::class,'unblockBiker']);
