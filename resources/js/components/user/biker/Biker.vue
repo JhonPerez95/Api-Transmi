@@ -1,12 +1,11 @@
 <template>
-  <div>
+  <div id="tableBiker">
     <!-- DATATABLE -->
     <vue-good-table
       :columns="columns"
       :rows="rows"
       :search-options="{ enabled: true }"
       :pagination-options="{ enabled: true }"
-
     >
       <div slot="table-actions">
         <button v-on:click="addData()" class="btn btn-primary">
@@ -420,6 +419,7 @@
       Datepicker,
     },
     data() {
+   
       return {
         es: es,
         previewImage: [],
@@ -550,19 +550,16 @@
         this.$bvModal.show("modal-biker");
       },
       exportBikers(){
-        // this.$api
-        //     .get("web/data/biker-export");
-        let wb = XLSX.utils.table_to_book(document.getElementById("__BVID__20")),
-                    wopts = {
-                        bookType: 'xlsx',
-                        bookSST: false,
-                        type: 'binary'
-                    },
-                    wbout = XLSX.write(wb, wopts);
- 
-               FileSaver.saveAs(new Blob([this.s2ab(wbout)], {
-                    type: "application/octet-stream;charset=utf-8"
-                                 }), "Bikers.xlsx");
+        let wb =  JSON.parse(localStorage.getItem('table'))
+        let wopts = {
+          bookType: 'xlsx',
+          bookSST: false,
+          type: 'binary'
+        }
+        let wbout = XLSX.write(wb, wopts);
+        FileSaver.saveAs(new Blob([this.s2ab(wbout)], {
+          type: "application/octet-stream;charset=utf-8"
+          }), "Bikers.xlsx");
         
       },
       s2ab(s) {
@@ -743,6 +740,10 @@
           res.data.response.indexes.parkings.forEach((element) => {
             this.parkingsData.push(element);
           });
+        }).finally(function() {  
+          let element = document.getElementById("tableBiker")
+          let wb = XLSX.utils.table_to_book(element)
+          localStorage.setItem("table", JSON.stringify(wb))
         });
       },
     },
@@ -752,6 +753,7 @@
     },
     computed: {
       groupedImages() {
+      
         return _.chunk(this.previewImage, 3);
         // returns a nested array:
         // [[article, article, article], [article, article, article], ...]
