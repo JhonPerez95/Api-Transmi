@@ -6,6 +6,7 @@
       :rows="rows"
       :search-options="{ enabled: true }"
       :pagination-options="{ enabled: true }"
+
     >
       <div slot="table-actions">
         <button v-on:click="addData()" class="btn btn-primary">
@@ -14,9 +15,12 @@
         <label for="file-upload" class="btn btn-success my-auto">
           Importar
         </label>
+        <button v-on:click="exportBikers()" class="btn btn-primary">
+          Exportar
+        </button>
         <input id="file-upload" class="d-none" type="file" />
       </div>
-      <template slot="table-row" slot-scope="props">
+      <template id="tableBiker" slot="table-row" slot-scope="props">
         <span v-if="props.column.field === 'active'">
           <div v-if="props.row.active == 1">Activo</div>
           <div v-else-if="props.row.active == 2">Inactivo</div>
@@ -408,6 +412,9 @@
   import Swal from "sweetalert2";
   import Datepicker from "vuejs-datepicker";
   import { en, es } from "vuejs-datepicker/dist/locale";
+  import XLSX from 'xlsx'
+  import FileSaver from 'file-saver'
+
   export default {
     components: {
       Datepicker,
@@ -542,6 +549,35 @@
       addData() {
         this.$bvModal.show("modal-biker");
       },
+      exportBikers(){
+        // this.$api
+        //     .get("web/data/biker-export");
+        let wb = XLSX.utils.table_to_book(document.getElementById("__BVID__20")),
+                    wopts = {
+                        bookType: 'xlsx',
+                        bookSST: false,
+                        type: 'binary'
+                    },
+                    wbout = XLSX.write(wb, wopts);
+ 
+               FileSaver.saveAs(new Blob([this.s2ab(wbout)], {
+                    type: "application/octet-stream;charset=utf-8"
+                                 }), "Bikers.xlsx");
+        
+      },
+      s2ab(s) {
+                if (typeof ArrayBuffer !== 'undefind') {
+                    var buf = new ArrayBuffer(s.length);
+                    var view = new Uint8Array(buf);
+                    for (var i = 0; i != s.length; ++i) view[i] = s.charCodeAt(i) & 0xFF;
+                    return buf;
+                } else {
+                    var buf = new Array(s.length);
+                    for (var i = 0; i != s.length; ++i) buf[i] = s.charCodeAt(i) & 0xFF;
+                    return buf;
+                }
+            },
+
       handleOk(bvModalEvt) {
         bvModalEvt.preventDefault();
         this.dataSubmit();
