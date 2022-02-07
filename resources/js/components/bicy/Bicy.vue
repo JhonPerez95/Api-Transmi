@@ -472,12 +472,20 @@ export default {
           field: "type",
         },
         {
-          label: "Fecha de Registro",
+          label: "Fecha Registro",
           field: "date",
         },
         {
-          label: "Hora de Registro",
+          label: "Hora Registro",
           field: "time",
+        },
+        {
+          label: "Fecha Actualización",
+          field: "dateUp",
+        },
+        {
+          label: "Hora Actualización",
+          field: "timeUp",
         },
         {
            label: "Foto 1",
@@ -690,6 +698,7 @@ export default {
         this.rows = res.data.response.bicies.map(el => {
           el._id = `0000${el.id}`.substr(-4,4);
           [el.date,el.time] = el.created_at.split(' ');
+          [el.dateUp,el.timeUp] = el.updated_at.split(' ');
           return el;
         });
         if (option == true) {
