@@ -219,8 +219,8 @@
               </ValidationProvider>
             </div>
 
-            <div class="form-group col" data-content="Caracteristicas Particulares">
-            <label for="name">Caracteristicas Particulares</label>
+            <div class="form-group col" data-content="Rasgos">
+            <label for="name">Rasgos</label>
             <ValidationProvider
               name="caracteristicas"
               rules="max:200|min:5"
