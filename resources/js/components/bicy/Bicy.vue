@@ -464,7 +464,7 @@ export default {
           field: "tires",
         },
         {
-          label: "Caracteristicas",
+          label: "Rasgos",
           field: "description",
         },
         {
