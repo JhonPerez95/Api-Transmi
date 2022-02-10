@@ -536,7 +536,7 @@ class BicyController extends Controller
      */
     public function destroy(Request $request, $id)
     {
-        return response()->json(['message' => 'Bad Request', 'response' => ['errors' => ['La eliminación de registros de bicicleta no es una funcionalidad del sistema.']]], 400);
+        // return response()->json(['message' => 'Bad Request', 'response' => ['errors' => ['La eliminación de registros de bicicleta no es una funcionalidad del sistema.']]], 400);
         try {
             $data = Bicy::find($id);
             if (!$data) {
@@ -552,8 +552,21 @@ class BicyController extends Controller
                 $sticker->delete();
             }
 
+            // Eliminando imagen de Cloudinary
+            try {
+                Cloudder::delete($data->id_image_back);
+                Cloudder::destroyImage($data->id_image_back);
+
+                Cloudder::delete($data->id_image_side);
+                Cloudder::destroyImage($data->id_image_side);
+
+                Cloudder::delete($data->id_image_front);
+                Cloudder::destroyImage($data->id_image_front);
+
+            } catch (\Throwable $th) {
+                return response()->json(['message' => 'Bad Request', 'response' => ['msg' => 'Error a eliminar la imagen del ciclista', 'error' => $th]], 500);
+            }
             $data->delete();
-            Storage::deleteDirectory("public/bicies/bicy$id");
 
             Schema::enableForeignKeyConstraints();
             return response()->json(['message' => 'Bicy Deleted',  'response' => ['errors' => []]], 200);
