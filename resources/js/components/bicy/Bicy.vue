@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div id="tableBicies">
     <!-- DATATABLE -->
     <vue-good-table
       :columns="columns"
@@ -20,6 +20,9 @@
         <label for="file-upload" class="btn btn-success my-auto">
           Importar
         </label>
+        <button v-on:click="exportBicies()" class="btn btn-primary">
+          Exportar
+        </button>
         <input id="file-upload" class="d-none" type="file" />
       </div>
       <template slot="table-row" slot-scope="props">
@@ -397,6 +400,8 @@ import toastr from "toastr";
 import Fuse from "fuse.js";
 import Swal from "sweetalert2";
 import Select2 from 'v-select2-component';
+import XLSX from 'xlsx'
+import FileSaver from 'file-saver'
 
 const VueSelect = require("vue-select2");
 
@@ -566,9 +571,32 @@ export default {
           this.previewSideImage.push(URL.createObjectURL(file));
         break;
       }
-
-      
     },
+    exportBicies(){
+      let wb =  JSON.parse(localStorage.getItem('tableBicies'))
+      let wopts = {
+        bookType: 'xlsx',
+        bookSST: false,
+        type: 'binary'
+      }
+      let wbout = XLSX.write(wb, wopts);
+      FileSaver.saveAs(new Blob([this.s2ab(wbout)], {
+      type: "application/octet-stream;charset=utf-8"
+      }), "Bicies.xlsx");
+        
+    },
+    s2ab(s) {
+      if (typeof ArrayBuffer !== 'undefind') {
+        var buf = new ArrayBuffer(s.length);
+        var view = new Uint8Array(buf);
+        for (var i = 0; i != s.length; ++i) view[i] = s.charCodeAt(i) & 0xFF;
+        return buf;
+      } else {
+        var buf = new Array(s.length);
+        for (var i = 0; i != s.length; ++i) buf[i] = s.charCodeAt(i) & 0xFF;
+        return buf;
+      }
+      },
     addData() {
       this.$bvModal.show("modal-bicy");
     },
@@ -707,7 +735,11 @@ export default {
           this.typeData = [{ value: null, text: "Selecciona una opcion" }].concat( res.data.response.indexes.type.map(el => el) );
           
         }
-      });
+      }).finally(function() {  
+        let element = document.getElementById("tableBicies")
+        let wb = XLSX.utils.table_to_book(element)
+        localStorage.setItem("tableBicies", JSON.stringify(wb))
+      });;
       this.$api.get("web/data/biker").then((res) => {
         const data = [];
         for(let biker of res.data.response.users){

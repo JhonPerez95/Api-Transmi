@@ -563,17 +563,17 @@
         
       },
       s2ab(s) {
-                if (typeof ArrayBuffer !== 'undefind') {
-                    var buf = new ArrayBuffer(s.length);
-                    var view = new Uint8Array(buf);
-                    for (var i = 0; i != s.length; ++i) view[i] = s.charCodeAt(i) & 0xFF;
-                    return buf;
-                } else {
-                    var buf = new Array(s.length);
-                    for (var i = 0; i != s.length; ++i) buf[i] = s.charCodeAt(i) & 0xFF;
-                    return buf;
-                }
-            },
+        if (typeof ArrayBuffer !== 'undefind') {
+          var buf = new ArrayBuffer(s.length);
+          var view = new Uint8Array(buf);
+          for (var i = 0; i != s.length; ++i) view[i] = s.charCodeAt(i) & 0xFF;
+          return buf;
+        } else {
+          var buf = new Array(s.length);
+          for (var i = 0; i != s.length; ++i) buf[i] = s.charCodeAt(i) & 0xFF;
+          return buf;
+        }
+      },
 
       handleOk(bvModalEvt) {
         bvModalEvt.preventDefault();
