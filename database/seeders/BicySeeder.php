@@ -27,7 +27,7 @@ class BicySeeder extends Seeder
             'description' => 'Bicicleta Rafael',
             'type_bicies_id' => '1',
             'active' => '1',
-            'url_image_back' => 'https://res.cloudinary.com/jhontt95/image/upload/v1643589196/bicy/icxl6ebib96vgccnucbv.jpg', 
+            'url_image_back' => 'https://res.cloudinary.com/jhontt95/image/upload/v1643856282/bicy/zuytlde9b4khcrbms0mq.jpg', 
             'url_image_side' => 'https://res.cloudinary.com/jhontt95/image/upload/v1643589196/bicy/icxl6ebib96vgccnucbv.jpg', 
             'url_image_front' => 'https://res.cloudinary.com/jhontt95/image/upload/v1643589196/bicy/icxl6ebib96vgccnucbv.jpg', 
             'id_image_back' => 'bicy/icxl6ebib96vgccnucbv',

@@ -596,7 +596,7 @@ export default {
         for (var i = 0; i != s.length; ++i) buf[i] = s.charCodeAt(i) & 0xFF;
         return buf;
       }
-      },
+    },
     addData() {
       this.$bvModal.show("modal-bicy");
     },
@@ -739,7 +739,7 @@ export default {
         let element = document.getElementById("tableBicies")
         let wb = XLSX.utils.table_to_book(element)
         localStorage.setItem("tableBicies", JSON.stringify(wb))
-      });;
+      });
       this.$api.get("web/data/biker").then((res) => {
         const data = [];
         for(let biker of res.data.response.users){

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div id="tableVisit">
     <!-- DATATABLE -->
     <vue-good-table
       :columns="columns"
@@ -11,6 +11,9 @@
       <div slot="table-actions">
         <button v-on:click="addData()" class="btn btn-primary">
           A&ntilde;adir
+        </button>
+        <button v-on:click="exportVisit()" class="btn btn-primary">
+          Exportar
         </button>
       </div>
       <template slot="table-row" slot-scope="props">
@@ -235,6 +238,8 @@
 import toastr from "toastr";
 import Swal from "sweetalert2";
 import Datepicker from "vuejs-datepicker";
+import XLSX from 'xlsx'
+import FileSaver from 'file-saver'
 import { en, es } from "vuejs-datepicker/dist/locale";
 export default {
   components: {
@@ -470,6 +475,10 @@ export default {
         res.data.response.indexes.parking.forEach((element) => {
           this.parkingData.push(element);
         });
+      }).finally(function() {  
+        let element = document.getElementById("tableVisit")
+        let wb = XLSX.utils.table_to_book(element)
+        localStorage.setItem("tableVisit", JSON.stringify(wb))
       });
     },
     getParkingVisitsConsecutive(){
@@ -518,7 +527,32 @@ export default {
           this.bikesData = res.data.response.bicies.map((el)=>{ return {value : el.code, text : el.code, id : el.id}});
         }
       });
-    }
+    },
+    exportVisit(){
+      let wb =  JSON.parse(localStorage.getItem('tableVisit'))
+      let wopts = {
+        bookType: 'xlsx',
+        bookSST: false,
+        type: 'binary'
+      }
+      let wbout = XLSX.write(wb, wopts);
+      FileSaver.saveAs(new Blob([this.s2ab(wbout)], {
+      type: "application/octet-stream;charset=utf-8"
+      }), "Visit.xlsx");
+        
+    },
+    s2ab(s) {
+      if (typeof ArrayBuffer !== 'undefind') {
+        var buf = new ArrayBuffer(s.length);
+        var view = new Uint8Array(buf);
+        for (var i = 0; i != s.length; ++i) view[i] = s.charCodeAt(i) & 0xFF;
+        return buf;
+      } else {
+        var buf = new Array(s.length);
+        for (var i = 0; i != s.length; ++i) buf[i] = s.charCodeAt(i) & 0xFF;
+        return buf;
+      }
+    },
   },
   created: function () {
     this.getData();
