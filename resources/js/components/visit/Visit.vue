@@ -283,14 +283,14 @@ export default {
           label: "Ciclista",
           field: "biker",
         },
-        // {
-        //   label: "Fecha Entrada",
-        //   field: "date_input",
-        // },
-        // {
-        //   label: "Hora Entrada",
-        //   field: "time_input",
-        // },
+        {
+          label: "Fecha Entrada",
+          field: "date_input",
+        },
+        {
+          label: "Hora Entrada",
+          field: "time_input",
+        },
         {
           label: "Bicicleta",
           field: "bicyCode",
