@@ -284,25 +284,29 @@ export default {
           field: "biker",
         },
         {
-          label: "Fecha Entrada",
-          field: "date_input",
-        },
-        {
-          label: "Hora Entrada",
-          field: "time_input",
-        },
-        {
           label: "Bicicleta",
           field: "bicyCode",
         },
         {
-          label: "Ingreso",
-          field: "nicely_entry",
+          label: "Fecha Ingreso",
+          field: "date_input",
+        },
+                {
+          label: "Hora Ingreso",
+          field: "time_input",
         },
         {
-          label: "Salida",
-          field: "nicely_exit",
+          label: "Fecha Salida",
+          field: "date_output",
         },
+        {
+          label: "Hora Salida",
+          field: "time_output",
+        },
+        // {
+        //   label: "Salida",
+        //   field: "nicely_exit",
+        // },
         {
           label: "Estado",
           field: "status",
@@ -467,9 +471,10 @@ export default {
       });
 
       this.$api.get("web/data/visit").then((res) => {
-        this.rows = res.data.response.visits.map(el=>{ el.nicely_entry = `${el.date_input} ${el.time_input}`;
-         el.nicely_exit = el.duration == 0  ? "" :  `${el.date_output} ${el.time_output}`; return el;});
-        res.data.response.indexes.status.forEach((element) => {
+        this.rows = res.data.response.visits.map(el=>{
+          el.nicely_entry = `${el.date_input} ${el.time_input}`;
+          el.nicely_exit = el.duration == 0  ? "" :  `${el.date_output} ${el.time_output}`; return el;});
+          res.data.response.indexes.status.forEach((element) => {
           this.statusData.push(element);
         });
         res.data.response.indexes.parking.forEach((element) => {
