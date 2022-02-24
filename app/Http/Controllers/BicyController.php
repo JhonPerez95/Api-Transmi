@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\DetailedStickerOrder;
 use Illuminate\Support\Facades\Schema;
+use App\Models\Visit;
 use App\Models\Bicy;
 use App\Models\Parking;
 use App\Models\Biker;
@@ -347,12 +348,16 @@ class BicyController extends Controller
         if (!$data) {
             return response()->json(['message' => 'Not Found', 'response' => ['errors' => ['Registro de bicicleta no encontrado']]], 404);
         }
+
         $id = $data->id;
+        $existVisit = Visit::where(['bicies_id'=>$id, 'duration'=>0])->first();
+
+        $isDisabled = $existVisit ? true : false;
 
 
         if ($detailed) {
             $biker = $data->biker;
-            return response()->json(['message' => "Sucess", 'response' => ['bicy' => $data, 'biker' => $biker]], 200);
+            return response()->json(['message' => "Sucess", 'response' => ['bicy' => $data, 'biker' => $biker , 'visit'=> $isDisabled ]], 200);
         } else {
             return response()->json(['message' => "Sucess", 'response' => ['data' => $data,]], 200);
         }
