@@ -19,7 +19,7 @@
                     :language="es"
                     :calendar-button="true"
                     calendar-button-icon="fa fa-calendar"
-                    :disabledDates="{customPredictor:onlyFirstDay}"
+                    :disabledDates="{ from: new Date() }"
                     format="yyyy MMM dd"
                     :full-month-name="true"
                     required
@@ -49,7 +49,7 @@
                     :language="es"
                     :calendar-button="true"
                     calendar-button-icon="fa fa-calendar"
-                    :disabledDates="{customPredictor:onlyLastDay}"
+                    :disabledDates="{ from: new Date() }"
                     format="yyyy MMM dd"
                     :full-month-name="true"
                     required
@@ -153,7 +153,13 @@ export default {
       }else{
         date_output = this.form.end.split('T')[0];
       }
-      
+      let dateStart = new Date(date_input).getTime();
+      let dateEnd = new Date(date_output).getTime();
+
+      if (dateStart >= dateEnd) {
+        return toastr.error("La fecha final no puede ser menor a la fecha inicial")
+      }
+
       this.$api.get(`/web/data/reports/visits/generalBikerByMonths?begining_date=${date_input}&end_date=${date_output}`).then((res) => {
           if (res.status == 200) {
             this.rows = res.data.response.data;
