@@ -78,15 +78,15 @@ class InventoryController extends Controller
         $validation = [
             "rules" => [
                 'parkings_id' => 'required|exists:parkings,id',
-                'date' => 'required|date_format:Y-m-d',
+                // 'date' => 'required|date_format:Y-m-d',
                 'bicies_code' => 'required',
             ],
             "messages" => [
                 'parkings_id.required' => 'El campo parqueadero es requerido',
                 'parkings_id.exists' => 'El campo parqueadero no acerta ningún registro existente',
 
-                'date.required' => 'El campo fecha inicio del inventario es requerido',
-                'date.date_format' => 'El campo fecha inicio del inventario es de tipo fecha (Y-m-d)',
+                // 'date.required' => 'El campo fecha inicio del inventario es requerido',
+                // 'date.date_format' => 'El campo fecha inicio del inventario es de tipo fecha (Y-m-d)',
 
                 'bicies_code.required' => 'El campo código(s) de bicicleta(s) es requerido',
             ]
@@ -94,12 +94,14 @@ class InventoryController extends Controller
         $biciesIndexedById = [];
         try{
             $validator = Validator::make($request->all(), $validation['rules'], $validation['messages']);
+            $hoy = date("Y-m-d");
+
             if ($validator->fails()) {
                 return response()->json(['response' => ['errors'=>$validator->errors()->all()], 'message' => 'Bad Request'], 400);
             }
             
 
-            $checkIfASameDateInventoryExists = Inventory::where(['date'=>$request->date, 'parkings_id'=>$request->parkings_id])
+            $checkIfASameDateInventoryExists = Inventory::where(['date'=>$hoy, 'parkings_id'=>$request->parkings_id])
                 ->join('parkings', 'parkings.id', '=', 'inventories.parkings_id')
                 ->select('inventories.*', 'parkings.name as parking','parkings.id as parking_id')
             ->first();
@@ -111,13 +113,13 @@ class InventoryController extends Controller
             $inventory = Inventory::create([
                 'parkings_id' => $request->parkings_id,
                 'users_id' => $request->user()->id,
-                'date' => $request->date,
+                'date' => $hoy,
                 'active' => '1',
             ]);
 
             $bicies = explode(',',$request->bicies_code);
             $success = [];
-            $error = [];
+             $error = [];
             foreach($bicies as $bicy){
                 
                 //Check if repeated in input
@@ -203,7 +205,6 @@ class InventoryController extends Controller
                 'nonActiveButRegistered'=>count($nonActiveButRegistered),
                 'activeButNotRegistered'=>count($activeButNotRegistered),
             ];
-
             DB::commit();
 
             return response()->json(['message'=>'Success', 'response'=>['data'=>['inventory'=>$inventory, 'report'=>$report], 'indexes'=>[], 'errors'=>[]]],200);
