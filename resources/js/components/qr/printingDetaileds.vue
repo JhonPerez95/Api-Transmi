@@ -22,7 +22,19 @@
                 '&chld=1|2'
               "
             />
-            <div class="container">
+            <img :src="'../storage/files/vectoring.png'" />
+
+            <div
+              style="
+                display: inline-block;
+                font-size: 0.9em;
+                position: absolute;
+                left: 182px;
+                top: 35px;
+                width: 127px;
+                height: 113px;
+              "
+            >
               <div class="overlayedText">
                 {{ qr.biker_document_type }} {{ qr.biker_document }}
               </div>
@@ -65,11 +77,11 @@
         </div>
       </span>
     </div>
-    <div class="row mt-2">
+    <!-- <div class="row mt-2">
       <div class="container col-1" style="max-width: none !important">
         <img :src="'../storage/files/vectoring.png'" />
       </div>
-    </div>
+    </div> -->
   </div>
 </template>
 <style>
