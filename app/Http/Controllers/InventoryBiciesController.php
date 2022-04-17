@@ -164,4 +164,3 @@ class InventoryBiciesController extends Controller
         return response()->json(['message'=>'Success', 'response'=>['errors'=>[]]],200);
     }
 }
-Huawei Nova 9
