@@ -106,9 +106,9 @@ class InventoryController extends Controller
                 ->select('inventories.*', 'parkings.name as parking','parkings.id as parking_id')
             ->first();
             if($checkIfASameDateInventoryExists){
-                return response()->json(['message'=>'Bad Request', 'response'=>['errors'=>
+                return response()->json(['message'=>'Error!', 'response'=>['errors'=>
                 ['El parqueadero seleccionado ya tiene un inventario para la fecha ingresada, 
-                para agregar registros de bicicletas utilizar el punto de acceso respectivo']]],200);
+                para agregar registros de bicicletas utilizar el punto de acceso respectivo']]],202);
             }
 
             DB::beginTransaction();
