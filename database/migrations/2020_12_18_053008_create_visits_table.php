@@ -27,14 +27,11 @@ class CreateVisitsTable extends Migration
             $table->date('date_output');
             $table->time('time_output');
             $table->integer('duration');
-            // $table->string('new')->default('Ninguna');
             $table->unsignedBigInteger('visit_statuses_id');
             $table->foreign('visit_statuses_id')->references('id')->on('visit_statuses');
             $table->timestamps();
 
             $table->unique(['number', 'date_input', 'parkings_id']);
-
-
 
         });
     }
