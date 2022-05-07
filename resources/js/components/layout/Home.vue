@@ -2,7 +2,7 @@
   <div id="wrapper">
     <!-- change: color -->
     <ul
-      class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion"
+      class="navbar-nav bg-gradient-danger sidebar sidebar-dark accordion"
       id="accordionSidebar"
     >
       <!-- Sidebar - Brand -->
@@ -79,20 +79,6 @@
           <span>Inventario</span>
         </router-link>
       </li>
-      
-      
-      
-
-
-      
-
-
-      <!--<li class="nav-item" v-if="debug">
-        <router-link class="nav-link collapsed" :to="{ name: 'permissions' }">
-          <i class="fas fa-fw fa-tachometer-alt"></i>
-          <span>Permisos</span>
-        </router-link>
-      </li>-->
 
       <!-- Divider -->
       <hr class="sidebar-divider" />
@@ -120,7 +106,7 @@
       <li class="nav-item">
         <router-link class="nav-link collapsed" :to="{ name: 'help' }">
           <i class="fas fa-store-alt"></i>
-          <span>Consultas</span>
+          <span>Servicio de ayuda</span>
         </router-link>
       </li>
 
@@ -248,7 +234,7 @@
       <!-- End of Footer -->
     </div>
   </div>
-  
+
 </template>
 <script>
 import toastr from "toastr";
