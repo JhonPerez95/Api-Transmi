@@ -167,8 +167,8 @@ class VisitController extends Controller
                 'duration' => 0,
                 'date_input' => $request->dateInput,
                 'time_input' => $request->timeInput,
-                'date_output' => 0,
-                'time_output' => 0,
+                'date_output' => '0000-00-00',
+                'time_output' => '00:00:00',
                 'visit_statuses_id' => $request->status,
                 ]);
 
