@@ -535,14 +535,14 @@ class ReportsController extends Controller
                 ->join('parkings','visits.parkings_id','parkings.id')
                 ->where('visits.date_input', '>=', $request->begining_date)
                 ->where('visits.date_input','<=', $request->end_date)
-                ->where('visits.duraction','=', 0)
+                ->where('visits.duration','=', 0)
                 ->select('parkings.name AS parking_name',
                          'parkings.id AS parking_id',
                          'visits.date_input',
                          'visits.number',
                          'visits.bikers_id',
                          'visits.bicies_id',
-                         'visits.duraction'
+                         'visits.duration'
                 )->get()->toArray();
 
             $output = array(); //creamos un array
