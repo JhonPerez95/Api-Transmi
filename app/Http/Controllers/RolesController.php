@@ -20,13 +20,13 @@ class RolesController extends Controller
     public function index()
     {
         $_roles = Role::where('id','!=',2)->get();
-        $roles = array(); 
+        $roles = array();
         // $roles->permissions;
         foreach($_roles as $role){
             $role->permissions;
             $roles[] = $role;
         }
-            
+
         return response()->json(['message'=>'Success','response'=>[
             'data'=>$roles
         ]],200);
@@ -78,7 +78,7 @@ class RolesController extends Controller
         $role->permissions;
 
         $role->nonPermissions = array_filter($permissions, function($permission){
-            
+
         });
     }
 
@@ -89,7 +89,7 @@ class RolesController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function asignToUser(Request $request,$id){
-        
+
         $request->request->add(['role_id'=>$id]);
 
         $validation = [
@@ -121,7 +121,7 @@ class RolesController extends Controller
             // }
 
             $Role = Role::find($id);
-            $User = User::find($request->user_id);            
+            $User = User::find($request->user_id);
             $User->assignRole($Role->name);
 
             return  response()->json(['message' => 'Success', 'response' => ["errors" => []],], 201);
@@ -139,7 +139,7 @@ class RolesController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function revokeToUser(Request $request,$id){
-        
+
         $request->request->add(['role_id'=>$id]);
 
         $validation = [
@@ -254,15 +254,15 @@ class RolesController extends Controller
             ]
         ];
 
-        
+
         try {
-            
+
             $validator = Validator::make($request->all(), $validation['rules'], $validation['messages']);
-            
+
             if ($validator->fails()) {
                 return response()->json(['response' => ['errors' => $validator->errors()->all()], 'message' => 'Bad Request'], 400);
             }
-            
+
             $exists = DB::table('role_has_permissions')->where(['role_id'=>$request->role_id,'permission_id'=>$request->permission_id])->get();
             if(!$exists->count()){
                 return response()->json(['response' => ['errors' => ['El rol no tiene el permiso especificado.']], 'message' => 'Bad Request'], 400);
@@ -277,13 +277,7 @@ class RolesController extends Controller
             return response()->json(['message' => 'Internal Error', 'response' => ["errors" => [$th->getMessage()]]], 500);
         }
 
-
-        
-
     }
-
-
-
 
     /**
      * Remove the specified resource from storage.

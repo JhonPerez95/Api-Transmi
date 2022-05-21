@@ -18,9 +18,12 @@ class CreateServiceSupportsTable extends Migration
 
             $table->unsignedBigInteger('parkings_id');
             $table->foreign('parkings_id')->references('id')->on('parkings');
+            $table->unsignedBigInteger('users_id');
+            $table->foreign('users_id')->references('id')->on('users');
             $table->string('title');
             $table->text('description')->nullable(true);
-            $table->tinyInteger('status')->default(0);
+            $table->tinyInteger('status')->default(1);
+            $table->text('answer')->nullable(true);
 
             $table->timestamps();
         });

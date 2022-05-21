@@ -11,10 +11,10 @@
                     v-if="show"
                 >
                     <div class="row">
-                        <div class="form-group col">
-                            <b-form-group label="Fecha Incial" label-for="start-input">
+                        <div class="form-group col-lg-6">
+                            <b-form-group label="Mes" label-for="start-input">
                                 <ValidationProvider
-                                    name="Fecha Inicial"
+                                    name="Mes"
                                     rules="required"
                                     v-slot="{ errors }"
                                 >
@@ -26,47 +26,13 @@
                                         :calendar-button="true"
                                         calendar-button-icon="fa fa-calendar"
                                         :disabledDates="{ from: new Date() }"
-                                        format="yyyy MMM dd"
+                                        format="yyyy-MM"
                                         :full-month-name="true"
                                         required
                                         v-model="formPernoctas.start"
-                                        :input-class="
-                          errors[0]
-                            ? 'form-control-user form-control is-invalid'
-                            : 'form-control-user form-control'
-                        "
+                                        :input-class=" errors[0] ? 'form-control-user form-control is-invalid' : 'form-control-user form-control'"
                                     />
 
-                                    <span class="form-text text-danger">{{ errors[0] }}</span>
-                                </ValidationProvider>
-                            </b-form-group>
-                        </div>
-
-                        <div class="form-group col">
-                            <b-form-group label="Fecha Final" label-for="end-input">
-                                <ValidationProvider
-                                    name="Fecha Final"
-                                    rules="required"
-                                    v-slot="{ errors }"
-                                >
-                                    <datepicker
-                                        ref="endtInput"
-                                        id="end-input"
-                                        :bootstrap-styling="true"
-                                        :language="es"
-                                        :calendar-button="true"
-                                        calendar-button-icon="fa fa-calendar"
-                                        :disabledDates="{ from: new Date() }"
-                                        format="yyyy MMM dd"
-                                        :full-month-name="true"
-                                        required
-                                        v-model="formPernoctas.end"
-                                        :input-class="
-                          errors[0]
-                            ? 'form-control-user form-control is-invalid'
-                            : 'form-control-user form-control'
-                        "
-                                    />
                                     <span class="form-text text-danger">{{ errors[0] }}</span>
                                 </ValidationProvider>
                             </b-form-group>
@@ -128,8 +94,124 @@ export default {
                     field: "parking_name",
                 },
                 {
-                    label: "Cantidad",
-                    field: "count",
+                    label: "dia 1",
+                    field: "1",
+                },
+                {
+                    label: "dia 2",
+                    field: "2",
+                },
+                {
+                    label: "dia 3",
+                    field: "3",
+                },
+                {
+                    label: "dia 4",
+                    field: "4",
+                },
+                {
+                    label: "dia 5",
+                    field: "5",
+                },
+                {
+                    label: "dia 6",
+                    field: "6",
+                },
+                {
+                    label: "dia 7",
+                    field: "7",
+                },
+                {
+                    label: "dia 8",
+                    field: "8",
+                },
+                {
+                    label: "dia 9",
+                    field: "9",
+                },
+                {
+                    label: "dia 10",
+                    field: "10",
+                },
+                {
+                    label: "dia 11",
+                    field: "11",
+                },
+                {
+                    label: "dia 12",
+                    field: "12",
+                },
+                {
+                    label: "dia 13",
+                    field: "13",
+                },
+                {
+                    label: "dia 14",
+                    field: "14",
+                },{
+                    label: "dia 15",
+                    field: "15",
+                },{
+                    label: "dia 16",
+                    field: "16",
+                },{
+                    label: "dia 17",
+                    field: "17",
+                },{
+                    label: "dia 18",
+                    field: "18",
+                },
+                {
+                    label: "dia 19",
+                    field: "19",
+                },
+                {
+                    label: "dia 20",
+                    field: "20",
+                },
+                {
+                    label: "dia 21",
+                    field: "21",
+                },
+                {
+                    label: "dia 22",
+                    field: "22",
+                },
+                {
+                    label: "dia 23",
+                    field: "23",
+                },
+                {
+                    label: "dia 24",
+                    field: "24",
+                },
+                {
+                    label: "dia 25",
+                    field: "25",
+                },
+                {
+                    label: "dia 26",
+                    field: "26",
+                },
+                {
+                    label: "dia 27",
+                    field: "27",
+                },
+                {
+                    label: "dia 28",
+                    field: "28",
+                },
+                {
+                    label: "dia 29",
+                    field: "29",
+                },
+                {
+                    label: "dia 30",
+                    field: "30",
+                },
+                {
+                    label: "dia 31",
+                    field: "31",
                 },
             ],
         };
@@ -149,32 +231,33 @@ export default {
                 date_input = this.formPernoctas.start.split("T")[0];
             }
 
-            if (typeof this.formPernoctas.end == "object") {
-                date_output = this.formPernoctas.end;
-                date_output.setDate(date_output.getDate());
-                date_output = date_output.toISOString();
-                date_output = date_output.split("T")[0];
+            let date_month = date_input.substr(5, 2);
+            let end_day;
+
+            date_input = date_input.substr(0, 8);
+            let date_in = date_input + '01';
+
+            if(date_month == 1 || date_month == 3 || date_month == 5 || date_month == 7 || date_month == 8 || date_month == 10 || date_month == 12 ) {
+                date_output = date_input + '31';
+                end_day = 31;
+            } else if(date_month == 2){
+                date_output = date_input + '28';
+                end_day = 28;
             } else {
-                date_output = this.formPernoctas.end.split("T")[0];
+                date_output = date_input + '30';
+                end_day = 30;
             }
 
-            let dateStart = new Date(date_input).getTime();
-            let dateEnd = new Date(date_output).getTime();
-
-            if (dateStart > dateEnd) {
-                return toastr.error("La fecha final no puede ser menor a la fecha inicial")
-            }
-
-            this.$api.get(`/web/data/reports/visits/pernoctas?begining_date=${date_input}&end_date=${date_output}`)
+            this.$api.get(`/web/data/reports/visits/pernoctas?begining_date=${date_in}&end_date=${date_output}&end_day=${end_day}`)
                 .then( (res) => {
                     if (res.status == 200) {
-                        //console.log(res);
+                        //console.log(res.data.response.data);
                         this.rows = res.data.response.data;
                           if(!this.rows.length){
                               toastr.info('No existen pernoctas para la fecha seleccionada.')
                           } else {
+                              toastr.info('Organizando la información.')
                               this.rows = res.data.response.data;
-                              //console.log('pernoctasData', this.rows);
                           }
                     } else {
                          console.warn({res});
@@ -226,3 +309,5 @@ export default {
 }
 
 </script>
+
+

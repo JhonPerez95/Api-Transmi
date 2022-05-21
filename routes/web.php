@@ -119,8 +119,9 @@ Route::group(['prefix' => 'web'], function () {
             Route::resource('inventoryBicy', InventoryBiciesController::class)->only(['store','destroy']);
 
             //Mesa de ayuda
-            //Route::resource('servicesupport', ServiceSupportController::class);
-            Route::get('servicesupport', [ServiceSupportController::class, 'index']);
+            Route::resource('servicesupport', ServiceSupportController::class);
+            //Route::get('servicesupport', [ServiceSupportController::class, 'index']);
+            //Route::get('servicesupport/{id}/edit',[ServiceSupportController::class, 'edit']);
 
             //Report
             Route::post('reports',[ReportsController::class, 'show']);

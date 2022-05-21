@@ -6,6 +6,7 @@ use Doctrine\DBAL\Query\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use DB;
+use DateTime;
 
 use App\Models\Visit;
 use App\Models\Parking;
@@ -529,38 +530,67 @@ class ReportsController extends Controller
     }
 
     public function pernoctas(Request $request){
+
         try {
             //Realizamos la consulta de la información de las visitas activas
             $pernoctas = DB::table('visits')
                 ->join('parkings','visits.parkings_id','parkings.id')
                 ->where('visits.date_input', '>=', $request->begining_date)
                 ->where('visits.date_input','<=', $request->end_date)
-                ->where('visits.duration','=', 0)
                 ->select('parkings.name AS parking_name',
                          'parkings.id AS parking_id',
                          'visits.date_input',
+                         'visits.date_output',
                          'visits.number',
                          'visits.bikers_id',
                          'visits.bicies_id',
                          'visits.duration'
                 )->get()->toArray();
 
-            $output = array(); //creamos un array
-            foreach($pernoctas as $p => $pernocta){
-                $key = "{$pernocta->parking_id}"; //Creamos una llave
+            $dataArray = array();
+            $out = array();
+            $end_day = $request->end_day;
+            foreach($pernoctas as $p => $pernoc) {
 
-                if(!array_key_exists($key,$output)){ //Validamos cuantas veces esta esa llave en el aray
-                    $output[$key] = ['count' => 0, 'parking_id' => $pernocta->parking_id, 'parking_name' => $pernocta->parking_name];
+                $date1 = new DateTime("{$pernoc->date_input}");
+                $date2 = new DateTime("{$pernoc->date_output}");
+                $difference = $date1->diff($date2);
+                $difference = $difference->days;
+
+                if($difference > 1) {
+                    for ($i = 0; $i <= $difference; $i++) {
+                        $start_date = substr($pernoc->date_input, 8, 2);
+                        $start_date = $start_date + $i;
+
+                        if($start_date <= $end_day){
+                            $key = $pernoc->parking_id;
+
+                            if(!array_key_exists($key, $out) ) {
+                                $out[$key] = ['parking_name' => $pernoc->parking_name ];
+                                //$out[$key]['parking_name'] = $pernoc->parking_name;
+                            }
+
+                            if(isset($out[$key]) && !array_key_exists( $start_date, $out[$key]) ){
+                                //$out[$key][sprintf('day_%s', $start_date)] = 0;
+                                $out[$key][$start_date] = 0;
+                            }
+
+                            //$out[$key][sprintf('day_%s', $start_date)]++;
+                            $out[$key][$start_date]++;
+                        }
+                    }
                 }
-                $output[$key]['count']++;
+                $dataArray = $out;
             }
 
-            $data = array(); //Creamos el array a enviar los datos
-            foreach($output as $key => $value){
-                $data[] = $value; //Mapeamos
+            //Organizamos la data
+            $data1 = array();
+            foreach($dataArray as $key => $value){
+                $data1[] = $value; //Mapeamos
             }
 
-            return response()->json(['message' => 'Success', 'response' => ['data' => $data, 'errors' => [] ] ],200);
+            return response()->json(['message' => 'Success', 'response' =>  ['data' => $data1, 'errors' => [] ] ],200);
+
         } catch (QueryException $th) {
             Log::emergency($th);
             return response()->json(['message' => 'Internal Error', 'response' => ["errors" => [$th->getMessage()]]], 500);
