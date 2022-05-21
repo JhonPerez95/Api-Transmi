@@ -109,7 +109,6 @@ class VisitStatusController extends Controller
                 return response()->json(['message' => 'Not Found', 'response' => ['id' => $request->id]], 404);
             }
 
-
             $validation = [
                 "rules" => [
                     'name' => 'required|min:6|max:100',
