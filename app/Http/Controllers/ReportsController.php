@@ -587,7 +587,6 @@ class ReportsController extends Controller
             $data1 = array();
             foreach($dataArray as $key => $value){
                 $data1[] = $value; //Mapeamos
-                //2022-05-09
             }
 
             return response()->json(['message' => 'Success', 'response' =>  ['data' => $data1, 'errors' => [] ] ],200);
