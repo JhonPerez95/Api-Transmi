@@ -94,7 +94,6 @@ export default {
       window.clearTimeout(this.timeout);
       toastr.clear();
       toastr.info('El refrescado se ha detenido.');
-
     },
     dataSubmit(id, parkingCode) {
       window.clearTimeout(this.timeout);

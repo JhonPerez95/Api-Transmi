@@ -277,8 +277,7 @@ class ReportsController extends Controller
                     )
                 ->get()->toArray();
 
-            }else{
-
+            } else {
 
                 $records = DB::table('visits')
                 ->where('visits.date_input', '>=', $request->begining_date )
@@ -319,7 +318,6 @@ class ReportsController extends Controller
                 'end_date.date_format' => 'El campo fecha final es de tipo fecha (AAAA-MM-DD)',
             ]
         ];
-
 
         try {
 
@@ -466,7 +464,6 @@ class ReportsController extends Controller
             ]
         ];
 
-
         try {
 
             $validator = Validator::make($request->all(), $validation['rules'], $validation['messages']);
@@ -549,37 +546,44 @@ class ReportsController extends Controller
             $dataArray = array();
             $out = array();
             $end_day = $request->end_day;
+            $end_date = $request->end_date;
             foreach($pernoctas as $p => $pernoc) {
 
-                $date1 = new DateTime("{$pernoc->date_input}");
-                $date2 = new DateTime("{$pernoc->date_output}");
-                $difference = $date1->diff($date2);
-                $difference = $difference->days;
+                if($pernoc->date_input != $pernoc->date_output) {
+                    if($pernoc->date_output == "0000-00-00") {
+                        $pernoc->date_output = $end_date;
+                    }
 
-                if($difference > 1) {
-                    for ($i = 0; $i <= $difference; $i++) {
-                        $start_date = substr($pernoc->date_input, 8, 2);
-                        $start_date = $start_date + $i;
+                    $date1 = new DateTime("{$pernoc->date_input}");
+                    $date2 = new DateTime("{$pernoc->date_output}");
+                    $difference = $date1->diff($date2);
+                    $difference = $difference->days;
 
-                        if($start_date <= $end_day){
-                            $key = $pernoc->parking_id;
+                    if($difference > 1) {
+                        for ($i = 0; $i <= $difference; $i++) {
+                            $start_date = substr($pernoc->date_input, 8, 2);
+                            $start_date = $start_date + $i;
 
-                            if(!array_key_exists($key, $out) ) {
-                                $out[$key] = ['parking_name' => $pernoc->parking_name ];
-                                //$out[$key]['parking_name'] = $pernoc->parking_name;
+                            if($start_date <= $end_day){
+                                $key = $pernoc->parking_id;
+
+                                if(!array_key_exists($key, $out) ) {
+                                    $out[$key] = ['parking_name' => $pernoc->parking_name ];
+                                    //$out[$key]['parking_name'] = $pernoc->parking_name;
+                                }
+
+                                if(isset($out[$key]) && !array_key_exists( $start_date, $out[$key]) ){
+                                    //$out[$key][sprintf('day_%s', $start_date)] = 0;
+                                    $out[$key][$start_date] = 0;
+                                }
+
+                                //$out[$key][sprintf('day_%s', $start_date)]++;
+                                $out[$key][$start_date]++;
                             }
-
-                            if(isset($out[$key]) && !array_key_exists( $start_date, $out[$key]) ){
-                                //$out[$key][sprintf('day_%s', $start_date)] = 0;
-                                $out[$key][$start_date] = 0;
-                            }
-
-                            //$out[$key][sprintf('day_%s', $start_date)]++;
-                            $out[$key][$start_date]++;
                         }
                     }
+                    $dataArray = $out;
                 }
-                $dataArray = $out;
             }
 
             //Organizamos la data

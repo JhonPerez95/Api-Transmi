@@ -253,7 +253,7 @@ export default {
             this.$api.get(`/web/data/reports/visits/pernoctas?begining_date=${date_in}&end_date=${date_output}&end_day=${end_day}`)
                 .then( (res) => {
                     if (res.status == 200) {
-                        //console.log(res.data.response.data);
+                        console.log(res.data);
                         this.rows = res.data.response.data;
                           if(!this.rows.length){
                               toastr.info('No existen pernoctas para la fecha seleccionada.')
