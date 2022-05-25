@@ -105,8 +105,7 @@ class ReportsController extends Controller
 
             $currentDate = date('Y-m-d H:i:s');
             $limitDate = date('Y-m-d H:i:s', strtotime($currentDate. " - 90 days"));
-            $bicies = Bicy::
-                where('bicies.active',1)
+            $bicies = Bicy::where('bicies.active',1)
                 ->join('visits','bicies.id','visits.bicies_id')
                 ->join('bikers','bicies.bikers_id','bikers.id')
                 ->join('parkings','visits.parkings_id','parkings.id')
@@ -123,7 +122,7 @@ class ReportsController extends Controller
                 )
             ->get();
 
-            return response()->json(['message'=>'Success', 'response'=>['data'=>$bicies, 'errors'=>[]]],200);
+            return response()->json(['message'=>'Success', 'response'=>['data' => $bicies, 'errors'=>[]]],200);
 
         } catch (QueryException $th) {
             Log::emergency($th);

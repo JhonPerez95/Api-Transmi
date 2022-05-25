@@ -27,11 +27,7 @@
                     :full-month-name="true"
                     required
                     v-model="form.start"
-                    :input-class="
-                      errors[0]
-                        ? 'form-control-user form-control is-invalid'
-                        : 'form-control-user form-control'
-                    "
+                    :input-class=" errors[0] ? 'form-control-user form-control is-invalid' : 'form-control-user form-control'"
                   />
                   <span class="form-text text-danger">{{ errors[0] }}</span>
                 </ValidationProvider>
@@ -85,11 +81,12 @@
 
           <b-button type="submit" variant="primary">Generar</b-button>
           <b-button type="reset" variant="danger">Reset</b-button>
+          <b-button v-on:click="exportDailyIncomeAndOutputReportByCPPerHour()" class="btn btn-success">Exportar</b-button>
         </form>
       </ValidationObserver>
     </div>
 
-    <div>
+    <div id="tableDailyIncomeAndOutputReportByCPPerHour">
       <vue-good-table
         :columns="columns"
         :rows="rows"
@@ -97,11 +94,7 @@
         :pagination-options="{ enabled: true }"
         :line-numbers="true"
       >
-        <div slot="table-actions">
-          <!-- <button v-on:click="addData()" class="btn btn-primary">
-            A&ntilde;adir
-          </button> -->
-        </div>
+        <div slot="table-actions"></div>
         <template slot="table-row" slot-scope="props">
           <span>
             {{ props.formattedRow[props.column.field] }}
@@ -113,11 +106,14 @@
 </template>
 
 <script>
+
 import toastr from "toastr";
-import Swal from "sweetalert2";
 import "vue-select/dist/vue-select.css";
 import Datepicker from "vuejs-datepicker";
 import { en, es } from "vuejs-datepicker/dist/locale";
+import XLSX from "xlsx";
+import FileSaver from 'file-saver' //Importante para exportar
+
 export default {
   components: {
     Datepicker,
@@ -187,31 +183,28 @@ export default {
           "La fecha final no puede ser menor a la fecha inicial"
         );
       }
-      const bikerDocument = this.form.biker_document
-        ? `&parkings_id=${this.form.biker_document}`
-        : "";
-      this.$api
-        .get(
-          `/web/data/reports/visits/hourlyByDays?begining_date=${date_input}&end_date=${date_output}${bikerDocument}`
-        )
+      const bikerDocument = this.form.biker_document ? `&parkings_id=${this.form.biker_document}` : "";
+
+      this.$api.get(`/web/data/reports/visits/hourlyByDays?begining_date=${date_input}&end_date=${date_output}${bikerDocument}`)
         .then((res) => {
           if (res.status == 200) {
             this.rows = res.data.response.data.map((el) => {
               const parking = this.parkingsData.find(
                 (_el) => _el.id == el.parking_id
               );
-              el.parking_name = parking
-                ? parking.name
-                : `Error : Bici Estación(${el.parking_id}) no encontrado.`;
+              el.parking_name = parking ? parking.name : `Error : Bici Estación(${el.parking_id}) no encontrado.`;
               return el;
             });
           } else {
-            console.warn({ res });
+            //console.warn({ res });
             toastr.success("Error en la petición.");
           }
+        }).finally(function() {
+          let element = document.getElementById("tableDailyIncomeAndOutputReportByCPPerHour");
+          let wb = XLSX.utils.table_to_book(element);
+          localStorage.setItem("tableDailyIncomeAndOutputReportByCPPerHour", JSON.stringify(wb));
         });
     },
-
     noLess(date) {
       let p1 = new Date(date);
       p1.setDate(p1.getDate() - 1);
@@ -254,6 +247,30 @@ export default {
           });
         }
       });
+    },
+    exportDailyIncomeAndOutputReportByCPPerHour(){
+        let wb =  JSON.parse(localStorage.getItem('tableDailyIncomeAndOutputReportByCPPerHour'));
+        let wopts = {
+            bookType: 'xlsx',
+            bookSST: false,
+            type: 'binary'
+        };
+        let wbout = XLSX.write(wb, wopts);
+        FileSaver.saveAs(new Blob([this.s2ab(wbout)], {
+            type: "application/octet-stream;charset=utf-8"
+        }), "tableDailyIncomeAndOutputReportByCPPerHour.xlsx");
+    },
+    s2ab(s) {
+      if (typeof ArrayBuffer !== 'undefind') {
+          var buf = new ArrayBuffer(s.length);
+          var view = new Uint8Array(buf);
+          for (var i = 0; i != s.length; ++i) view[i] = s.charCodeAt(i) & 0xFF;
+          return buf;
+      } else {
+          var buf = new Array(s.length);
+          for (var i = 0; i != s.length; ++i) buf[i] = s.charCodeAt(i) & 0xFF;
+          return buf;
+      }
     },
   },
   created: function () {

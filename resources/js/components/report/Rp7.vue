@@ -68,11 +68,13 @@
 </template>
 
 <script>
+
 import toastr from "toastr";
 import Datepicker from "vuejs-datepicker";
 import { en, es } from "vuejs-datepicker/dist/locale";
 import XLSX from "xlsx";
 import FileSaver from 'file-saver' //Importante para exportar
+
 export default {
     components: {
         //Para mostrar el calendario
@@ -267,7 +269,7 @@ export default {
                     let element = document.getElementById("tablePernoctas");
                     let wb = XLSX.utils.table_to_book(element);
                     localStorage.setItem("tablePernoctas", JSON.stringify(wb));
-            });
+                });
         },
         onReset(event) {
             event.preventDefault();

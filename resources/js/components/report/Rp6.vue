@@ -1,8 +1,10 @@
 <template>
   <div>
     <div class="btn btn-warning my-2" @click="stopRefreshing()">Detener refrescado</div>
+    <b-button v-on:click="exportWebMapService()" class="btn btn-success">Exportar</b-button>
     <div class="row">
       <div class="col-4">
+
         <table class="table table-striped">
           <thead>
             <th>Bici Estación</th>
@@ -17,26 +19,12 @@
             </tr>
           </tbody>
         </table>
-        <!-- <ValidationObserver ref="observer" v-slot="{ handleSubmit }">
-          <form ref="form" @submit.prevent="handleSubmit(dataSubmit)" @reset="onReset" v-if="show">
-            <b-form-group label="Cicloparqueadero">
-                  <ValidationProvider
-                  name="cicloparqueadero"
-                  v-slot="{ errors }"
-                >
-                  <v-select multiple v-model="form.biker_document" :options="parkingsData" :reduce="biker => biker.id" label="name"/>
 
-                  <span class="form-text text-danger">{{ errors[0] }}</span>
-                </ValidationProvider>
-              </b-form-group>
-            <b-button type="submit" variant="primary">Generar</b-button>
-            <b-button type="reset" variant="danger">Reset</b-button>
-          </form>
-        </ValidationObserver> -->
       </div>
 
-      <div class="col-8">
+      <div class="col-8" id="tableWebMapService">
         <span class="my-2 alert alert-info">Cupos disponibles {{parkingVacancy}}</span>
+
         <vue-good-table
           :columns="columns"
           :rows="rows"
@@ -44,11 +32,7 @@
           :pagination-options="{ enabled: true }"
           :line-numbers="true"
         >
-          <div slot="table-actions">
-            <!-- <button v-on:click="addData()" class="btn btn-primary">
-              A&ntilde;adir
-            </button> -->
-          </div>
+          <div slot="table-actions"></div>
           <template slot="table-row" slot-scope="props">
             <span>
               {{ props.formattedRow[props.column.field] }}
@@ -63,9 +47,12 @@
 </template>
 
 <script>
+
 import toastr from "toastr";
-import Swal from "sweetalert2";
 import 'vue-select/dist/vue-select.css';
+import XLSX from "xlsx";
+import FileSaver from 'file-saver' //Importante para exportar
+
 export default {
   data() {
     return {
@@ -127,24 +114,28 @@ export default {
       elm.classList.add('bg-info');
       //? ==
 
-      this.$api.get(`/web/data/reports/visits/webMapService?parkings_id=${id}`).then((res) => {
-          if (res.status == 200) {
-            this.rows = res.data.response.data.map(el => {
-              el.full_date_input = `${el.date_input} ${el.time_input}`;
-              el.full_date_output = (el.date_output)? `${el.date_output} ${el.time_output}` : '';
-              el.status = el.date_output ?  'Cerrada' : 'Activa';
-              return el;
-            });
-            this.parkingVacancy = res.data.response.vacancy;
-            if(!this.rows.length){
-                toastr.info('No existen registros actualmente.')
-            }
-          }else{
-            console.warn({res});
-            toastr.success("Error en la petición.");
-
-          }
-      });
+      this.$api.get(`/web/data/reports/visits/webMapService?parkings_id=${id}`)
+          .then((res) => {
+              if (res.status == 200) {
+                this.rows = res.data.response.data.map(el => {
+                  el.full_date_input = `${el.date_input} ${el.time_input}`;
+                  el.full_date_output = (el.date_output)? `${el.date_output} ${el.time_output}` : '';
+                  el.status = el.date_output ?  'Cerrada' : 'Activa';
+                  return el;
+                });
+                this.parkingVacancy = res.data.response.vacancy;
+                if(!this.rows.length){
+                    toastr.info('No existen registros actualmente.')
+                }
+              } else {
+                //console.warn({res});
+                toastr.success("Error en la petición.");
+              }
+          }).finally(function() {
+              let element = document.getElementById("tableWebMapService");
+              let wb = XLSX.utils.table_to_book(element);
+              localStorage.setItem("tableWebMapService", JSON.stringify(wb));
+          });
     },
 
     noLess(ymd, date){
@@ -170,13 +161,35 @@ export default {
             this.parkingsData = res.data.response.parkings.map(el => { return el; } );
         }
       });
-    }
+    },
+    exportWebMapService(){
+        let wb =  JSON.parse(localStorage.getItem('tableWebMapService'));
+        let wopts = {
+            bookType: 'xlsx',
+            bookSST: false,
+            type: 'binary'
+        };
+        let wbout = XLSX.write(wb, wopts);
+        FileSaver.saveAs(new Blob([this.s2ab(wbout)], {
+            type: "application/octet-stream;charset=utf-8"
+        }), "tableWebMapService.xlsx");
+    },
+    s2ab(s) {
+      if (typeof ArrayBuffer !== 'undefind') {
+          var buf = new ArrayBuffer(s.length);
+          var view = new Uint8Array(buf);
+          for (var i = 0; i != s.length; ++i) view[i] = s.charCodeAt(i) & 0xFF;
+          return buf;
+      } else {
+          var buf = new Array(s.length);
+          for (var i = 0; i != s.length; ++i) buf[i] = s.charCodeAt(i) & 0xFF;
+          return buf;
+      }
+    },
   },
   created :function(){
       this.getData();
   }
 };
+
 </script>
-
-
-abandonedBicies
