@@ -68,11 +68,13 @@
 </template>
 
 <script>
+
 import toastr from "toastr";
 import Datepicker from "vuejs-datepicker";
 import { en, es } from "vuejs-datepicker/dist/locale";
 import XLSX from "xlsx";
 import FileSaver from 'file-saver' //Importante para exportar
+
 export default {
     components: {
         //Para mostrar el calendario
@@ -251,7 +253,7 @@ export default {
             this.$api.get(`/web/data/reports/visits/pernoctas?begining_date=${date_in}&end_date=${date_output}&end_day=${end_day}`)
                 .then( (res) => {
                     if (res.status == 200) {
-                        //console.log(res.data.response.data);
+                        console.log(res.data);
                         this.rows = res.data.response.data;
                           if(!this.rows.length){
                               toastr.info('No existen pernoctas para la fecha seleccionada.')
@@ -267,7 +269,7 @@ export default {
                     let element = document.getElementById("tablePernoctas");
                     let wb = XLSX.utils.table_to_book(element);
                     localStorage.setItem("tablePernoctas", JSON.stringify(wb));
-            });
+                });
         },
         onReset(event) {
             event.preventDefault();
