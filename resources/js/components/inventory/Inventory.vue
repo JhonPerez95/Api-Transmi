@@ -37,6 +37,7 @@
         </span>
       </template>
     </vue-good-table>
+
     <!-- MODAL -->
     <b-modal
       hide-footer
@@ -51,8 +52,8 @@
       <ValidationObserver ref="observer" v-slot="{ handleSubmit }">
         <form ref="form" @submit.prevent="handleSubmit(dataSubmit)">
 
-
           <div class="row">
+
             <div class="form-group col" data-content="Cicloparqueadero">
               <label for="name">Bici Estación</label>
               <ValidationProvider
@@ -78,14 +79,7 @@
                 rules="required"
                 v-slot="{ errors }"
               >
-                <!-- <b-form-datepicker
-                  v-model="form.date"
-                  class="form-control-user form-control"
-                  :disabled="form.active == 0"
-                  :class="errors[0] ? 'is-invalid' : ''"
-                ></b-form-datepicker> -->
-
-                 <datepicker
+               <datepicker
                   :bootstrap-styling="true"
                   :language="es"
                   :calendar-button="true"
@@ -94,56 +88,30 @@
                   :disabled="form.active == 0"
                   :full-month-name="true"
                   v-model="form.date"
-                  :input-class="
-                    errors[0]
-                      ? 'form-control-user form-control is-invalid'
-                      : 'form-control-user form-control'
-                  "
+                  :input-class="errors[0] ? 'form-control-user form-control is-invalid' : 'form-control-user form-control' "
                 />
 
                 <span class="form-text text-danger">{{ errors[0] }}</span>
               </ValidationProvider>
             </div>
 
-            <div class="form-group col" data-content="Hora de Entrada">
-               <label for="name">Hora de Entrada</label>
-                 <ValidationProvider
-                     name="hora de entrada"
-                     rules="required"
-                     v-slot="{ errors }"
-                 >
-                 <b-form-input
-                     v-model="form.time_input"
-                     class="form-control-user form-control"
-                     :class="errors[0] ? 'is-invalid' : ''"
-                     @blur="checkIfTimeWorks()"
-                     :readonly="!!form.id"
-                     type="time"
-                 ></b-form-input>
-                 <span class="form-text text-danger">{{ errors[0] }}</span>
-                 </ValidationProvider>
-            </div>
-            <!-- <div class="form-group col" data-content="Estado">
-              <label for="active">Estado</label>
-              <ValidationProvider
-                rules="required"
-                name="estado"
-                v-slot="{ errors }"
-              >
-                <select
-                  id="active"
-                  v-model="form.active"
-                  :disabled="form.active == 0"
-                  class="form-control-user form-control"
-                  :class="errors[0] ? 'is-invalid' : ''"
-                >
-                  <option :value="null">Seleccione una opcion</option>
-                  <option value="1">Activo</option>
-                  <option value="0">Finalizado</option>
-                </select>
-                <span class="form-text text-danger">{{ errors[0] }}</span>
-              </ValidationProvider>
-            </div> -->
+              <div class="form-group col" data-content="Hora de Entrada">
+                  <label for="name">Hora de Inicio</label>
+                  <ValidationProvider
+                      name="hora de entrada"
+                      rules="required"
+                      v-slot="{ errors }"
+                  >
+                      <b-form-input
+                          v-model="form.time_active"
+                          class="form-control-user form-control"
+                          :class="errors[0] ? 'is-invalid' : '' "
+                          type="time"
+                      ></b-form-input>
+                      <span class="form-text text-danger">{{ errors[0] }}</span>
+                  </ValidationProvider>
+              </div>
+
           </div>
 
           <div class="p-3 shadow-sm" v-if="form.id">
@@ -204,6 +172,7 @@
         </form>
       </ValidationObserver>
     </b-modal>
+
   </div>
 </template>
 
@@ -233,7 +202,8 @@ export default {
         bicies : null,
         inputBicies : null,
         active: null,
-        report : null
+        report : null,
+        time_active: "",
       },
       columns: [
         {
@@ -246,7 +216,7 @@ export default {
         },
         {
           label: "Hora de inventario",
-          field: "date",
+          field: "time_active",
         },
         {
           label: "Estado",
@@ -270,38 +240,32 @@ export default {
           this.dataSubmit();
       },
       closeInventory(id) {
-          this.$api
-              .put("web/data/inventory/" + id, {})
-              .then((res) => {
-                  if (res.status == 200) {
-                      this.getData();
-                      toastr.success("Inventario Finalizado");
-                      this.$bvModal.hide("modal-inventary");
-                  }
-              });
+          this.$api.put("web/data/inventory/" + id, {}).then((res) => {
+              if (res.status == 200) {
+                  this.getData();
+                  toastr.success("Inventario Finalizado");
+                  this.$bvModal.hide("modal-inventary");
+              }
+          });
       },
       async dataSubmit() {
 
           if (this.form.id) {
-
               if (!this.form.inputBicies.length) {
                   toastr.error('No ha seleccionado ninguna bicicleta');
                   return;
               }
 
-              // const bicies_code = typeof this.form.inputBicies == 'object' ? Object.values(this.form.inputBicies).join(',') : this.form.inputBicies;
               const bicies_code = typeof this.form.inputBicies == 'object' ? Object.values(this.form.inputBicies).join(',') : this.form.inputBicies;
+
+              //console.log({bicies_code});
               let errors = {};
-
-              console.log({bicies_code});
-
-              await this.$api.post("web/data/inventoryBicy", {inventories_id: this.form.id, bicies_code})
-                  .then((res) => {
+              await this.$api.post("web/data/inventoryBicy", {inventories_id: this.form.id, bicies_code}).then((res) => {
                       console.log(res);
                       errors = res.data.response.errors;
                   });
 
-              console.log({errors});
+              //console.log({errors});
               if (!Object.keys(errors).length) {
                   toastr.success("Bicicletas registradas");
                   this.$bvModal.hide("modal-inventary");
@@ -313,7 +277,7 @@ export default {
                   }, 1000);
               }
 
-          } else {
+           } else {
 
               const tempForm = this.form;
               if (typeof tempForm.date == 'object') {
@@ -325,14 +289,14 @@ export default {
               }
 
               this.$api.post("web/data/inventory", this.form).then((res) => {
+                  console.log(res);
                   if (res.status == 201) {
                       this.getData();
                       toastr.success("Dato Guardado");
                       this.$bvModal.hide("modal-inventary");
                   }
               });
-
-          }
+           }
       },
       resetModal() {
           toastr.clear();
@@ -394,6 +358,7 @@ export default {
       getData() {
           this.parkingData = [{value: null, text: "Selecciona una opcion"}];
           this.$api.get("web/data/inventory").then((res) => {
+              //console.log(res);
               this.rows = res.data.response.data;
               res.data.response.indexes.parkings.forEach((element) => {
                   this.parkingData.push(element);
@@ -406,8 +371,8 @@ export default {
 
           this.$api.get("web/data/inventory").then((res) => {
               this.rows = res.data.response.inventories.map(el=>{
-                  el.nicely_entry = `${el.date_input} ${el.time_input}`;
-                  el.nicely_exit = el.duration == 0  ? "" :  `${el.date_output} ${el.time_output}`; return el;
+                  el.nicely_entry = `${el.date_input} ${el.time_active}`;
+                  el.nicely_exit = el.duration == 0  ? "" :  `${el.date_output} ${el.time_active}`; return el;
               });
               res.data.response.indexes.status.forEach((element) => {
                   this.statusData.push(element);
