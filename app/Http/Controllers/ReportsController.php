@@ -530,7 +530,7 @@ class ReportsController extends Controller
         try {
             //Realizamos la consulta de la información de las visitas activas
             $pernoctas = DB::table('visits')
-                ->join('parkings','visits.parkings_id','parkings.id')
+                ->join('parkings','visits.parkings_id', 'parkings.id')
                 ->where('visits.date_input', '>=', $request->begining_date)
                 ->where('visits.date_input','<=', $request->end_date)
                 ->select('parkings.name AS parking_name',

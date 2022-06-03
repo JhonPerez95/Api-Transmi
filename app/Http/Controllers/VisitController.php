@@ -167,12 +167,12 @@ class VisitController extends Controller
                 'duration' => 0,
                 'date_input' => $request->dateInput,
                 'time_input' => $request->timeInput,
-                'date_output' => '0000-00-00',
-                'time_output' => '00:00:00',
+                //'date_output' => $request->dateInput,
+                //'time_output' => $request->timeInput,
                 'visit_statuses_id' => $request->status,
                 ]);
 
-            $smsResponse = $bicy->biker->notifyBicyStorage($bicy->id,$request->parking,$visit->id);
+            $smsResponse = $bicy->biker->notifyBicyStorage($bicy->id, $request->parking, $visit->id);
 
             $visit->getCode();
             return response()->json(['message'=>'Success', 'response'=>['data'=>$visit,'errors'=>[]]],201);

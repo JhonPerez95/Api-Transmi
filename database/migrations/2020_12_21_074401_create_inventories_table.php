@@ -19,7 +19,7 @@ class CreateInventoriesTable extends Migration
             $table->foreign('parkings_id')->references('id')->on('parkings');
             $table->enum('active',[0,1]);
             $table->date('date');
-            $table->time('time_active');
+            $table->time('time_active')->nullable();
             $table->string('totalRegistered')->nullable();
             $table->string('nonActiveButRegistered')->nullable();
             $table->string('activeButNotRegistered')->nullable();

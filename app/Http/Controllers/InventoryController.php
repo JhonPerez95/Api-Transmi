@@ -37,18 +37,18 @@ class InventoryController extends Controller
                 ->select('visit_statuses.name as text', 'visit_statuses.id as value')
                 ->where('visit_statuses.active', '=', 1)
                 ->get();
-          
+
             $active = [
                 ["text" => "Activo", "value" => 1],
                 ["text" => "Inactivo", "value" => 2],
                 ["text" => "Bloqueado", "value" => 3],
             ];
-            
-            return response()->json(['message'=>'Success', 'response'=>[
-                    'data'=> $data,
-                    'indexes'=>[
-                        'parkings'=>$parking
-                    ],                    
+
+            return response()->json(['message'=>'Success', 'response' => [
+                    'data' => $data,
+                    'indexes' => [
+                        'parkings' => $parking
+                    ],
                     'errors'=>[]]],200);
 
         } catch (QueryException $th) {
@@ -72,7 +72,7 @@ class InventoryController extends Controller
     /**
      * By petition an endpoint which will do several tasks at once
      * bcz it was too hard to do three petitions (+1 @show)
-     */    
+     */
 
     public function storeInventoryStoreBiciesUpdateInventoryShowInventory(Request $request){
         $validation = [
@@ -99,7 +99,7 @@ class InventoryController extends Controller
             if ($validator->fails()) {
                 return response()->json(['response' => ['errors'=>$validator->errors()->all()], 'message' => 'Bad Request'], 400);
             }
-            
+
 
             $checkIfASameDateInventoryExists = Inventory::where(['date'=>$hoy, 'parkings_id'=>$request->parkings_id])
                 ->join('parkings', 'parkings.id', '=', 'inventories.parkings_id')
@@ -107,7 +107,7 @@ class InventoryController extends Controller
             ->first();
             // if($checkIfASameDateInventoryExists){
             //     return response()->json(['message'=>'Error!', 'response'=>['errors'=>
-            //     ['El parqueadero seleccionado ya tiene un inventario para la fecha ingresada, 
+            //     ['El parqueadero seleccionado ya tiene un inventario para la fecha ingresada,
             //     para agregar registros de bicicletas utilizar el punto de acceso respectivo']]],202);
             // }
 
@@ -123,13 +123,13 @@ class InventoryController extends Controller
             $success = [];
              $error = [];
             foreach($bicies as $bicy){
-                
+
                 //Check if repeated in input
                 if(array_key_exists($bicy,$error)  || array_key_exists($bicy,$success)){ continue; }
 
                 $Bicy = Bicy::where('code',$bicy)->first();
                 if(!$Bicy){
-                    $error[$bicy] = 'Registro de bicicleta no encontrado'; 
+                    $error[$bicy] = 'Registro de bicicleta no encontrado';
                     continue;
                 }
                 $biciesIndexedById[$Bicy->id] = $Bicy;
@@ -142,11 +142,11 @@ class InventoryController extends Controller
                 if($inventoryBicy->id){
                     $success[$bicy] = $inventoryBicy;
                 }else{
-                    $error[$bicy] = 'Error inesperado al guardar.';                    
+                    $error[$bicy] = 'Error inesperado al guardar.';
                 }
             }
 
-            # Ciclas que registró el vigilante 
+            # Ciclas que registró el vigilante
 	        $totalRegistered = count($biciesIndexedById);
 
             # Ciclas que registró el vigilante pero no tienen visita activa en la app
@@ -180,7 +180,7 @@ class InventoryController extends Controller
                 }
 
                 if($hasActiveVisitAndWasntRegistered){
-                    $activeButNotRegistered[] = $currentBicy ;   
+                    $activeButNotRegistered[] = $currentBicy ;
                 }
             }
 
@@ -214,7 +214,7 @@ class InventoryController extends Controller
             DB::rollBack();
             return response()->json(['message' => 'Internal Error', 'response' => ['errors'=>$ex->getMessage(), 'biciesIndexedById'=>$biciesIndexedById]], 500);
         }catch(Exception $ex){
-            DB::rollBack();            
+            DB::rollBack();
             return response()->json(['message' => 'Internal Error', 'response' => ['errors'=>$ex->getMessage()]], 500);
         }
     }
@@ -228,7 +228,6 @@ class InventoryController extends Controller
      */
     public function store(Request $request)
     {
-
         $validation = [
             "rules" => [
                 'parkings_id' => 'required|exists:parkings,id',
@@ -266,6 +265,7 @@ class InventoryController extends Controller
                 'users_id' => $request->user()->id,
                 'date' => $request->date,
                 'active' => '1',
+                'time_active' => $request->time_active
             ]);
             return response()->json(['message'=>'Success', 'response'=>['data'=>['id'=>$inventory->id], 'errors'=>[]]],201);
         } catch (QueryException $ex) {
@@ -282,7 +282,7 @@ class InventoryController extends Controller
     public function showByDateAndParking(Request $request)
     {
         try {
-            $inventory = Inventory::where(['date'=>$request->date, 'parkings_id'=>$request->parkings_id])
+            $inventory = Inventory::where(['date' => $request->date, 'parkings_id' => $request->parkings_id])
                 ->join('parkings', 'parkings.id', '=', 'inventories.parkings_id')
                 ->select('inventories.*', 'parkings.name as parking','parkings.id as parking_id')
                 ->first();
@@ -298,9 +298,9 @@ class InventoryController extends Controller
 
 
             $bicies = $inventory->bicies;
-            
+
             $report = null;
-            
+
             if($inventory->active == 0){
                 $nonActiveButRegistered = [];
                 $_nonActiveButRegistered = json_decode($inventory->nonActiveButRegistered,true);
@@ -322,9 +322,9 @@ class InventoryController extends Controller
             }
 
             return response()->json(['message'=>'Success', 'response'=>[
-                'data'=> $inventory,   
+                'data'=> $inventory,
                 'report'=>$report,
-                'indexes' => [ 'type' => $typeBicies ],     
+                'indexes' => [ 'type' => $typeBicies ],
                 'errors'=>[]]
             ],200);
 
@@ -338,6 +338,9 @@ class InventoryController extends Controller
 
     public function show($id)
     {
+
+        //return response()->json(['message'=>'Success', 'response'=>['Hola perrito', 'errors'=>[]] ],200);
+
         try {
             $inventory = Inventory::where('inventories.id',$id)
                 ->join('parkings', 'parkings.id', '=', 'inventories.parkings_id')
@@ -350,9 +353,9 @@ class InventoryController extends Controller
                 ->get();
 
             $bicies = $inventory->bicies;
-            
+
             $report = null;
-            
+
             if($inventory->active == 0){
                 $nonActiveButRegistered = [];
                 $_nonActiveButRegistered = json_decode($inventory->nonActiveButRegistered,true);
@@ -374,9 +377,9 @@ class InventoryController extends Controller
             }
 
             return response()->json(['message'=>'Success', 'response'=>[
-                'data'=> $inventory,   
+                'data'=> $inventory,
                 'report'=>$report,
-                'indexes' => [ 'type' => $typeBicies ],     
+                'indexes' => [ 'type' => $typeBicies ],
                 'errors'=>[]]
             ],200);
 
@@ -417,7 +420,7 @@ class InventoryController extends Controller
      * @param  \App\Models\Inventory  $inventory
      * @return \Illuminate\Http\Response
      */
-  
+
   public function update(Request $request,$id)
     {
 
@@ -432,20 +435,20 @@ class InventoryController extends Controller
             ]
         ];
         try {
-        
+
             $validator = Validator::make($request->all(), $validation['rules'], $validation['messages']);
             if ($validator->fails()) {
                 return response()->json(['response' => ['errors'=>$validator->errors()->all()], 'message' => 'Bad Request'], 400);
             }
-            
+
             $inventory = Inventory::find($id);
-            
+
             if($inventory->active == 0){
-                return response()->json(['response' => ['errors'=>['El inventario ya se encuentra cerrado.']], 'message' => 'Bad Request'], 400);                
+                return response()->json(['response' => ['errors'=>['El inventario ya se encuentra cerrado.']], 'message' => 'Bad Request'], 400);
             }
 
 
-            # Ciclas que registró el vigilante 
+            # Ciclas que registró el vigilante
 	        $totalRegistered = $inventory->bicies->count();
 
             # Ciclas que registró el vigilante pero no tienen visita activa en la app
@@ -479,7 +482,7 @@ class InventoryController extends Controller
                 }
 
                 if($bool){
-                    $activeButNotRegistered[] = $currentBicy ;   
+                    $activeButNotRegistered[] = $currentBicy ;
                 }
             }
 
