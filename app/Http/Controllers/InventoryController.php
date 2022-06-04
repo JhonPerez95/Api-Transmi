@@ -123,6 +123,7 @@ class InventoryController extends Controller
             $bicies  = explode(',', $request->bicies_code);
             $success = [];
             $error   = [];
+            $totalRegistered = 1;
             $cont = 0;
             foreach($bicies as $bicy) {
                 //Check if repeated in input
@@ -134,7 +135,6 @@ class InventoryController extends Controller
                     continue;
                 }
                 $biciesIndexedById[$Bicy->id] = $Bicy;
-
                 $inventoryBicy = InventoryBicy::create([ 'inventory_id' => $inventory->id, 'bicies_id' => $Bicy->id ]);
 
                 if($inventoryBicy->id){
@@ -179,11 +179,10 @@ class InventoryController extends Controller
 
             //return response()->json(['message'=>'Success', 'response'=>['data' => ['activeButNotRegistered' =>  $activeButNotRegistered], 'errors'=>[]]],200);
 
-            $inventory->active = '0';
-            //$inventory->totalRegistered = $totalRegistered;
             $inventory->totalRegistered = $totalRegistered;
             $inventory->nonActiveButRegistered = json_encode($nonActiveButRegistered);
             $inventory->activeButNotRegistered = json_encode($activeButNotRegistered);
+            $inventory->active = '0';
             $inventory->save();
             // Report
             $nonActiveButRegistered = [];
