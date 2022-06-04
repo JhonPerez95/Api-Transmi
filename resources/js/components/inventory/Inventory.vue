@@ -341,6 +341,7 @@ export default {
       editData(id) {
           this.resetModal();
           this.$api.get("web/data/inventory/" + id).then((res) => {
+              console.log(res);
               if (res.status == 200) {
                   let data = res.data.response.data;
                   data.report = res.data.response.report;
