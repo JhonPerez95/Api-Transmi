@@ -111,6 +111,15 @@ class InventoryController extends Controller
             //     para agregar registros de bicicletas utilizar el punto de acceso respectivo']]],202);
             // }
 
+            DB::beginTransaction();
+            $inventory = Inventory::create([
+                'parkings_id' => $request->parkings_id,
+                'users_id' => $request->user()->id,
+                'date' => $hoy,
+                'time_active' => $hora,
+                'active' => '1',
+            ]);
+
             $bicies  = explode(',', $request->bicies_code);
             $success = [];
             $error   = [];
@@ -167,24 +176,12 @@ class InventoryController extends Controller
                 //}
             }
 
-            //return response()->json(['message'=>'Success', 'response'=>['data' => ['activeButNotRegistered' =>  $activeButNotRegistered], 'errors'=>[]]],200);
+            $inventory->totalRegistered = $totalRegistered;
+            $inventory->nonActiveButRegistered = json_encode($nonActiveButRegistered);
+            $inventory->activeButNotRegistered = json_encode($activeButNotRegistered);
+            $inventory->active = '0';
+            $inventory->save();
 
-            DB::beginTransaction();
-            $inventory = Inventory::create([
-                'parkings_id' => $request->parkings_id,
-                'users_id' => $request->user()->id,
-                'date' => $hoy,
-                'time_active' => $hora,
-                'active' => '0',
-                'totalRegistered' => $totalRegistered,
-                'nonActiveButRegistered' => json_encode($nonActiveButRegistered),
-                'activeButNotRegistered' => json_encode($activeButNotRegistered),
-            ]);
-//            $inventory->totalRegistered = $totalRegistered;
-//            $inventory->nonActiveButRegistered = json_encode($nonActiveButRegistered);
-//            $inventory->activeButNotRegistered = json_encode($activeButNotRegistered);
-//            $inventory->active = '0';
-//            $inventory->save();
             // Report
             $nonActiveButRegistered = [];
             $_nonActiveButRegistered = json_decode($inventory->nonActiveButRegistered,true);
@@ -205,7 +202,7 @@ class InventoryController extends Controller
             ];
             DB::commit();
 
-            return response()->json(['message'=>'Success', 'response'=>['data'=>['inventory' => $inventory, 'report' => $report], 'indexes'=>[], 'errors'=>[]]],200);
+            return response()->json(['message'=>'Success', 'response'=>['data'=>['inventory'=>$inventory, 'report'=>$report], 'indexes'=>[], 'errors'=>[]]],200);
         }catch (QueryException $ex) {
             DB::rollBack();
             return response()->json(['message' => 'Internal Error', 'response' => ['errors'=>$ex->getMessage(), 'biciesIndexedById'=>$biciesIndexedById]], 500);
@@ -458,10 +455,7 @@ class InventoryController extends Controller
 
             # Las ciclas que tienen una visita activa en la app pero el vigilante no registró
             $activeButNotRegistered = [];
-            $visits = $visit = Visit::where([
-                    'parkings_id' => $inventory->parkings_id,
-                    'duration' => 0
-                ])->get();
+            $visits = $visit = Visit::where([ 'parkings_id' => $inventory->parkings_id, 'duration' => 0 ])->get();
             foreach($visits as $visit){
                 $currentBicy = $visit->bicies_id;
                 $bool = true;
@@ -477,10 +471,10 @@ class InventoryController extends Controller
                 }
             }
 
-            $inventory->active = '0';
             $inventory->totalRegistered = $totalRegistered;
             $inventory->nonActiveButRegistered = json_encode($nonActiveButRegistered);
             $inventory->activeButNotRegistered = json_encode($activeButNotRegistered);
+            $inventory->active = '0';
             $inventory->save();
 
             return response()->json(['message'=>'Success', 'response'=>['errors'=>[]]],200);
