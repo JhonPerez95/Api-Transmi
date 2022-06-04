@@ -76,12 +76,9 @@ class InventoryController extends Controller
 
     public function storeInventoryStoreBiciesUpdateInventoryShowInventory(Request $request)
     {
-        return response()->json(['message'=>'Success', 'response'=>['data' => ['Hola Perrito1'], 'errors'=>['Error1']]],200);
-
         $validation = [
             "rules" => [
                 'parkings_id' => 'required|exists:parkings,id',
-                // 'date' => 'required|date_format:Y-m-d',
                 'bicies_code' => 'required',
             ],
             "messages" => [
@@ -94,6 +91,7 @@ class InventoryController extends Controller
                 'bicies_code.required' => 'El campo código(s) de bicicleta(s) es requerido',
             ]
         ];
+
         $biciesIndexedById = [];
         try{
             $validator = Validator::make($request->all(), $validation['rules'], $validation['messages']);
@@ -103,14 +101,12 @@ class InventoryController extends Controller
                 return response()->json(['response' => ['errors'=>$validator->errors()->all()], 'message' => 'Bad Request'], 400);
             }
 
-
-            $checkIfASameDateInventoryExists = Inventory::where(['date'=>$hoy, 'parkings_id'=>$request->parkings_id])
+            $checkIfASameDateInventoryExists = Inventory::where(['date' => $hoy, 'parkings_id' => $request->parkings_id])
                 ->join('parkings', 'parkings.id', '=', 'inventories.parkings_id')
                 ->select('inventories.*', 'parkings.name as parking','parkings.id as parking_id')
                 ->first();
             // if($checkIfASameDateInventoryExists){
-            //     return response()->json(['message'=>'Error!', 'response'=>['errors'=>
-            //     ['El parqueadero seleccionado ya tiene un inventario para la fecha ingresada,
+            //     return response()->json(['message'=>'Error!', 'response'=>['errors' => ['El parqueadero seleccionado ya tiene un inventario para la fecha ingresada,
             //     para agregar registros de bicicletas utilizar el punto de acceso respectivo']]],202);
             // }
 
@@ -129,7 +125,7 @@ class InventoryController extends Controller
             foreach($bicies as $bicy) {
 
                 //Check if repeated in input
-                if(array_key_exists($bicy,$error)  || array_key_exists($bicy,$success)){ continue; }
+                if(array_key_exists($bicy, $error)  || array_key_exists($bicy,$success)){ continue; }
 
                 $Bicy = Bicy::where('code',$bicy)->first();
                 if(!$Bicy){
@@ -151,16 +147,12 @@ class InventoryController extends Controller
             }
 
             # Ciclas que registró el vigilante
-	        $totalRegistered = count($biciesIndexedById);
+            $totalRegistered = count($biciesIndexedById);
 
             # Ciclas que registró el vigilante pero no tienen visita activa en la app
             $nonActiveButRegistered = [];
             foreach($biciesIndexedById as $bike){
-                $visit = Visit::where([
-                    'parkings_id' => $inventory->parkings_id,
-                    'bicies_id'=>$bike->id,
-                    'duration'=>0
-                ])->get();
+                $visit = Visit::where([ 'parkings_id' => $inventory->parkings_id, 'bicies_id' => $bike->id, 'duration' => 0 ])->get();
 
                 if(!$visit->count()){
                     $nonActiveButRegistered[] = $bike->id;
@@ -169,23 +161,23 @@ class InventoryController extends Controller
 
             # Las ciclas que tienen una visita activa en la app pero el vigilante no registró
             $activeButNotRegistered = [];
-            $visits = $visit = Visit::where([
-                    'parkings_id' => $inventory->parkings_id,
-                    'duration'=>0
-                ])->get();
+            $visits = Visit::where(['parkings_id' => $inventory->parkings_id, 'duration' => 0 ])->get();
             foreach($visits as $visit){
                 $currentBicy = $visit->bicies_id;
-                $hasActiveVisitAndWasntRegistered = true;
-                foreach($biciesIndexedById as $bike){
-                    if($bike->id == $visit->bicies_id){
-                        $hasActiveVisitAndWasntRegistered = false;
-                        break;
-                    }
+                //$hasActiveVisitAndWasntRegistered = true;
+                if (array_key_exists($visit->bicies_id, $biciesIndexedById)){
+                    $activeButNotRegistered[] = $currentBicy;
                 }
+//                foreach($biciesIndexedById as $bike){
+//                    if($bike->id == $visit->bicies_id){
+//                        $hasActiveVisitAndWasntRegistered = false;
+//                        break;
+//                    }
+//                }
 
-                if($hasActiveVisitAndWasntRegistered){
-                    $activeButNotRegistered[] = $currentBicy ;
-                }
+//                if($hasActiveVisitAndWasntRegistered){
+//                    $activeButNotRegistered[] = $currentBicy ;
+//                }
             }
 
             $inventory->active = '0';
@@ -232,8 +224,6 @@ class InventoryController extends Controller
      */
     public function store(Request $request)
     {
-        return response()->json(['message'=>'Success', 'response'=>['data' => ['Hola Perrito3'], 'errors'=>['Error2']]],201);
-
         $validation = [
             "rules" => [
                 'parkings_id' => 'required|exists:parkings,id',
@@ -426,9 +416,6 @@ class InventoryController extends Controller
 
   public function update(Request $request, $id)
     {
-
-        return response()->json(['message'=>'Success', 'response'=>['data' => ['Hola Perrito2'], 'errors'=>['Error3']]],200);
-
         $request->request->add(['inventories_id' => $id]);
         $validation = [
             "rules" => [
