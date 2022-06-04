@@ -111,19 +111,9 @@ class InventoryController extends Controller
             //     para agregar registros de bicicletas utilizar el punto de acceso respectivo']]],202);
             // }
 
-            DB::beginTransaction();
-            $inventory = Inventory::create([
-                'parkings_id' => $request->parkings_id,
-                'users_id' => $request->user()->id,
-                'date' => $hoy,
-                'time_active' => $hora,
-                'active' => '1',
-            ]);
-
             $bicies  = explode(',', $request->bicies_code);
             $success = [];
             $error   = [];
-            $totalRegistered = 1;
             $cont = 0;
             foreach($bicies as $bicy) {
                 //Check if repeated in input
@@ -179,11 +169,22 @@ class InventoryController extends Controller
 
             //return response()->json(['message'=>'Success', 'response'=>['data' => ['activeButNotRegistered' =>  $activeButNotRegistered], 'errors'=>[]]],200);
 
-            $inventory->totalRegistered = $totalRegistered;
-            $inventory->nonActiveButRegistered = json_encode($nonActiveButRegistered);
-            $inventory->activeButNotRegistered = json_encode($activeButNotRegistered);
-            $inventory->active = '0';
-            $inventory->save();
+            DB::beginTransaction();
+            $inventory = Inventory::create([
+                'parkings_id' => $request->parkings_id,
+                'users_id' => $request->user()->id,
+                'date' => $hoy,
+                'time_active' => $hora,
+                'active' => '0',
+                'totalRegistered' => $totalRegistered,
+                'nonActiveButRegistered' => json_encode($nonActiveButRegistered),
+                'activeButNotRegistered' => json_encode($activeButNotRegistered),
+            ]);
+//            $inventory->totalRegistered = $totalRegistered;
+//            $inventory->nonActiveButRegistered = json_encode($nonActiveButRegistered);
+//            $inventory->activeButNotRegistered = json_encode($activeButNotRegistered);
+//            $inventory->active = '0';
+//            $inventory->save();
             // Report
             $nonActiveButRegistered = [];
             $_nonActiveButRegistered = json_decode($inventory->nonActiveButRegistered,true);
@@ -204,7 +205,7 @@ class InventoryController extends Controller
             ];
             DB::commit();
 
-            return response()->json(['message'=>'Success', 'response'=>['data'=>['inventory'=>$inventory, 'report'=>$report], 'indexes'=>[], 'errors'=>[]]],200);
+            return response()->json(['message'=>'Success', 'response'=>['data'=>['inventory' => $inventory, 'report' => $report], 'indexes'=>[], 'errors'=>[]]],200);
         }catch (QueryException $ex) {
             DB::rollBack();
             return response()->json(['message' => 'Internal Error', 'response' => ['errors'=>$ex->getMessage(), 'biciesIndexedById'=>$biciesIndexedById]], 500);
