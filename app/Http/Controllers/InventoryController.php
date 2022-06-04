@@ -177,7 +177,7 @@ class InventoryController extends Controller
 
                 if($hasActiveVisitAndWasntRegistered){
                     $activeButNotRegistered[] = $currentBicy ;
-//                }
+                }
             }
 
             $inventory->active = '0';
