@@ -124,7 +124,6 @@ class InventoryController extends Controller
             $success = [];
             $error   = [];
             foreach($bicies as $bicy) {
-
                 //Check if repeated in input
                 if(array_key_exists($bicy, $error)  || array_key_exists($bicy,$success)){ continue; }
 
@@ -165,19 +164,19 @@ class InventoryController extends Controller
             $visits = Visit::where(['parkings_id' => $inventory->parkings_id, 'duration' => 0 ])->get();
             foreach($visits as $visit){
                 $currentBicy = $visit->bicies_id;
-                //$hasActiveVisitAndWasntRegistered = true;
-                if (array_key_exists($visit->bicies_id, $biciesIndexedById)){
-                    $activeButNotRegistered[] = $currentBicy;
-                }
-//                foreach($biciesIndexedById as $bike){
-//                    if($bike->id == $visit->bicies_id){
-//                        $hasActiveVisitAndWasntRegistered = false;
-//                        break;
-//                    }
+                $hasActiveVisitAndWasntRegistered = true;
+//                if (array_key_exists($visit->bicies_id, $biciesIndexedById)){
+//                    $activeButNotRegistered[] = $currentBicy;
 //                }
+                foreach($biciesIndexedById as $bike){
+                    if($bike->id == $visit->bicies_id){
+                        $hasActiveVisitAndWasntRegistered = false;
+                        break;
+                    }
+                }
 
-//                if($hasActiveVisitAndWasntRegistered){
-//                    $activeButNotRegistered[] = $currentBicy ;
+                if($hasActiveVisitAndWasntRegistered){
+                    $activeButNotRegistered[] = $currentBicy ;
 //                }
             }
 
@@ -250,7 +249,7 @@ class InventoryController extends Controller
             $user_ts = strtotime($currentDate);
 
             if(!(($user_ts >= $start_ts) && ($user_ts <= $end_ts))){
-                // return response()->json(['message' => 'Requested Range Not Satisfiable', 'response' => ['errors'=>['El módulo de inventario no está activo para el día actual.']]], 416);
+                //return response()->json(['message' => 'Requested Range Not Satisfiable', 'response' => ['errors'=>['El módulo de inventario no está activo para el día actual.']]], 416);
             }
 
             $validator = Validator::make($request->all(), $validation['rules'], $validation['messages']);
