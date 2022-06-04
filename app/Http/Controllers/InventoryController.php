@@ -74,7 +74,10 @@ class InventoryController extends Controller
      * bcz it was too hard to do three petitions (+1 @show)
      */
 
-    public function storeInventoryStoreBiciesUpdateInventoryShowInventory(Request $request){
+    public function storeInventoryStoreBiciesUpdateInventoryShowInventory(Request $request)
+    {
+        return response()->json(['message'=>'Success', 'response'=>['data' => ['Hola Perrito1'], 'errors'=>[]]],200);
+
         $validation = [
             "rules" => [
                 'parkings_id' => 'required|exists:parkings,id',
@@ -104,7 +107,7 @@ class InventoryController extends Controller
             $checkIfASameDateInventoryExists = Inventory::where(['date'=>$hoy, 'parkings_id'=>$request->parkings_id])
                 ->join('parkings', 'parkings.id', '=', 'inventories.parkings_id')
                 ->select('inventories.*', 'parkings.name as parking','parkings.id as parking_id')
-            ->first();
+                ->first();
             // if($checkIfASameDateInventoryExists){
             //     return response()->json(['message'=>'Error!', 'response'=>['errors'=>
             //     ['El parqueadero seleccionado ya tiene un inventario para la fecha ingresada,
@@ -116,13 +119,14 @@ class InventoryController extends Controller
                 'parkings_id' => $request->parkings_id,
                 'users_id' => $request->user()->id,
                 'date' => $hoy,
+                'time_active' => '',
                 'active' => '1',
             ]);
 
-            $bicies = explode(',',$request->bicies_code);
+            $bicies  = explode(',', $request->bicies_code);
             $success = [];
-             $error = [];
-            foreach($bicies as $bicy){
+            $error   = [];
+            foreach($bicies as $bicy) {
 
                 //Check if repeated in input
                 if(array_key_exists($bicy,$error)  || array_key_exists($bicy,$success)){ continue; }
@@ -338,9 +342,6 @@ class InventoryController extends Controller
 
     public function show($id)
     {
-
-        //return response()->json(['message'=>'Success', 'response'=>['Hola perrito', 'errors'=>[]] ],200);
-
         try {
             $inventory = Inventory::where('inventories.id',$id)
                 ->join('parkings', 'parkings.id', '=', 'inventories.parkings_id')
@@ -421,10 +422,12 @@ class InventoryController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-  public function update(Request $request,$id)
+  public function update(Request $request, $id)
     {
 
-        $request->request->add(['inventories_id'=>$id]);
+        return response()->json(['message'=>'Success', 'response'=>['data' => ['Hola Perrito2'], 'errors'=>[]]],200);
+
+        $request->request->add(['inventories_id' => $id]);
         $validation = [
             "rules" => [
                 'inventories_id' => 'required|exists:inventories,id',
@@ -447,7 +450,6 @@ class InventoryController extends Controller
                 return response()->json(['response' => ['errors'=>['El inventario ya se encuentra cerrado.']], 'message' => 'Bad Request'], 400);
             }
 
-
             # Ciclas que registró el vigilante
 	        $totalRegistered = $inventory->bicies->count();
 
@@ -456,8 +458,8 @@ class InventoryController extends Controller
             foreach($inventory->bicies as $bike){
                 $visit = Visit::where([
                     'parkings_id' => $inventory->parkings_id,
-                    'bicies_id'=>$bike->id,
-                    'duration'=>0
+                    'bicies_id' => $bike->id,
+                    'duration' => 0
                 ])->get();
 
                 if(!$visit->count()){
@@ -469,7 +471,7 @@ class InventoryController extends Controller
             $activeButNotRegistered = [];
             $visits = $visit = Visit::where([
                     'parkings_id' => $inventory->parkings_id,
-                    'duration'=>0
+                    'duration' => 0
                 ])->get();
             foreach($visits as $visit){
                 $currentBicy = $visit->bicies_id;
