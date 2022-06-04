@@ -76,6 +76,40 @@ class BicyController extends Controller
     }
 
     /**
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function biciesinparking($id){
+        try {
+
+            $bicies = DB::table('visits')
+                ->join('bicies','visits.bicies_id','bicies.id')
+                ->select('bicies.id AS bicies_id',
+                    'bicies.code AS bicies_code',
+                    'bicies.bikers_id AS bickers_id',
+                )->where('visits.parkings_id', '=', $id)
+                ->where('visits.duration', '=', 0)
+                ->get()->toArray();
+
+            $dataBicies = array();
+            foreach($bicies as $bicie) {
+                $outBicies = array();
+                $outBicies['bicies_id'] = $bicie->bicies_id;
+                $outBicies['code'] = $bicie->bicies_code;
+                $outBicies['bickers_id'] = $bicie->bickers_id;
+
+                $dataBicies[] = $outBicies;
+            }
+
+            return response()->json(['message' => 'Success', 'response' => ["data" => $dataBicies, "errors" => [] ] ], 200);
+        } catch (QueryException $th){
+            Log::emergency($th);
+            return response()->json(['response' => ['errors' => [$th->getMessage()]], 'message' => 'Internal Error'], 500);
+        }
+
+    }
+
+    /**
      * Show the form for creating a new resource.
      *
      * @return \Illuminate\Http\Response
@@ -160,8 +194,6 @@ class BicyController extends Controller
         return $phValid;
     }
 
-
-
     private function savePhotoInCloud($photo)
     {
         try {
@@ -175,7 +207,6 @@ class BicyController extends Controller
             return response()->json(['message' => 'Bad Request', 'response' => ['message' => 'Problema al guardar la imagen', 'error' => $th]], 500);
         }
     }
-
 
     public function store(Request $request)
     {
@@ -323,7 +354,6 @@ class BicyController extends Controller
             return response()->json(['message' => 'Internal Error', 'response' => ["errors" => [$th->getMessage()]]], 500);
         }
     }
-
 
     /**
      * Display the specified resource.
@@ -601,7 +631,7 @@ class BicyController extends Controller
         foreach ($bicies as $bici) {
             $bici->biker;
 
-            // If it hasn't been already notified 
+            // If it hasn't been already notified
             if (!$bici->abandonNotification()->where('active', '1')->first()) {
                 $smsResponses[] = $bici->biker->notifyBikeExpiration($bici->id, $bici->parkings_id);
                 $_bicies[] = $bici;
@@ -629,7 +659,7 @@ class BicyController extends Controller
         $smsResponses = [];
         foreach ($bicies as $bici) {
             $bici->biker;
-            // If it has been already notified 
+            // If it has been already notified
             if ($bici->abandonNotification()->where('active', '1')->where('created_at', '<', $notificationLimitDate)->first()) {
                 $_bicies[] = $bici;
                 $smsResponses[] = $bici->biker->notifyBikeAbandoning($bici->id, $bici->parkings_id);

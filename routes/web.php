@@ -97,6 +97,7 @@ Route::group(['prefix' => 'web'], function () {
             Route::post('bicy/{id}', [BicyController::class,'update']);
             Route::post('bicyMassive', [BicyController::class,'massiveStore']);
             Route::resource('maintenance', ParkingMaintenancesController::class);
+            Route::get('bicyparking/{id}', [BicyController::class, 'biciesinparking']);
 
             Route::post('biker/massiveRawMsg', [BikerController::class,'massiveRawTextMessage']);
             Route::resource('biker', BikerController::class);

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Bicy;
 use App\Models\Inventory;
 use App\Models\InventoryBicy;
+use App\Models\Visit;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -20,7 +21,7 @@ class InventoryBiciesController extends Controller
      */
     public function index()
     {
-       
+
     }
 
     /**
@@ -54,25 +55,27 @@ class InventoryBiciesController extends Controller
                 'inventories_id.exists' => 'El campo inventario no acerta ningún registro existente',
             ]
         ];
+
+        $biciesIndexedById = [];
         try {
-        
+
             $validator = Validator::make($request->all(), $validation['rules'], $validation['messages']);
             if ($validator->fails()) {
                 return response()->json(['message' => 'Bad Request', 'response' => ['errors'=>$validator->errors()->all()]], 400);
             }
 
-            
             $inventory = Inventory::find($request->inventories_id);
-            
+
             // Inventory already closed/finished
-            if(!$inventory->active){
+            if(!$inventory->active) {
                 return response()->json(['message' => 'Bad Request', 'response' => ['errors'=>['El inventario especificado ya ha sido cerrado.']]], 400);
             }
 
-            $bicies = explode(',',$request->bicies_code);
+            $bicies = explode(',', $request->bicies_code);
             $success = [];
             $error = [];
-            foreach($bicies as $bicy){
+            $cont = 0;
+            foreach($bicies as $bicy) {
 
                 if(array_key_exists($bicy,$error)  || array_key_exists($bicy,$success)){ continue; }
 
@@ -82,25 +85,51 @@ class InventoryBiciesController extends Controller
                     $error[$bicy] = 'Registro de bicicleta no encontrado'; continue;
                 }
 
-                $exists = InventoryBicy::where(['inventory_id'=>$request->inventories_id, 'bicies_id'=>$Bicy->id]);
+                $exists = InventoryBicy::where(['inventory_id' => $request->inventories_id, 'bicies_id'=>$Bicy->id]);
                 if($exists->count()){
                     $error[$bicy] = 'La bicicleta ya se ha encuentra en el inventario recibido.'; continue;
                 }
 
-                $inventoryBicy = InventoryBicy::create([
-                    'inventory_id' => $request->inventories_id,
-                    'bicies_id' => $Bicy->id,
-                ]);
+                $biciesIndexedById[$Bicy->id] = $Bicy;
+
+                $inventoryBicy = InventoryBicy::create([ 'inventory_id' => $request->inventories_id, 'bicies_id' => $Bicy->id, ]);
 
                 if($inventoryBicy->id){
-                    $success[$bicy] = $inventoryBicy;
+                   $success[$bicy] = $inventoryBicy;
+                   $cont++;
                 }else{
-                    $error[$bicy] = 'Error inesperado al guardar.';                    
+                    $error[$bicy] = 'Error inesperado al guardar.';
                 }
-
             }
 
-            return response()->json(['message'=>count($success) ? 'Success' : 'Bad Request', 'response'=>['data'=>$success, 'errors'=>$error]], count($success) ? 201 : 400 );
+            $totalRegistered = $cont;
+
+            # Ciclas que registró el vigilante pero no tienen visita activa en la app
+            $nonActiveButRegistered = [];
+            foreach($biciesIndexedById as $bike) {
+                $visit = Visit::where([ 'parkings_id' => $inventory->parkings_id, 'bicies_id' => $bike->id, 'duration' => 0 ])->get();
+
+                if(!$visit->count()){
+                    $nonActiveButRegistered[] = $bike->id;
+                }
+            }
+
+            # Las ciclas que tienen una visita activa en la app pero el vigilante no registró
+            $activeButNotRegistered = [];
+            $visits = Visit::where(['parkings_id' => $inventory->parkings_id, 'duration' => 0 ])->get();
+            foreach($visits as $visit){
+                $currentBicy = $visit->bicies_id;
+                $activeButNotRegistered[] = $currentBicy;
+            }
+
+            $inventory->totalRegistered = $totalRegistered;
+            $inventory->nonActiveButRegistered = json_encode($nonActiveButRegistered);
+            $inventory->activeButNotRegistered = json_encode($activeButNotRegistered);
+            $inventory->active = '0';
+            $inventory->save();
+
+            //return response()->json(['message'=>count($success) ? 'Success' : 'Bad Request', 'response'=>['data'=>$success, 'errors'=>$error]], count($success) ? 201 : 400 );
+            return response()->json(['message'=>'Success', 'response'=>['data'=>['inventory' => $inventory], 'errors'=>[]]],200);
 
         } catch (QueryException $ex) {
             return response()->json(['message' => 'Internal Error', 'response' => ['errors'=>$ex->getMessage()]], 500);
@@ -126,7 +155,7 @@ class InventoryBiciesController extends Controller
      */
     public function edit($id)
     {
-        
+
     }
 
     /**
@@ -139,7 +168,7 @@ class InventoryBiciesController extends Controller
     public function update(Request $request)
     {
         return response()->json(['message'=>'Not Found', 'response'=>['errors'=>['Método no encontrado.']]],404);
-       
+
     }
 
     /**
