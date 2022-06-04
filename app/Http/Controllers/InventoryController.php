@@ -181,7 +181,7 @@ class InventoryController extends Controller
 
             $inventory->active = '0';
             //$inventory->totalRegistered = $totalRegistered;
-            $inventory->totalRegistered = $cont;
+            $inventory->totalRegistered = 5;
             $inventory->nonActiveButRegistered = json_encode($nonActiveButRegistered);
             $inventory->activeButNotRegistered = json_encode($activeButNotRegistered);
             $inventory->save();
