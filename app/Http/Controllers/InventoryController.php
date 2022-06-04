@@ -232,6 +232,8 @@ class InventoryController extends Controller
      */
     public function store(Request $request)
     {
+        return response()->json(['message'=>'Success', 'response'=>['data' => ['Hola Perrito3'], 'errors'=>[]]],200);
+
         $validation = [
             "rules" => [
                 'parkings_id' => 'required|exists:parkings,id',
