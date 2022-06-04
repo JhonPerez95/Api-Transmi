@@ -123,24 +123,23 @@ class InventoryController extends Controller
             $bicies  = explode(',', $request->bicies_code);
             $success = [];
             $error   = [];
+            $cont = 0;
             foreach($bicies as $bicy) {
                 //Check if repeated in input
-                if(array_key_exists($bicy, $error)  || array_key_exists($bicy,$success)){ continue; }
+                //if(array_key_exists($bicy, $error)  || array_key_exists($bicy,$success)){ continue; }
 
-                $Bicy = Bicy::where('code',$bicy)->first();
+                $Bicy = Bicy::where('code', $bicy)->first();
                 if(!$Bicy){
                     $error[$bicy] = 'Registro de bicicleta no encontrado';
                     continue;
                 }
                 $biciesIndexedById[$Bicy->id] = $Bicy;
 
-                $inventoryBicy = InventoryBicy::create([
-                    'inventory_id' => $inventory->id,
-                    'bicies_id' => $Bicy->id,
-                ]);
+                $inventoryBicy = InventoryBicy::create([ 'inventory_id' => $inventory->id, 'bicies_id' => $Bicy->id ]);
 
                 if($inventoryBicy->id){
                     $success[$bicy] = $inventoryBicy;
+                    $cont++;
                 }else{
                     $error[$bicy] = 'Error inesperado al guardar.';
                 }
@@ -148,6 +147,7 @@ class InventoryController extends Controller
 
             # Ciclas que registró el vigilante
             $totalRegistered = count($biciesIndexedById);
+            //$totalRegistered = $cont;
 
             # Ciclas que registró el vigilante pero no tienen visita activa en la app
             $nonActiveButRegistered = [];
@@ -164,24 +164,24 @@ class InventoryController extends Controller
             $visits = Visit::where(['parkings_id' => $inventory->parkings_id, 'duration' => 0 ])->get();
             foreach($visits as $visit){
                 $currentBicy = $visit->bicies_id;
-                $hasActiveVisitAndWasntRegistered = true;
-//                if (array_key_exists($visit->bicies_id, $biciesIndexedById)){
-//                    $activeButNotRegistered[] = $currentBicy;
+//                $hasActiveVisitAndWasntRegistered = true;
+//                foreach($biciesIndexedById as $bike){
+//                    if($bike->id == $visit->bicies_id){
+//                        $hasActiveVisitAndWasntRegistered = false;
+//                        break;
+//                    }
 //                }
-                foreach($biciesIndexedById as $bike){
-                    if($bike->id == $visit->bicies_id){
-                        $hasActiveVisitAndWasntRegistered = false;
-                        break;
-                    }
-                }
 
-                if($hasActiveVisitAndWasntRegistered){
-                    $activeButNotRegistered[] = $currentBicy ;
-                }
+                //if($hasActiveVisitAndWasntRegistered){
+                    $activeButNotRegistered[] = $currentBicy;
+                //}
             }
 
+            //return response()->json(['message'=>'Success', 'response'=>['data' => ['activeButNotRegistered' =>  $activeButNotRegistered], 'errors'=>[]]],200);
+
             $inventory->active = '0';
-            $inventory->totalRegistered = $totalRegistered;
+            //$inventory->totalRegistered = $totalRegistered;
+            $inventory->totalRegistered = $cont;
             $inventory->nonActiveButRegistered = json_encode($nonActiveButRegistered);
             $inventory->activeButNotRegistered = json_encode($activeButNotRegistered);
             $inventory->save();
@@ -199,9 +199,9 @@ class InventoryController extends Controller
             }
 
             $report = [
-                'totalRegistered'=>$inventory->totalRegistered,
-                'nonActiveButRegistered'=>count($nonActiveButRegistered),
-                'activeButNotRegistered'=>count($activeButNotRegistered),
+                'totalRegistered' => $inventory->totalRegistered,
+                'nonActiveButRegistered' => count($nonActiveButRegistered),
+                'activeButNotRegistered' => count($activeButNotRegistered),
             ];
             DB::commit();
 
