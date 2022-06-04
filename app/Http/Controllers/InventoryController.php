@@ -76,7 +76,7 @@ class InventoryController extends Controller
 
     public function storeInventoryStoreBiciesUpdateInventoryShowInventory(Request $request)
     {
-        return response()->json(['message'=>'Success', 'response'=>['data' => ['Hola Perrito1'], 'errors'=>[]]],200);
+        return response()->json(['message'=>'Success', 'response'=>['data' => ['Hola Perrito1'], 'errors'=>['Error1']]],200);
 
         $validation = [
             "rules" => [
@@ -232,7 +232,7 @@ class InventoryController extends Controller
      */
     public function store(Request $request)
     {
-        return response()->json(['message'=>'Success', 'response'=>['data' => ['Hola Perrito3'], 'errors'=>[]]],200);
+        return response()->json(['message'=>'Success', 'response'=>['data' => ['Hola Perrito3'], 'errors'=>['Error2']]],201);
 
         $validation = [
             "rules" => [
@@ -427,7 +427,7 @@ class InventoryController extends Controller
   public function update(Request $request, $id)
     {
 
-        return response()->json(['message'=>'Success', 'response'=>['data' => ['Hola Perrito2'], 'errors'=>[]]],200);
+        return response()->json(['message'=>'Success', 'response'=>['data' => ['Hola Perrito2'], 'errors'=>['Error3']]],200);
 
         $request->request->add(['inventories_id' => $id]);
         $validation = [
