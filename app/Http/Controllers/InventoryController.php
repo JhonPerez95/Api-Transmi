@@ -146,8 +146,8 @@ class InventoryController extends Controller
             }
 
             # Ciclas que registró el vigilante
-            $totalRegistered = count($biciesIndexedById);
-            //$totalRegistered = $cont;
+            //$totalRegistered = count($biciesIndexedById);
+            $totalRegistered = $cont;
 
             # Ciclas que registró el vigilante pero no tienen visita activa en la app
             $nonActiveButRegistered = [];
@@ -181,7 +181,7 @@ class InventoryController extends Controller
 
             $inventory->active = '0';
             //$inventory->totalRegistered = $totalRegistered;
-            $inventory->totalRegistered = 5;
+            $inventory->totalRegistered = $totalRegistered;
             $inventory->nonActiveButRegistered = json_encode($nonActiveButRegistered);
             $inventory->activeButNotRegistered = json_encode($activeButNotRegistered);
             $inventory->save();
