@@ -96,6 +96,7 @@ class InventoryController extends Controller
         try{
             $validator = Validator::make($request->all(), $validation['rules'], $validation['messages']);
             $hoy = date("Y-m-d");
+            $hora = date("H:i:s");
 
             if ($validator->fails()) {
                 return response()->json(['response' => ['errors'=>$validator->errors()->all()], 'message' => 'Bad Request'], 400);
@@ -115,7 +116,7 @@ class InventoryController extends Controller
                 'parkings_id' => $request->parkings_id,
                 'users_id' => $request->user()->id,
                 'date' => $hoy,
-                'time_active' => '',
+                'time_active' => $hora,
                 'active' => '1',
             ]);
 
@@ -243,7 +244,7 @@ class InventoryController extends Controller
             $tomorrow = date('Y-m-d', strtotime("$currentDay + 1 days"));
             $currentDate = date('Y-m-d H:i');
 
-            $x = ["$currentDay 22:00","$tomorrow 04:00"];
+            $x = ["$currentDay 12:00","$tomorrow 16:00"];
             $start_ts = strtotime($x[0]);
             $end_ts = strtotime($x[1]);
             $user_ts = strtotime($currentDate);
