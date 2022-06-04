@@ -92,6 +92,7 @@ class InventoryController extends Controller
             ]
         ];
 
+
         $biciesIndexedById = [];
         try{
             $validator = Validator::make($request->all(), $validation['rules'], $validation['messages']);

@@ -22,7 +22,7 @@
           <div v-else>Finalizado</div>
         </span>
         <span v-else-if="props.column.field === 'delete'">
-          <button v-on:click="editData(props.row.id)" class="btn btn-info text-light">
+          <button v-on:click="editData(props.row.id, props.row.parkings_id)" class="btn btn-info text-light">
             Detalle
           </button>
           <button v-if="props.row.active == 1" v-on:click="closeInventory(props.row.id)" class="btn btn-warning text-dark">
@@ -177,6 +177,7 @@
 </template>
 
 <script>
+
 import toastr from "toastr";
 import Swal from "sweetalert2";
 import 'vue-select/dist/vue-select.css';
@@ -258,10 +259,10 @@ export default {
 
               const bicies_code = typeof this.form.inputBicies == 'object' ? Object.values(this.form.inputBicies).join(',') : this.form.inputBicies;
 
-              //console.log({bicies_code});
+              console.log({bicies_code});
               let errors = {};
               await this.$api.post("web/data/inventoryBicy", {inventories_id: this.form.id, bicies_code}).then((res) => {
-                      console.log(res);
+                      //console.log(res);
                       errors = res.data.response.errors;
                   });
 
@@ -338,10 +339,16 @@ export default {
                   }
               });
       },
-      editData(id) {
+      editData(id, parking_id) {
           this.resetModal();
+
+           this.$api.get("web/data/bicyparking/" + parking_id).then((res) => {
+               console.log('code_new', res.data.response.data);
+               this.biciesRawData = res.data.response.data;
+           });
+
           this.$api.get("web/data/inventory/" + id).then((res) => {
-              console.log(res);
+              //console.log('res', res);
               if (res.status == 200) {
                   let data = res.data.response.data;
                   data.report = res.data.response.report;
@@ -366,9 +373,10 @@ export default {
               });
           });
 
-          this.$api.get("web/data/bicy").then((res) => {
-              this.biciesRawData = res.data.response.bicies;
-          });
+          // this.$api.get("web/data/bicy").then((res) => {
+          //     console.log('code_before',res.data.response.bicies);
+          //     //this.biciesRawData = res.data.response.bicies;
+          // });
 
           this.$api.get("web/data/inventory").then((res) => {
               this.rows = res.data.response.inventories.map(el=>{
