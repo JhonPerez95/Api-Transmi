@@ -163,17 +163,17 @@ class InventoryController extends Controller
             $visits = Visit::where(['parkings_id' => $inventory->parkings_id, 'duration' => 0 ])->get();
             foreach($visits as $visit){
                 $currentBicy = $visit->bicies_id;
-//                $hasActiveVisitAndWasntRegistered = true;
-//                foreach($biciesIndexedById as $bike){
-//                    if($bike->id == $visit->bicies_id){
-//                        $hasActiveVisitAndWasntRegistered = false;
-//                        break;
-//                    }
-//                }
+                $hasActiveVisitAndWasntRegistered = true;
+                foreach($biciesIndexedById as $bike){
+                    if($bike->id == $visit->bicies_id){
+                        $hasActiveVisitAndWasntRegistered = false;
+                        break;
+                    }
+                }
 
-                //if($hasActiveVisitAndWasntRegistered){
+                if($hasActiveVisitAndWasntRegistered){
                     $activeButNotRegistered[] = $currentBicy;
-                //}
+                }
             }
 
             $inventory->totalRegistered = $totalRegistered;
