@@ -27,6 +27,7 @@ class InventoryController extends Controller
             $data = DB::table('inventories')
                 ->join('parkings', 'parkings.id', '=', 'inventories.parkings_id')
                 ->select('inventories.*', 'parkings.name as parking','parkings.id as parking_id')
+                ->orderBy('inventories.id')
                 ->get();
 
             $parking = DB::table('parkings')
@@ -125,6 +126,7 @@ class InventoryController extends Controller
             $success = [];
             $error   = [];
             $cont = 0;
+            $idBicies = [];
             foreach($bicies as $bicy) {
                 //Check if repeated in input
                 //if(array_key_exists($bicy, $error)  || array_key_exists($bicy,$success)){ continue; }
@@ -135,6 +137,7 @@ class InventoryController extends Controller
                     continue;
                 }
                 $biciesIndexedById[$Bicy->id] = $Bicy;
+                $idBicies[] = $Bicy->id;
                 $inventoryBicy = InventoryBicy::create([ 'inventory_id' => $inventory->id, 'bicies_id' => $Bicy->id ]);
 
                 if($inventoryBicy->id){
@@ -146,12 +149,11 @@ class InventoryController extends Controller
             }
 
             # Ciclas que registró el vigilante
-            //$totalRegistered = count($biciesIndexedById);
-            $totalRegistered = $cont;
+            $totalInventoried = $cont;
 
             # Ciclas que registró el vigilante pero no tienen visita activa en la app
             $nonActiveButRegistered = [];
-            foreach($biciesIndexedById as $bike){
+            foreach($biciesIndexedById as $bike) {
                 $visit = Visit::where([ 'parkings_id' => $inventory->parkings_id, 'bicies_id' => $bike->id, 'duration' => 0 ])->get();
 
                 if(!$visit->count()){
@@ -159,25 +161,44 @@ class InventoryController extends Controller
                 }
             }
 
-            # Las ciclas que tienen una visita activa en la app pero el vigilante no registró
-            $activeButNotRegistered = [];
-            $visits = Visit::where(['parkings_id' => $inventory->parkings_id, 'duration' => 0 ])->get();
+            # Consultamos todas las visitas activas de este cicloparqueadero
+            $activeVisits = []; //Visitas activas
+            $visits = Visit::where(['parkings_id' => $inventory->parkings_id, 'duration' => 0 ])->get(); //Ciclas con visita activa
+            $countVisits = 0;
             foreach($visits as $visit){
                 $currentBicy = $visit->bicies_id;
-//                $hasActiveVisitAndWasntRegistered = true;
-//                foreach($biciesIndexedById as $bike){
-//                    if($bike->id == $visit->bicies_id){
-//                        $hasActiveVisitAndWasntRegistered = false;
-//                        break;
-//                    }
-//                }
-
-                //if($hasActiveVisitAndWasntRegistered){
-                    $activeButNotRegistered[] = $currentBicy;
-                //}
+                $activeVisits[] = $currentBicy;
+                $countVisits++;
             }
 
-            $inventory->totalRegistered = $totalRegistered;
+            $activeButNotRegistered = [];
+            # Sacamos la difererencia de las ciclas que tienen una visita activa en la app pero el vigilante no escaneo
+            $results = array_diff($activeVisits, $idBicies);
+            foreach($results as $result){
+                $activeButNotRegistered[] = $result;
+            }
+
+//            # Las ciclas que tienen una visita activa en la app pero el vigilante no registró
+//            $activeButNotRegistered = [];
+//            $visits = Visit::where(['parkings_id' => $inventory->parkings_id, 'duration' => 0 ])->get();
+//            $countVisits = 0;
+//
+//            foreach($visits as $visit){
+//                $currentBicy = $visit->bicies_id;
+////                $hasActiveVisitAndWasntRegistered = true;
+////                foreach($biciesIndexedById as $bike){
+////                    if($bike->id == $visit->bicies_id){
+////                        $hasActiveVisitAndWasntRegistered = false;
+////                        break;
+////                    }
+////                }
+//
+//                //if($hasActiveVisitAndWasntRegistered){
+//                $activeButNotRegistered[] = $currentBicy;
+//                //}
+//            }
+
+            $inventory->totalRegistered = $totalInventoried;
             $inventory->nonActiveButRegistered = json_encode($nonActiveButRegistered);
             $inventory->activeButNotRegistered = json_encode($activeButNotRegistered);
             $inventory->active = '0';
@@ -197,7 +218,9 @@ class InventoryController extends Controller
             }
 
             $report = [
-                'totalRegistered' => $inventory->totalRegistered,
+                'countActiveVisits' => $countVisits,
+                'activeVisits' => $activeVisits,
+                'totalInventoried' => $inventory->totalRegistered,
                 'nonActiveButRegistered' => count($nonActiveButRegistered),
                 'activeButNotRegistered' => count($activeButNotRegistered),
             ];
@@ -438,17 +461,12 @@ class InventoryController extends Controller
             }
 
             # Ciclas que registró el vigilante
-	        $totalRegistered = $inventory->bicies->count();
+	        $totalInventoried = $inventory->bicies->count();
 
             # Ciclas que registró el vigilante pero no tienen visita activa en la app
             $nonActiveButRegistered = [];
             foreach($inventory->bicies as $bike){
-                $visit = Visit::where([
-                    'parkings_id' => $inventory->parkings_id,
-                    'bicies_id' => $bike->id,
-                    'duration' => 0
-                ])->get();
-
+                $visit = Visit::where([ 'parkings_id' => $inventory->parkings_id, 'bicies_id' => $bike->id, 'duration' => 0 ])->get();
                 if(!$visit->count()){
                     $nonActiveButRegistered[] = $bike->id;
                 }
@@ -472,7 +490,7 @@ class InventoryController extends Controller
                 }
             }
 
-            $inventory->totalRegistered = $totalRegistered;
+            $inventory->totalRegistered = $totalInventoried;
             $inventory->nonActiveButRegistered = json_encode($nonActiveButRegistered);
             $inventory->activeButNotRegistered = json_encode($activeButNotRegistered);
             $inventory->active = '0';
