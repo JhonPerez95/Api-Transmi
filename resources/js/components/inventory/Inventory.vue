@@ -115,12 +115,12 @@
           </div>
 
           <div class="p-3 shadow-sm" v-if="form.id">
-            <div :data-toggle="false" class="text-center py-2" aria-expanded="true" href="#inventoryBicies">Bicicletas Registradas en el Inventario ({{form.bicies.length}})</div>
+<!--            <div :data-toggle="false" class="text-center py-2" aria-expanded="true" href="#inventoryBicies">Bicicletas Registradas en el Inventario ({{form.bicies.length}})</div>
             <div id="inventoryBicies" class="row collapse fade show" aria-expanded="true">
               <div v-for="(bicy,index) of form.bicies" :key="index" class="btn btn-secondary m-2" >
                 {{bicy.code}}
               </div>
-            </div>
+            </div>-->
 
             <div class="form-group" v-if="form.active == 1">
              <label>Registrar Bicicletas</label>
@@ -140,11 +140,11 @@
               <table class="table table-sm">
                 <tbody>
                   <tr>
-                    <th>Total de bicicletas registradas</th>
+                    <th>Total de bicicletas Inventariadas</th>
                     <td>{{form.report.totalRegistered}}</td>
                   </tr>
                   <tr>
-                    <th>Bicicletas registradas no activas en el sistema</th>
+                    <th>Bicicletas inventariadas no activas en el sistema</th>
                     <td>
                       <div v-for="(bicy,index) of form.report.nonActiveButRegistered" :key="index" class="btn btn-secondary m-2" >
                         {{bicy.code}}
@@ -152,7 +152,7 @@
                     </td>
                   </tr>
                   <tr>
-                    <th>Bicicletas activas en el sistema pero no registradas</th>
+                    <th>Bicicletas activas en el sistema pero no inventariadas</th>
                     <td>
                       <div v-for="(bicy,index) of form.report.activeButNotRegistered" :key="index" class="btn btn-secondary m-2" >
                         {{bicy.code}}
@@ -372,11 +372,6 @@ export default {
                   this.parkingData.push(element);
               });
           });
-
-          // this.$api.get("web/data/bicy").then((res) => {
-          //     console.log('code_before',res.data.response.bicies);
-          //     //this.biciesRawData = res.data.response.bicies;
-          // });
 
           this.$api.get("web/data/inventory").then((res) => {
               this.rows = res.data.response.inventories.map(el=>{
