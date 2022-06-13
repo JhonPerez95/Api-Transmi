@@ -11,4 +11,6 @@
 ### php artisan migrate
 ### php artisan serve
 
+### php artisan migrate:refresh --seed
+
 
