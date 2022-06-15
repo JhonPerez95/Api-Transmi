@@ -20,9 +20,10 @@ class CreateInventoriesTable extends Migration
             $table->enum('active',[0,1]);
             $table->date('date');
             $table->time('time_active')->nullable();
-            $table->string('totalRegistered')->nullable();
+            $table->integer('totalRegistered')->nullable();
             $table->string('nonActiveButRegistered')->nullable();
             $table->string('activeButNotRegistered')->nullable();
+            $table->string('codesInventoried')->nullable();
             $table->unsignedBigInteger('users_id');
             $table->foreign('users_id')->references('id')->on('users');
             $table->timestamps();

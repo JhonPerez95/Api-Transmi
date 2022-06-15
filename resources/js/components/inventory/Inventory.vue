@@ -159,6 +159,16 @@
                       </div>
                     </td>
                   </tr>
+                  <tr>
+                      <th>Bicicletas Inventariadas</th>
+                      <td>
+                          <div v-for="(bicy,index) of form.report.codesInventoried" :key="index" class="btn btn-secondary m-2" >
+                              {{bicy.code}}
+                          </div>
+                      </td>
+                  </tr>
+
+
                 </tbody>
               </table>
             </div>
@@ -290,7 +300,7 @@ export default {
               }
 
               this.$api.post("web/data/inventory", this.form).then((res) => {
-                  console.log(res);
+                  //console.log(res);
                   if (res.status == 201) {
                       this.getData();
                       toastr.success("Dato Guardado");
@@ -342,8 +352,9 @@ export default {
       editData(id, parking_id) {
           this.resetModal();
 
+          //Obtener los codigos con visitas activas de cada cicloparqueadero
            this.$api.get("web/data/bicyparking/" + parking_id).then((res) => {
-               console.log('code_new', res.data.response.data);
+               //console.log('code_new', res.data.response.data);
                this.biciesRawData = res.data.response.data;
            });
 

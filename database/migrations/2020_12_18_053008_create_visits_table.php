@@ -24,8 +24,8 @@ class CreateVisitsTable extends Migration
             $table->foreign('bicies_id')->references('id')->on('bicies');
             $table->date('date_input');
             $table->time('time_input');
-            $table->date('date_output');
-            $table->time('time_output');
+            $table->date('date_output')->nullable(true);
+            $table->time('time_output')->nullable(true);
             $table->integer('duration');
             $table->unsignedBigInteger('visit_statuses_id');
             $table->foreign('visit_statuses_id')->references('id')->on('visit_statuses');

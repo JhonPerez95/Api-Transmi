@@ -104,7 +104,7 @@ class InventoryBiciesController extends Controller
 
             $totalRegistered = $cont;
 
-            # Ciclas que registró el vigilante pero no tienen visita activa en la app
+            # Ciclas que registró el vigilante pero tienen visita activa en la app
             $nonActiveButRegistered = [];
             foreach($biciesIndexedById as $bike) {
                 $visit = Visit::where([ 'parkings_id' => $inventory->parkings_id, 'bicies_id' => $bike->id, 'duration' => 0 ])->get();
@@ -142,6 +142,7 @@ class InventoryBiciesController extends Controller
             $inventory->totalRegistered = $totalRegistered;
             $inventory->nonActiveButRegistered = json_encode($nonActiveButRegistered);
             $inventory->activeButNotRegistered = json_encode($activeButNotRegistered);
+            $inventory->codesInventoried = json_encode($idBicies);
             $inventory->active = '0';
             $inventory->save();
 
