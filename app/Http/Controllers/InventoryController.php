@@ -201,6 +201,7 @@ class InventoryController extends Controller
             $inventory->totalRegistered = $totalInventoried;
             $inventory->nonActiveButRegistered = json_encode($nonActiveButRegistered);
             $inventory->activeButNotRegistered = json_encode($activeButNotRegistered);
+            $inventory->codesInventoried = json_encode($idBicies);
             $inventory->active = '0';
             $inventory->save();
 
@@ -223,10 +224,11 @@ class InventoryController extends Controller
                 'totalInventoried' => $inventory->totalRegistered,
                 'nonActiveButRegistered' => count($nonActiveButRegistered),
                 'activeButNotRegistered' => count($activeButNotRegistered),
+                'codesInventoried' => count($idBicies),
             ];
             DB::commit();
 
-            return response()->json(['message'=>'Success', 'response'=>['data'=>['inventory'=>$inventory, 'report'=>$report], 'indexes'=>[], 'errors'=>[]]],200);
+            return response()->json(['message'=>'Success', 'response'=>['data' => ['inventory' => $inventory, 'report' => $report], 'indexes' => [], 'errors'=> [] ]],200);
         }catch (QueryException $ex) {
             DB::rollBack();
             return response()->json(['message' => 'Internal Error', 'response' => ['errors'=>$ex->getMessage(), 'biciesIndexedById'=>$biciesIndexedById]], 500);
@@ -383,19 +385,25 @@ class InventoryController extends Controller
                     $activeButNotRegistered[] = Bicy::find($bike_id);
                 }
 
+                $codesInventoried = [];
+                $_codesInventoried = json_decode($inventory->codesInventoried,true);
+                foreach($_codesInventoried as $bike_id){
+                    $codesInventoried[] = Bicy::find($bike_id);
+                }
+
                 $report = [
                     'totalRegistered'=>$inventory->totalRegistered,
                     'nonActiveButRegistered'=>$nonActiveButRegistered,
                     'activeButNotRegistered'=>$activeButNotRegistered,
+                    'codesInventoried' => $codesInventoried,
                 ];
             }
 
-            return response()->json(['message'=>'Success', 'response'=>[
-                'data'=> $inventory,
-                'report'=>$report,
+            return response()->json(['message'=>'Success', 'response' => [
+                'data'    => $inventory,
+                'report'  => $report,
                 'indexes' => [ 'type' => $typeBicies ],
-                'errors'=>[]]
-            ],200);
+                'errors' => [] ] ],200);
 
         }catch (QueryException $th) {
             Log::emergency($th);
@@ -436,7 +444,7 @@ class InventoryController extends Controller
      */
 
   public function update(Request $request, $id)
-    {
+  {
         $request->request->add(['inventories_id' => $id]);
         $validation = [
             "rules" => [
@@ -474,7 +482,7 @@ class InventoryController extends Controller
 
             # Las ciclas que tienen una visita activa en la app pero el vigilante no registró
             $activeButNotRegistered = [];
-            $visits = $visit = Visit::where([ 'parkings_id' => $inventory->parkings_id, 'duration' => 0 ])->get();
+            $visits = Visit::where([ 'parkings_id' => $inventory->parkings_id, 'duration' => 0 ])->get();
             foreach($visits as $visit){
                 $currentBicy = $visit->bicies_id;
                 $bool = true;
@@ -500,7 +508,7 @@ class InventoryController extends Controller
         } catch (QueryException $ex) {
             return response()->json(['message' => 'Internal Error', 'response' => ['errors'=>$ex->getMessage()]], 500);
         }
-    }
+  }
 
     /**
      * Remove the specified resource from storage.
