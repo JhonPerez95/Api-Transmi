@@ -115,7 +115,6 @@ class VisitController extends Controller
      */
     public function store(Request $request)
     {
-
         $bicyRules = ($this->client == 'web') ? 'required|exists:bicies,id' : 'required|exists:bicies,code';
 
          $validation = [
@@ -190,7 +189,6 @@ class VisitController extends Controller
      */
     public function massiveStorage(Request $request, $parkingId)
     {
-
         $validation = [
             "rules" => [
                 'bicy'   => 'required|exists:bicies,code',
@@ -305,8 +303,6 @@ class VisitController extends Controller
                 }
 
             }
-
-
 
             return response()->json(['message'=>'Success', 'response'=>['data'=>$succeses, 'errors'=>$errors, 'log'=>$log]],201);
         } catch (QueryException $th) {
