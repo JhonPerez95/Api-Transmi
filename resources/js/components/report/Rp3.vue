@@ -96,7 +96,13 @@
         :columns="columns"
         :rows="rows"
         :search-options="{ enabled: true }"
-        :pagination-options="{ enabled: true }"
+        :pagination-options="{
+            enabled: true,
+            mode: 'records',
+            perPage: 100,
+            position: 'top',
+            perPageDropdown: [100, 500, 1000],
+        }"
         :line-numbers="true"
       >
         <div slot="table-actions"></div>
@@ -212,11 +218,7 @@ export default {
             //console.warn({ res });
             toastr.success("Error en la petición.");
           }
-        }).finally(function() {
-           let element = document.getElementById("tableDetailedMonthlyRevenuePerUser");
-           let wb = XLSX.utils.table_to_book(element);
-           localStorage.setItem("tableDetailedMonthlyRevenuePerUser", JSON.stringify(wb));
-        });
+        }).finally(function() { });
     },
     onlyFirstDay(date) {
       const day = date.getDate();
@@ -265,29 +267,11 @@ export default {
       });
     },
     exportDetailedMonthlyRevenuePerUser() {
-        let wb =  JSON.parse(localStorage.getItem('tableDetailedMonthlyRevenuePerUser'));
-        let wopts = {
-            bookType: 'xlsx',
-            bookSST: false,
-            type: 'binary'
-        };
-        let wbout = XLSX.write(wb, wopts);
-        FileSaver.saveAs(new Blob([this.s2ab(wbout)], {
-            type: "application/octet-stream;charset=utf-8"
-        }), "tableDetailedMonthlyRevenuePerUser.xlsx");
-    },
-    s2ab(s) {
-      if (typeof ArrayBuffer !== 'undefind') {
-          var buf = new ArrayBuffer(s.length);
-          var view = new Uint8Array(buf);
-          for (var i = 0; i != s.length; ++i) view[i] = s.charCodeAt(i) & 0xFF;
-          return buf;
-      } else {
-          var buf = new Array(s.length);
-          for (var i = 0; i != s.length; ++i) buf[i] = s.charCodeAt(i) & 0xFF;
-          return buf;
-      }
-    },
+        var table_elt = document.getElementById("tableDetailedMonthlyRevenuePerUser");
+        var workbook = XLSX.utils.table_to_book(table_elt);
+        var worksheet = workbook.Sheets["Sheet1"];
+        XLSX.writeFile(workbook, "tableDetailedMonthlyRevenuePerUser.xlsx");
+    }
   },
   created: function () {
     this.getData();

@@ -14,7 +14,13 @@
         :columns="columns"
         :rows="rows"
         :search-options="{ enabled: true }"
-        :pagination-options="{ enabled: true }"
+        :pagination-options="{
+            enabled: true,
+            mode: 'records',
+            perPage: 100,
+            position: 'top',
+            perPageDropdown: [100, 500, 1000],
+        }"
         :line-numbers="true"
       >
         <div slot="table-actions"></div>
@@ -27,7 +33,6 @@
     </div>
   </div>
 
-
 </template>
 
 <script>
@@ -35,7 +40,7 @@
 import toastr from "toastr";
 import 'vue-select/dist/vue-select.css';
 import XLSX from "xlsx";
-import FileSaver from 'file-saver' //Importante para exportar
+import FileSaver from 'file-saver'; //Importante para exportar
 
 export default {
   data() {
@@ -87,13 +92,8 @@ export default {
                 //console.warn({res});
                 toastr.success("Error en la petición.");
               }
-          }).finally(function() {
-              let element = document.getElementById("tableReportOfAbandonedBicycles");
-              let wb = XLSX.utils.table_to_book(element);
-              localStorage.setItem("tableReportOfAbandonedBicycles", JSON.stringify(wb));
-          });
+          }).finally(function() { });
     },
-
     noLess(ymd, date){
       const p1 = date.toISOString(),
         _date = p1.split('T')[0];
@@ -112,28 +112,10 @@ export default {
 
     },
     exportReportOfAbandonedBicycles(){
-        let wb =  JSON.parse(localStorage.getItem('tableReportOfAbandonedBicycles'));
-        let wopts = {
-            bookType: 'xlsx',
-            bookSST: false,
-            type: 'binary'
-        };
-        let wbout = XLSX.write(wb, wopts);
-        FileSaver.saveAs(new Blob([this.s2ab(wbout)], {
-            type: "application/octet-stream;charset=utf-8"
-        }), "tableReportOfAbandonedBicycles.xlsx");
-    },
-    s2ab(s) {
-      if (typeof ArrayBuffer !== 'undefind') {
-          var buf = new ArrayBuffer(s.length);
-          var view = new Uint8Array(buf);
-          for (var i = 0; i != s.length; ++i) view[i] = s.charCodeAt(i) & 0xFF;
-          return buf;
-      } else {
-          var buf = new Array(s.length);
-          for (var i = 0; i != s.length; ++i) buf[i] = s.charCodeAt(i) & 0xFF;
-          return buf;
-      }
+        var table_elt = document.getElementById("tableReportOfAbandonedBicycles");
+        var workbook = XLSX.utils.table_to_book(table_elt);
+        var worksheet = workbook.Sheets["Sheet1"];
+        XLSX.writeFile(workbook, "tableReportOfAbandonedBicycles.xlsx");
     },
   }
 };

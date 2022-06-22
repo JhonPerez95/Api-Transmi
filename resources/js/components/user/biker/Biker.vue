@@ -1,11 +1,17 @@
 <template>
-  <div id="tableBiker">
+  <div id="tableBikerExport">
     <!-- DATATABLE -->
     <vue-good-table
       :columns="columns"
       :rows="rows"
       :search-options="{ enabled: true }"
-      :pagination-options="{ enabled: true }"
+      :pagination-options="{
+            enabled: true,
+            mode: 'records',
+            perPage: 100,
+            position: 'top',
+            perPageDropdown: [100, 500, 1000],
+        }"
     >
       <div slot="table-actions">
         <button v-on:click="addData()" class="btn btn-primary">
@@ -111,11 +117,7 @@
                   format="yyyy MMM dd"
                   :full-month-name="true"
                   v-model="form.birth"
-                  :input-class="
-                    errors[0]
-                      ? 'form-control-user form-control is-invalid'
-                      : 'form-control-user form-control'
-                  "
+                  :input-class=" errors[0] ? 'form-control-user form-control is-invalid' : 'form-control-user form-control' "
                 />
 
                 <span class="form-text text-danger">{{ errors[0] }}</span>
@@ -369,9 +371,6 @@
                   ></b-form-file>
                   <span class="form-text text-danger">{{ errors[0] }}</span>
                 </ValidationProvider>
-
-
-
             </div>
             <div
                 v-for="group in groupedImages"
@@ -411,8 +410,8 @@
   import Swal from "sweetalert2";
   import Datepicker from "vuejs-datepicker";
   import { en, es } from "vuejs-datepicker/dist/locale";
-  import XLSX from 'xlsx'
-  import FileSaver from 'file-saver'
+  import XLSX from 'xlsx';
+  import FileSaver from 'file-saver';
 
   export default {
     components: {
@@ -550,29 +549,19 @@
         this.$bvModal.show("modal-biker");
       },
       exportBikers(){
-        let wb =  JSON.parse(localStorage.getItem('table'))
-        let wopts = {
-          bookType: 'xlsx',
-          bookSST: false,
-          type: 'binary'
-        }
-        let wbout = XLSX.write(wb, wopts);
-        FileSaver.saveAs(new Blob([this.s2ab(wbout)], {
-          type: "application/octet-stream;charset=utf-8"
-          }), "Bikers.xlsx");
 
-      },
-      s2ab(s) {
-        if (typeof ArrayBuffer !== 'undefind') {
-          var buf = new ArrayBuffer(s.length);
-          var view = new Uint8Array(buf);
-          for (var i = 0; i != s.length; ++i) view[i] = s.charCodeAt(i) & 0xFF;
-          return buf;
-        } else {
-          var buf = new Array(s.length);
-          for (var i = 0; i != s.length; ++i) buf[i] = s.charCodeAt(i) & 0xFF;
-          return buf;
-        }
+          // Acquire Data (reference to the HTML table)
+          var table_elt = document.getElementById("tableBikerExport");
+
+          // Extract Data (create a workbook object from the table)
+          var workbook = XLSX.utils.table_to_book(table_elt);
+
+          // Process Data (add a new row)
+          var worksheet = workbook.Sheets["Sheet1"];
+
+          //console.log(JSON.stringify(worksheet));
+          // Package and Release Data (`writeFile` tries to write and save an XLSB file)
+          XLSX.writeFile(workbook, "Bikers.xlsx");
       },
       handleOk(bvModalEvt) {
         bvModalEvt.preventDefault();
@@ -629,17 +618,11 @@
             }
           });
         } else {
-          // for (var i = 0; i < this.form.photo.length; i++) {
-          //   let file = this.form.photo[i];
-          //   data.append("photo[" + i + "]", file);
-          // }
-          this.$api
-            .post("web/data/biker", data, {
+          this.$api.post("web/data/biker", data, {
               headers: {
                 "Content-Type": "multipart/form-data",
               },
-            })
-            .then((res) => {
+            }).then((res) => {
               if (res.status == 201) {
                 console.log(res);
                 this.getData();
@@ -648,7 +631,6 @@
               }
             });
         }
-
       },
       resetModal() {
         toastr.clear();
@@ -727,9 +709,11 @@
           res.data.response.indexes.type.forEach((element) => {
             this.typeData.push(element);
           });
+
           res.data.response.indexes.gender.forEach((element) => {
             this.genderData.push(element);
           });
+
           res.data.response.indexes.job.forEach((element) => {
             this.jobData.push(element);
           });
@@ -737,11 +721,7 @@
           res.data.response.indexes.parkings.forEach((element) => {
             this.parkingsData.push(element);
           });
-        }).finally(function() {
-          let element = document.getElementById("tableBiker")
-          let wb = XLSX.utils.table_to_book(element)
-          localStorage.setItem("table", JSON.stringify(wb))
-        });
+        }).finally(function() { });
       },
     },
 

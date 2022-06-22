@@ -52,7 +52,13 @@
                 :columns="columns"
                 :rows="rows"
                 :search-options="{ enabled: true }"
-                :pagination-options="{ enabled: true }"
+                :pagination-options="{
+                    enabled: true,
+                    mode: 'records',
+                    perPage: 100,
+                    position: 'top',
+                    perPageDropdown: [100, 500, 1000],
+                }"
                 :line-numbers="true"
             >
                 <div slot="table-actions"></div>
@@ -73,7 +79,7 @@ import toastr from "toastr";
 import Datepicker from "vuejs-datepicker";
 import { en, es } from "vuejs-datepicker/dist/locale";
 import XLSX from "xlsx";
-import FileSaver from 'file-saver' //Importante para exportar
+import FileSaver from 'file-saver'; //Importante para exportar
 
 export default {
     components: {
@@ -265,11 +271,7 @@ export default {
                          console.warn({res});
                          toastr.success("Error en la petición.");
                     }
-                }).finally(function() {
-                    let element = document.getElementById("tablePernoctas");
-                    let wb = XLSX.utils.table_to_book(element);
-                    localStorage.setItem("tablePernoctas", JSON.stringify(wb));
-                });
+                }).finally(function() { });
         },
         onReset(event) {
             event.preventDefault();
@@ -284,28 +286,10 @@ export default {
         },
         //Exportar información
         exportPernoctas(){
-            let wb =  JSON.parse(localStorage.getItem('tablePernoctas'));
-            let wopts = {
-                bookType: 'xlsx',
-                bookSST: false,
-                type: 'binary'
-            };
-            let wbout = XLSX.write(wb, wopts);
-            FileSaver.saveAs(new Blob([this.s2ab(wbout)], {
-                type: "application/octet-stream;charset=utf-8"
-            }), "Pernoctas.xlsx");
-        },
-        s2ab(s) {
-            if (typeof ArrayBuffer !== 'undefind') {
-                var buf = new ArrayBuffer(s.length);
-                var view = new Uint8Array(buf);
-                for (var i = 0; i != s.length; ++i) view[i] = s.charCodeAt(i) & 0xFF;
-                return buf;
-            } else {
-                var buf = new Array(s.length);
-                for (var i = 0; i != s.length; ++i) buf[i] = s.charCodeAt(i) & 0xFF;
-                return buf;
-            }
+            var table_elt = document.getElementById("tablePernoctas");
+            var workbook = XLSX.utils.table_to_book(table_elt);
+            var worksheet = workbook.Sheets["Sheet1"];
+            XLSX.writeFile(workbook, "Pernoctas.xlsx");
         },
     }
 }

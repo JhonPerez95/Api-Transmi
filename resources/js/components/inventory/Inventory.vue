@@ -1,11 +1,17 @@
 <template>
-  <div>
+  <div id="inventoryTable">
     <!-- DATATABLE -->
     <vue-good-table
       :columns="columns"
       :rows="rows"
       :search-options="{ enabled: true }"
-      :pagination-options="{ enabled: true }"
+      :pagination-options=" {
+            enabled: true,
+            mode: 'records',
+            perPage: 100,
+            position: 'top',
+            perPageDropdown: [100, 500, 1000],
+        }"
       :line-numbers="true"
     >
       <div slot="table-actions">
@@ -395,35 +401,22 @@ export default {
               res.data.response.indexes.parking.forEach((element) => {
                   this.parkingData.push(element);
               });
-          }).finally(function() {
-              let element = document.getElementById("tableInventory")
-              let wb = XLSX.utils.table_to_book(element)
-              localStorage.setItem("tableInventory", JSON.stringify(wb))
-          });
+          }).finally(function() { });
       },
       exportInventory() {
-          let wb = JSON.parse(localStorage.getItem('tableInventory'))
-          let wopts = {
-              bookType: 'xlsx',
-              bookSST: false,
-              type: 'binary'
-          }
-          let wbout = XLSX.write(wb, wopts);
-          FileSaver.saveAs(new Blob([this.s2ab(wbout)], {
-              type: "application/octet-stream;charset=utf-8"
-          }), "Inventories.xlsx");
-      },
-      s2ab(s) {
-          if (typeof ArrayBuffer !== 'undefind') {
-              var buf = new ArrayBuffer(s.length);
-              var view = new Uint8Array(buf);
-              for (var i = 0; i != s.length; ++i) view[i] = s.charCodeAt(i) & 0xFF;
-              return buf;
-          } else {
-              var buf = new Array(s.length);
-              for (var i = 0; i != s.length; ++i) buf[i] = s.charCodeAt(i) & 0xFF;
-              return buf;
-          }
+
+          // Acquire Data (reference to the HTML table)
+          var table_elt = document.getElementById("inventoryTable");
+
+          // Extract Data (create a workbook object from the table)
+          var workbook = XLSX.utils.table_to_book(table_elt);
+
+          // Process Data (add a new row)
+          var worksheet = workbook.Sheets["Sheet1"];
+
+          // Package and Release Data (`writeFile` tries to write and save an XLSB file)
+          XLSX.writeFile(workbook, "Inventories.xlsx");
+
       },
   },
   created: function () {

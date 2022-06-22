@@ -546,11 +546,17 @@ class ReportsController extends Controller
             $dataArray = array();
             $out = array();
             $end_day = $request->end_day;
-            $end_date = $request->end_date;
+            $end_date = $request->end_date; //Dia final del mes
+            //$currentDate = date('Y-m-d');
+            $currentDay = date('d'); //Sacamos el dia en que se genera el reporte
+
+            if($end_day >= $currentDay) {
+                $end_day = $currentDay;
+            }
             foreach($pernoctas as $p => $pernoc) {
 
                 if($pernoc->date_input != $pernoc->date_output) {
-                    if($pernoc->date_output == "0000-00-00") {
+                    if($pernoc->date_output == null) {
                         $pernoc->date_output = $end_date;
                     }
 
