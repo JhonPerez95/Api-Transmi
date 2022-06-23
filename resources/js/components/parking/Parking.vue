@@ -1,11 +1,17 @@
 <template>
-  <div>
+  <div id="parkingTable">
     <!-- DATATABLE -->
     <vue-good-table
       :columns="columns"
       :rows="rows"
       :search-options="{ enabled: true }"
-      :pagination-options="{ enabled: true }"
+      :pagination-options="{
+            enabled: true,
+            mode: 'records',
+            perPage: 100,
+            position: 'top',
+            perPageDropdown: [100, 500, 1000],
+        }"
       :line-numbers="true"
     >
       <div slot="table-actions">
@@ -15,6 +21,9 @@
         <label for="file-upload" class="btn btn-success my-auto">
           Importar
         </label>
+        <button v-on:click="exportParking()" class="btn btn-success">
+              Exportar
+        </button>
         <input id="file-upload" class="d-none" type="file" />
       </div>
       <template slot="table-row" slot-scope="props">
@@ -166,6 +175,9 @@
 <script>
 import toastr from "toastr";
 import Swal from "sweetalert2";
+import XLSX from "xlsx";
+
+
 export default {
   data() {
     return {
@@ -303,6 +315,20 @@ export default {
         });
       });
     },
+    exportParking() {
+
+          // Acquire Data (reference to the HTML table)
+          var table_elt = document.getElementById("parkingTable");
+
+          // Extract Data (create a workbook object from the table)
+          var workbook = XLSX.utils.table_to_book(table_elt);
+
+          // Process Data (add a new row)
+          var worksheet = workbook.Sheets["Sheet1"];
+
+          // Package and Release Data (`writeFile` tries to write and save an XLSB file)
+          XLSX.writeFile(workbook, "Parkings.xlsx");
+      },
   },
 
   created: function () {

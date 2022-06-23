@@ -10,16 +10,10 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Database\QueryException;
 use DateTime;
 
+use Illuminate\Support\Facades\Validator;
+
 class ServiceSupportController extends Controller
 {
-    private $client;
-
-    public function __construct(){
-        if(Route::getCurrentRoute()){
-            $route = Route::getCurrentRoute()->uri();
-            $this->client = ( preg_match("/api\//",$route)) ? "app" : "web";
-        }
-    }
     /**
      * Display a listing of the resource.
      *
@@ -84,12 +78,47 @@ class ServiceSupportController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \App\Http\Requests\Storeservice_supportRequest  $request
+     * @param  \App\Http\Requests\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Storeservice_supportRequest $request)
+    public function store(Request $request)
     {
-        //
+        $validation = [
+            "rules" => [
+                'parking_id'  => 'required',
+                'users_id'    => 'required',
+                'title'       =>  'required',
+                'description' => 'required',
+            ],
+            "messages" => [
+                'parking_id.required'  => 'El campo parqueadero es requerido',
+                'users_id.required'    => 'El campo usuario es requerido',
+                'title.required'       => 'El campo titulo es requerido',
+                'description.required' => 'El campo parqueadero es requerido',
+            ],
+        ];
+
+        $validator = Validator::make($request->all(), $validation['rules'], $validation['messages']);
+
+        if ($validator->fails()) {
+            return response()->json(['response' => ['errors'=>$validator->errors()->all()], 'message' => 'Bad Request'], 400);
+        }
+
+        try {
+
+            $service_return = Service_support::create([
+                'parkings_id' => $request->parking_id,
+                'users_id' => $request->users_id,
+                'title' => $request->title,
+                'description' => $request->description,
+                'status' => 1
+            ]);
+
+            return response()->json(['message' => 'Success', 'response' => $service_return->id ],200);
+        } catch (QueryException $th) {
+            Log::emergency($th);
+            return response()->json(['response' => ['errors' => [$th->getMessage()]], 'message' => 'Internal Error'], 500);
+        }
     }
 
     /**

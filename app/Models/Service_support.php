@@ -10,8 +10,8 @@ class Service_support extends Model
     use HasFactory;
     protected $guarded = [];
     protected $fillable = [
-        'user_id',
         'parkings_id',
+        'users_id',
         'title',
         'description',
         'status',

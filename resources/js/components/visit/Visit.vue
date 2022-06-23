@@ -5,7 +5,12 @@
       :columns="columns"
       :rows="rows"
       :search-options="{ enabled: true }"
-      :pagination-options="{ enabled: true }"
+      :pagination-options="{
+          enabled: true,
+          mode: 'records',
+          position: 'top',
+          perPageDropdown: [100, 500, 1000],
+      }"
       :line-numbers="true"
     >
       <div slot="table-actions">
@@ -238,8 +243,8 @@
 import toastr from "toastr";
 import Swal from "sweetalert2";
 import Datepicker from "vuejs-datepicker";
-import XLSX from 'xlsx'
-import FileSaver from 'file-saver'
+import XLSX from 'xlsx';
+import FileSaver from 'file-saver';
 import { en, es } from "vuejs-datepicker/dist/locale";
 export default {
   components: {
@@ -480,11 +485,7 @@ export default {
         res.data.response.indexes.parking.forEach((element) => {
           this.parkingData.push(element);
         });
-      }).finally(function() {
-        let element = document.getElementById("tableVisit");
-        let wb = XLSX.utils.table_to_book(element);
-        localStorage.setItem("tableVisit", JSON.stringify(wb));
-      });
+      }).finally(function() { });
     },
     getParkingVisitsConsecutive(){
       if(!this.form.parkings_id){
@@ -534,29 +535,18 @@ export default {
       });
     },
     exportVisit(){
-      let wb =  JSON.parse(localStorage.getItem('tableVisit'))
-      let wopts = {
-        bookType: 'xlsx',
-        bookSST: false,
-        type: 'binary'
-      }
-      let wbout = XLSX.write(wb, wopts);
-          FileSaver.saveAs(new Blob([this.s2ab(wbout)], {
-          type: "application/octet-stream;charset=utf-8"
-      }), "Visit.xlsx");
+        // Acquire Data (reference to the HTML table)
+        var table_elt = document.getElementById("tableVisit");
 
-    },
-    s2ab(s) {
-      if (typeof ArrayBuffer !== 'undefind') {
-        var buf = new ArrayBuffer(s.length);
-        var view = new Uint8Array(buf);
-        for (var i = 0; i != s.length; ++i) view[i] = s.charCodeAt(i) & 0xFF;
-        return buf;
-      } else {
-        var buf = new Array(s.length);
-        for (var i = 0; i != s.length; ++i) buf[i] = s.charCodeAt(i) & 0xFF;
-        return buf;
-      }
+        // Extract Data (create a workbook object from the table)
+        var workbook = XLSX.utils.table_to_book(table_elt);
+
+        // Process Data (add a new row)
+        var worksheet = workbook.Sheets["Sheet1"];
+
+        //console.log(JSON.stringify(worksheet));
+        // Package and Release Data (`writeFile` tries to write and save an XLSB file)
+        XLSX.writeFile(workbook, "Visit.xlsx");
     },
   },
   created: function () {

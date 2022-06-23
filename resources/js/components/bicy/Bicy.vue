@@ -5,7 +5,13 @@
       :columns="columns"
       :rows="rows"
       :search-options="{ enabled: true, }"
-      :pagination-options="{ enabled: true }"
+      :pagination-options="{
+            enabled: true,
+            mode: 'records',
+            perPage: 100,
+            position: 'top',
+            perPageDropdown: [100, 500, 1000],
+        }"
       :row-style-class="rowStyleClassFn"
       :sort-options="{
         enabled: true,
@@ -72,7 +78,6 @@
     >
       <ValidationObserver ref="observer" v-slot="{ handleSubmit }">
         <form ref="form" @submit.prevent="handleSubmit(dataSubmit)">
-
 
           <div class="form-group" data-content="Cicloparqueadero">
             <label for="name">Bici Estación</label>
@@ -400,8 +405,8 @@ import toastr from "toastr";
 import Fuse from "fuse.js";
 import Swal from "sweetalert2";
 import Select2 from 'v-select2-component';
-import XLSX from 'xlsx'
-import FileSaver from 'file-saver'
+import XLSX from 'xlsx';
+import FileSaver from 'file-saver';
 
 const VueSelect = require("vue-select2");
 
@@ -409,7 +414,6 @@ export default {
   components:{
     Select2,
     VueSelect
-
   },
   data() {
     return {
@@ -573,29 +577,16 @@ export default {
       }
     },
     exportBicies(){
-      let wb =  JSON.parse(localStorage.getItem('tableBicies'))
-      let wopts = {
-        bookType: 'xlsx',
-        bookSST: false,
-        type: 'binary'
-      }
-      let wbout = XLSX.write(wb, wopts);
-      FileSaver.saveAs(new Blob([this.s2ab(wbout)], {
-      type: "application/octet-stream;charset=utf-8"
-      }), "Bicies.xlsx");
+        // Acquire Data (reference to the HTML table)
+        var table_elt = document.getElementById("tableBicies");
 
-    },
-    s2ab(s) {
-      if (typeof ArrayBuffer !== 'undefind') {
-        var buf = new ArrayBuffer(s.length);
-        var view = new Uint8Array(buf);
-        for (var i = 0; i != s.length; ++i) view[i] = s.charCodeAt(i) & 0xFF;
-        return buf;
-      } else {
-        var buf = new Array(s.length);
-        for (var i = 0; i != s.length; ++i) buf[i] = s.charCodeAt(i) & 0xFF;
-        return buf;
-      }
+        // Extract Data (create a workbook object from the table)
+        var workbook = XLSX.utils.table_to_book(table_elt);
+
+        // Process Data (add a new row)
+        var worksheet = workbook.Sheets["Sheet1"];
+        // Package and Release Data (`writeFile` tries to write and save an XLSB file)
+        XLSX.writeFile(workbook, "Bicies.xlsx");
     },
     addData() {
       this.$bvModal.show("modal-bicy");
@@ -735,11 +726,7 @@ export default {
           this.typeData = [{ value: null, text: "Selecciona una opcion" }].concat( res.data.response.indexes.type.map(el => el) );
 
         }
-      }).finally(function() {
-        let element = document.getElementById("tableBicies")
-        let wb = XLSX.utils.table_to_book(element)
-        localStorage.setItem("tableBicies", JSON.stringify(wb))
-      });
+      }).finally(function() { });
       this.$api.get("web/data/biker").then((res) => {
         const data = [];
         for(let biker of res.data.response.users){
@@ -747,7 +734,6 @@ export default {
         }
         this.bikersData = data;
       });
-
     },
     rowStyleClassFn(row){
       return row.active == 1 ? '' : 'alert alert-danger'
