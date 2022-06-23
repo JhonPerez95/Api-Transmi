@@ -24,7 +24,7 @@ class PermissionsChecker
         $action = "{$controller}@{$method}";
 
         if(!$request->user()->can($action)){
-            return response()->json(['message'=>'Unauthorized', 'response'=>['errors'=>['El usuario no tiene acceso a esta acción.']]],401);
+            return response()->json(['message'=>'Unauthorized', 'response'=>['errors' => ['El usuario no tiene acceso a esta acción.']]],401);
         }
 
         return $next($request);

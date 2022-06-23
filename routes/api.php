@@ -34,6 +34,7 @@ use App\Http\Controllers\DetailedStickerOrderController;
 use App\Http\Controllers\Auth\QuerierUserController;
 use App\Http\Controllers\Auth\VigilantUserController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\ServiceSupportController;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -56,11 +57,11 @@ use App\Models\VerificationCode;
 \Event::listen('Illuminate\Database\Events\QueryExecuted', function ($query) {
     Log::info( json_encode($query->sql) );
     Log::info( json_encode($query->bindings) );
-    Log::info( json_encode($query->time)   );
+    Log::info( json_encode($query->time));
 });
 
 
-Route::middleware(['auth:sanctum',PermissionsChecker::class])->group(function () {
+Route::middleware(['auth:sanctum', PermissionsChecker::class])->group(function () {
     Route::get('user', function (Request $request) {
         return $request->user();
     });
@@ -108,7 +109,6 @@ Route::middleware(['auth:sanctum',PermissionsChecker::class])->group(function ()
         Route::post('biker/parentVerificationCode/{id}', [ParentsController::class,'getParentVerificationCode']);
         Route::put('biker/{id}/unblock', [BikerController::class,'unblockBiker']);
 
-
         Route::resource('gender', GenderController::class);
         Route::resource('job', JobController::class);
         Route::resource('neighborhood', NeighborhoodController::class);
@@ -131,6 +131,9 @@ Route::middleware(['auth:sanctum',PermissionsChecker::class])->group(function ()
         Route::get('reports/visits/hourlyByDays',[ReportsController::class, 'hourlyVisitsByDays']);
         Route::get('reports/visits/abandonedBicies',[ReportsController::class, 'visitAbandonedBicies']);
         Route::get('reports/visits/inventoryMapService',[ReportsController::class, 'webMapService']);
+
+        //Mesa de ayuda
+        Route::resource('servicesupport', ServiceSupportController::class);
     });
 
     Route::name('user.')->group(function(){

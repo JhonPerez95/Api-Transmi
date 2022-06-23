@@ -6,7 +6,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Schema;
 
 use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;    
+use Spatie\Permission\Models\Permission;
 
 use DB;
 
@@ -21,13 +21,10 @@ class RolePermissionsSeed extends Seeder
      */
     public function run()
     {
-        
-        
-
         Schema::disableForeignKeyConstraints();
 
             User::truncate();
-        
+
             $superAdminUser = User::create([
                 'name'  => 'Super ADMIN',
                 'email'     => 'email@email.com',
@@ -66,7 +63,7 @@ class RolePermissionsSeed extends Seeder
             Permission::truncate();
 
         Schema::enableForeignKeyConstraints();
-            
+
             $userIndex = Permission::create(['name' => 'UserController@index']);
             $userShow = Permission::create(['name' => 'UserController@show']);
             $userStore = Permission::create(['name' => 'UserController@store']);
@@ -159,7 +156,7 @@ class RolePermissionsSeed extends Seeder
             $TypeBicyControllerStore = Permission::create(['name' => 'TypeBicyController@store']);
             $TypeBicyControllerUpdate = Permission::create(['name' => 'TypeBicyController@update']);
             $TypeBicyControllerDestroy = Permission::create(['name' => 'TypeBicyController@destroy']);
-            
+
 
 
             $TypeParkingControllerIndex = Permission::create(['name' => 'TypeParkingController@index']);
@@ -220,7 +217,7 @@ class RolePermissionsSeed extends Seeder
             $ParkingMaintenancesStore = Permission::create(['name' => 'ParkingMaintenancesController@store']);
             $ParkingMaintenancesUpdate = Permission::create(['name' => 'ParkingMaintenancesController@update']);
             $ParkingMaintenancesDestroy = Permission::create(['name' => 'ParkingMaintenancesController@destroy']);
-            
+
             $ParkingIndex = Permission::create(['name' => 'ParkingController@index']);
             $ParkingShow = Permission::create(['name' => 'ParkingController@show']);
             $ParkingStore = Permission::create(['name' => 'ParkingController@store']);
@@ -232,7 +229,7 @@ class RolePermissionsSeed extends Seeder
             $provisionalStickerOrderStore = Permission::create(['name' => 'ProvisionalStickerOrdersController@store']);
             $provisionalStickerOrderUpdate = Permission::create(['name' => 'ProvisionalStickerOrdersController@update']);
             $provisionalStickerOrderDestroy = Permission::create(['name' => 'ProvisionalStickerOrdersController@destroy']);
-            
+
             $detailedStickerOrderIndex = Permission::create(['name' => 'DetailedStickerOrderController@index']);
             $detailedStickerOrderShow = Permission::create(['name' => 'DetailedStickerOrderController@show']);
             $detailedStickerOrderStore = Permission::create(['name' => 'DetailedStickerOrderController@store']);
@@ -262,36 +259,35 @@ class RolePermissionsSeed extends Seeder
             $reportsHourlyVisitsByDays = Permission::create(['name' => 'ReportsController@hourlyVisitsByDays']);
             $reportsWebMapService = Permission::create(['name' => 'ReportsController@webMapService']);
 
-
             $permissionsIndex = Permission::create(['name' => 'PermissionsController@index']);
             // El store no se utiliza pues para que sea funcional debe haber un método/controlador codificado
             $permissionsDestroy = Permission::create(['name' => 'PermissionsController@destroy']);
-        
-        $visitsIndex = Permission::create(['name' => 'VisitController@index']);
-        $visitsStore = Permission::create(['name' => 'VisitController@store']);
-        $visitsMassiveStorage = Permission::create(['name' => 'VisitController@massiveStorage']);
-        $visitsCreate = Permission::create(['name' => 'VisitController@create']);
-        $visitsUpdate = Permission::create(['name' => 'VisitController@update']);
-        $visitsUpdateByBicyCode = Permission::create(['name' => 'VisitController@updateByBicyCode']);
 
-        $authsIndex = Permission::create(['name' => 'AuthsController@index']);
-        $authsStore = Permission::create(['name' => 'AuthsController@store']);
-        $authsDestroy = Permission::create(['name' => 'AuthsController@destroy']);
+            $visitsIndex = Permission::create(['name' => 'VisitController@index']);
+            $visitsStore = Permission::create(['name' => 'VisitController@store']);
+            $visitsMassiveStorage = Permission::create(['name' => 'VisitController@massiveStorage']);
+            $visitsCreate = Permission::create(['name' => 'VisitController@create']);
+            $visitsUpdate = Permission::create(['name' => 'VisitController@update']);
+            $visitsUpdateByBicyCode = Permission::create(['name' => 'VisitController@updateByBicyCode']);
 
-        $rolesIndex = Permission::create(['name' => 'RolesController@index']);
-        $rolesStore = Permission::create(['name' => 'RolesController@store']);
-        $rolesDestroy = Permission::create(['name' => 'RolesController@destroy']);
-        $rolesAsign = Permission::create(['name' => 'RolesController@asignToUser']);
-        $rolesRevoke = Permission::create(['name' => 'RolesController@revokeToUser']);
-        $rolesAuthRoleTo = Permission::create(['name' => 'RolesController@authRoleTo']);
-        $rolesUnauthorizeRoleTo = Permission::create(['name' => 'RolesController@unauthorizeRoleTo']);
+            $authsIndex = Permission::create(['name' => 'AuthsController@index']);
+            $authsStore = Permission::create(['name' => 'AuthsController@store']);
+            $authsDestroy = Permission::create(['name' => 'AuthsController@destroy']);
 
-        
+            $rolesIndex = Permission::create(['name' => 'RolesController@index']);
+            $rolesStore = Permission::create(['name' => 'RolesController@store']);
+            $rolesDestroy = Permission::create(['name' => 'RolesController@destroy']);
+            $rolesAsign = Permission::create(['name' => 'RolesController@asignToUser']);
+            $rolesRevoke = Permission::create(['name' => 'RolesController@revokeToUser']);
+            $rolesAuthRoleTo = Permission::create(['name' => 'RolesController@authRoleTo']);
+            $rolesUnauthorizeRoleTo = Permission::create(['name' => 'RolesController@unauthorizeRoleTo']);
 
-        $admin = Role::create(['name' => 'admin']);
-        $superAdmin = Role::create(['name' => 'superAdmin']);
-        $querier = Role::create(['name' => 'querier']);
-        $vigilant = Role::create(['name' => 'vigilant']);
+            $servicesupport = Permission::create(['name' => 'ServiceSupportController@store']);
+
+            $admin = Role::create(['name' => 'admin']);
+            $superAdmin = Role::create(['name' => 'superAdmin']);
+            $querier = Role::create(['name' => 'querier']);
+            $vigilant = Role::create(['name' => 'vigilant']);
 
 
         $adminPermissions = [
@@ -300,19 +296,19 @@ class RolePermissionsSeed extends Seeder
             $provisionalStickerOrderStore,
             $provisionalStickerOrderUpdate,
             $provisionalStickerOrderDestroy,
-            
+
             $detailedStickerOrderIndex,
             $detailedStickerOrderShow,
             $detailedStickerOrderStore,
             $detailedStickerOrderUpdate,
             $detailedStickerOrderDestroy,
 
-            $bikersDestroy, 
+            $bikersDestroy,
             $bikerExport,
-            $bikersIndex, 
-            $bikersShow, 
-            $bikersStore, 
-            $bikersUpdate, 
+            $bikersIndex,
+            $bikersShow,
+            $bikersStore,
+            $bikersUpdate,
             $bikerGetCode,
             $bikerMassiveRawSMS,
             $bikersUnblock,
@@ -323,9 +319,9 @@ class RolePermissionsSeed extends Seeder
             $bikerAuthEdit,
             $bikerAuthDestroy,
 
-            $permissionsIndex, 
+            $permissionsIndex,
             $permissionsDestroy,
-            
+
             $authsIndex,
             $authsStore,
             $authsDestroy,
@@ -344,7 +340,6 @@ class RolePermissionsSeed extends Seeder
             $rolesAuthRoleTo,
             $rolesUnauthorizeRoleTo,
             $rolesRevoke,
-            
 
             $bikeDestroy,
             $bikeIndex,
@@ -450,8 +445,7 @@ class RolePermissionsSeed extends Seeder
             $inventoryBiciesStore,
             $inventoryBiciesUpdate,
             $inventoryBiciesDestroy,
-            
-                        
+
             $userIndex,
             $userShow,
 
@@ -464,7 +458,6 @@ class RolePermissionsSeed extends Seeder
             $vigilantUserUpdate,
             $vigilantUserDestroy,
 
-
             $reportsShow,
             $reportsDailyVisitsByMonths,
             $reportsGeneralBikerVisitsByMonths,
@@ -472,9 +465,9 @@ class RolePermissionsSeed extends Seeder
             $reportsVisitAbandonedBicies,
             $reportsHourlyVisitsByDays,
             $reportsWebMapService,
+
+            $servicesupport,
         ];
-
-
 
         $admin->syncPermissions($adminPermissions);
 
@@ -488,11 +481,11 @@ class RolePermissionsSeed extends Seeder
             $querierUserDestroy,
         ]));
 
-        $vigilant->syncPermissions([ 
-            $bikersIndex, 
+        $vigilant->syncPermissions([
+            $bikersIndex,
             $bikersShow,
-            $bikersStore, 
-            $bikersUpdate, 
+            $bikersStore,
+            $bikersUpdate,
             $bikerGetCode,
             $bikersDestroy,
             $bikerExport,
@@ -539,7 +532,7 @@ class RolePermissionsSeed extends Seeder
             $jobIndex,
             $jobShow,
             $neighborhoodIndex,
-            $neighborhoodShow,       
+            $neighborhoodShow,
             $levelIndex,
             $levelShow,
 
@@ -556,6 +549,8 @@ class RolePermissionsSeed extends Seeder
             $detailedStickerOrderIndex,
             $detailedStickerOrderShow,
             $detailedStickerOrderStore,
+
+            $servicesupport,
         ]);
 
         $querier->syncPermissions([
@@ -572,7 +567,6 @@ class RolePermissionsSeed extends Seeder
         $adminUser->assignRole('admin');
         $querierUser->assignRole('querier');
         $vigilantUser->assignRole('vigilant');
-
 
     }
 }

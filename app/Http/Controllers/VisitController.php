@@ -18,7 +18,6 @@ use Illuminate\Support\Facades\Validator;
 class VisitController extends Controller
 {
 
-
     private $client;
 
     public function __construct(){
@@ -27,7 +26,6 @@ class VisitController extends Controller
             $this->client = ( preg_match("/api\//",$route)) ? "app" : "web";
         }
     }
-
 
     /**
      * Display a listing of the resource.
@@ -140,8 +138,7 @@ class VisitController extends Controller
 
                 'status.required'=>'El campo estado de la visita es requerido',
                 'status.exists'=>'El campo estado de la visita no acerta ningún registro existente'
-
-            ]
+            ],
         ];
 
         try {
@@ -174,10 +171,10 @@ class VisitController extends Controller
             $smsResponse = $bicy->biker->notifyBicyStorage($bicy->id, $request->parking, $visit->id);
 
             $visit->getCode();
-            return response()->json(['message'=>'Success', 'response'=>['data'=>$visit,'errors'=>[]]],201);
+            return response()->json(['message'=>'Success', 'response'=>['data' => $visit, 'errors'=>[]]],201);
         } catch (QueryException $th) {
             Log::emergency($th);
-            return response()->json(['message'=>'Internal Error', 'response'=>['errors'=>[$th->getMessage()]]],500);
+            return response()->json(['message'=>'Internal Error', 'response' => ['errors' => [$th->getMessage()]]],500);
         }
     }
 
