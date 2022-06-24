@@ -196,7 +196,7 @@
               </ValidationProvider>
             </div>
 
-            <div class="form-group col" data-content="Telefono">
+            <div class="form-group col" data-content="Teléfono">
               <label for="name">Teléfono</label>
               <ValidationProvider
                 name="telefono"
@@ -321,7 +321,7 @@
                   class="form-control-user form-control"
                   :class="errors[0] ? 'is-invalid' : ''"
                 >
-                  <option :value="null">Seleccione una opcion</option>
+                  <option :value="null">Seleccione una opción</option>
                   <option value="1">Activo</option>
                   <option value="2">Inactivo</option>
                 </select>
@@ -342,7 +342,7 @@
                   class="form-control-user form-control"
                   :class="errors[0] ? 'is-invalid' : ''"
                 >
-                  <option :value="null">Seleccione una opcion</option>
+                  <option :value="null">Seleccione una opción</option>
                   <option value="1">Si</option>
                   <option value="2">No</option>
                 </select>
@@ -423,12 +423,12 @@
         es: es,
         previewImage: [],
         validateImage: null,
-        typeData: [{ value: null, text: "Selecciona una opcion" }],
-        genderData: [{ value: null, text: "Selecciona una opcion" }],
-        jobData: [{ value: null, text: "Selecciona una opcion" }],
-        parkingsData: [{ value: null, text: "Selecciona una opcion" }],
+        typeData: [{ value: null, text: "Selecciona una opción" }],
+        genderData: [{ value: null, text: "Selecciona una opción" }],
+        jobData: [{ value: null, text: "Selecciona una opción" }],
+        parkingsData: [{ value: null, text: "Selecciona una opción" }],
         levelData: [
-          { value: null, text: "Selecciona una opcion" },
+          { value: null, text: "Selecciona una opción" },
           { value: "1", text: "Estrato 1" },
           { value: "2", text: "Estrato 2" },
           { value: "3", text: "Estrato 3" },
@@ -528,10 +528,10 @@
     },
     methods: {
       resetSelects(){
-        this.typeData = [{ value: null, text: "Selecciona una opcion" }];
-        this.genderData = [{ value: null, text: "Selecciona una opcion" }];
-        this.jobData = [{ value: null, text: "Selecciona una opcion" }];
-        this.parkingsData = [{ value: null, text: "Selecciona una opcion" }];
+        this.typeData = [{ value: null, text: "Selecciona una opción" }];
+        this.genderData = [{ value: null, text: "Selecciona una opción" }];
+        this.jobData = [{ value: null, text: "Selecciona una opción" }];
+        this.parkingsData = [{ value: null, text: "Selecciona una opción" }];
       },
       deleteImage(e) {
         this.previewImage.splice(e, 1);
@@ -666,7 +666,7 @@
         swalWithBootstrapButtons
           .fire({
             title: "Estas Seguro De Eliminar Este Dato?",
-            text: "Esta opcion no se puede reversar",
+            text: "Esta opción no se puede reversar",
             icon: "warning",
             showCancelButton: false,
             confirmButtonText: "Eliminar",

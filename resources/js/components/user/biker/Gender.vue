@@ -44,7 +44,7 @@
       <ValidationObserver ref="observer" v-slot="{ handleSubmit }">
         <form ref="form" @submit.prevent="handleSubmit(dataSubmit)">
           <div class="form-group">
-            <label for="name">Codigo</label>
+            <label for="name">Código</label>
             <ValidationProvider
               name="codigo"
               rules="required|min:1|max:10"
@@ -91,7 +91,7 @@
                 class="form-control-user form-control"
                 :class="errors[0] ? 'is-invalid' : ''"
               >
-                <option :value="null">Seleccione una opcion</option>
+                <option :value="null">Seleccione una opción</option>
                 <option value="1">Activo</option>
                 <option value="2">Inactivo</option>
               </select>
@@ -123,7 +123,7 @@ export default {
       },
       columns: [
         {
-          label: "Codigo",
+          label: "Código",
           field: "code",
         },
         {
@@ -190,7 +190,7 @@ export default {
       swalWithBootstrapButtons
         .fire({
           title: "Estas Seguro De Eliminar Este Dato?",
-          text: "Esta opcion no se puede reversar",
+          text: "Esta opción no se puede reversar",
           icon: "warning",
           showCancelButton: false,
           confirmButtonText: "Eliminar",

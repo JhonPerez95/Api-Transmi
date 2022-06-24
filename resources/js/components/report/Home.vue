@@ -9,7 +9,7 @@
         active-nav-item-class="font-weight-bold text-danger"
         content-class="mt-3"
       >
-        <b-tab title="Ingresos y salidas Mensual diario por CP" active>
+        <b-tab title="Ingresos y salidas Mensual diario por BE" active>
           <div v-if="tabComponent == 0">
             <Rp1Component />
           </div>
@@ -24,7 +24,7 @@
             <Rp3Component />
           </div>
         </b-tab>
-        <b-tab title="Reporte ingresos y salidas diario por CP por hora">
+        <b-tab title="Reporte ingresos y salidas diario por BE por hora">
           <div v-if="tabComponent == 3">
             <Rp4Component />
           </div>

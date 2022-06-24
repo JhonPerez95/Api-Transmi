@@ -101,12 +101,12 @@ Route::group(['prefix' => 'web'], function () {
 
             Route::post('biker/massiveRawMsg', [BikerController::class,'massiveRawTextMessage']);
             Route::resource('biker', BikerController::class);
-            Route::post('biker/{id}', [BikerController::class,'update']);
-            Route::post('bikerMassive', [BikerController::class,'massiveStore']);
-            Route::get('biker-excel', [BikerController::class,'export']);
-            Route::get('biker/verificationCode/{phone}', [BikerController::class,'getVerificationCode'] );
-            Route::post('biker/parentVerificationCode/{id}', [ParentsController::class,'getParentVerificationCode']);
-            Route::put('biker/{id}/unblock', [BikerController::class,'unblockBiker']);
+            Route::post('biker/{id}', [BikerController::class, 'update']);
+            Route::post('bikerMassive', [BikerController::class, 'massiveStore']);
+            Route::get('biker-excel', [BikerController::class, 'export']);
+            Route::get('biker/verificationCode/{phone}', [BikerController::class, 'getVerificationCode'] );
+            Route::post('biker/parentVerificationCode/{id}', [ParentsController::class, 'getParentVerificationCode']);
+            Route::put('biker/{id}/unblock', [BikerController::class, 'unblockBiker']);
 
             Route::resource('gender', GenderController::class);
             Route::resource('job', JobController::class);
@@ -121,8 +121,7 @@ Route::group(['prefix' => 'web'], function () {
 
             //Mesa de ayuda
             Route::resource('servicesupport', ServiceSupportController::class);
-            //Route::get('servicesupport', [ServiceSupportController::class, 'index']);
-            //Route::get('servicesupport/{id}/edit',[ServiceSupportController::class, 'edit']);
+            Route::put('servicesupport/updateSelect/{id}/{status}', [ServiceSupportController::class, 'updateSelect']);
 
             //Report
             Route::post('reports',[ReportsController::class, 'show']);

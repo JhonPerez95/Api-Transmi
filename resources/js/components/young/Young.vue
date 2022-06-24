@@ -54,9 +54,9 @@
                 <datalist id="my-biker-list-id" >
                   <option v-for="(biker,index) in editing ? allBikersData : bikersData " :key="index" :value="biker.document" >{{ biker.text }}</option>
                 </datalist>
-                
+
                 <span class="form-text text-danger">{{ errors[0] }}</span>
-              </ValidationProvider> 
+              </ValidationProvider>
 
               <div class="row mb-3">
                 <div class="form-group col">
@@ -74,12 +74,12 @@
                     <b-form-input name="documentoAcudiente" @input="checkParent()" list="my-parents-list-id" v-model="form.parents_id" :disabled="editing"></b-form-input>
                     <datalist id="my-parents-list-id">
                       <option v-for="(parent,index) in parentData" :key="index" :value="parent.value">{{ parent.text }}</option>
-                    </datalist>                    
+                    </datalist>
                     <span class="form-text text-danger">{{ errors[0] }}</span>
                   </div>
                   <div class="btn btn-info btn-sm text-light fa fa-envelope col-2" v-show="(form.parents_id && !errors.length) && !editing" @click="sendMessage()"></div>
                 </div>
-              </ValidationProvider> 
+              </ValidationProvider>
               <div class="row">
                 <div class="form-group col">
                   <label>Nombre</label>
@@ -107,7 +107,7 @@
               <span class="form-text text-danger">{{ errors[0] }}</span>
             </ValidationProvider>
           </div>
-         
+
           <div v-show="!editing">
             <button class="btn btn-primary btn-block my-3" type="submit">
               Guardar
@@ -167,7 +167,7 @@ export default {
           phone : ""
         }
       }
-      
+
     };
   },
   methods: {
@@ -227,7 +227,7 @@ export default {
       swalWithBootstrapButtons
         .fire({
           title: "Estas Seguro De Eliminar Este Dato?",
-          text: "Esta opcion no se puede reversar",
+          text: "Esta opción no se puede reversar",
           icon: "warning",
           showCancelButton: false,
           confirmButtonText: "Eliminar",
@@ -272,28 +272,28 @@ export default {
 
       this.$api.get("web/data/biker").then((res) => {
         if(res.status == 200){
-          let filtered = res.data.response.users.filter((el)=> el.auth == "2" ).map(el=>{ 
-            return { value: el.document, text :`${el.name} ${el.last_name}`, 
-              id: el.id, document : el.document, name :`${el.name} ${el.last_name}` 
-            } 
+          let filtered = res.data.response.users.filter((el)=> el.auth == "2" ).map(el=>{
+            return { value: el.document, text :`${el.name} ${el.last_name}`,
+              id: el.id, document : el.document, name :`${el.name} ${el.last_name}`
+            }
           });
           this.bikersData = this.bikersData.concat(filtered);
           this.allBikersData = res.data.response.users;
         }
       });
-    },    
+    },
     sendMessage(){
 
       if(!this.parentData.filter(el => el.id == this.selected.parent.id ).length || !this.selected.parent.id){
-        toastr.error("El identificador del acudiente no se ha recibido correctamente.");       
-        return;   
+        toastr.error("El identificador del acudiente no se ha recibido correctamente.");
+        return;
       }
 
       this.$api.post("web/data/biker/parentVerificationCode/" + this.selected.parent.id, {biker_id : this.selected.biker.id }).then((res) => {
         if(res.status == 200){
           toastr.success("Código de verificación enviado");
         }else{
-          toastr.error("Error inesperado");          
+          toastr.error("Error inesperado");
         }
       });
     },
@@ -306,7 +306,7 @@ export default {
       }
       if(!biker.length){
         this.form.biker_young = this.selected.biker.name = this.selected.biker.document =  ""; return;
-      } 
+      }
       this.selected.biker.name = (specified) ? `${biker[0].name} ${biker[0].last_name}` : biker[0].name;
       this.selected.biker.id = biker[0].id;
     },

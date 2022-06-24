@@ -19,7 +19,7 @@
       :pagination-options="{ enabled: true }"
       :select-options="{ enabled: true}"
       @on-selected-rows-change="selectionChanged"
-      
+
     >
       <div slot="table-actions">
         <button v-on:click="addData()" :disabled="!form.bikers.length" class="btn btn-primary">
@@ -63,7 +63,7 @@
     >
       <ValidationObserver ref="observer" v-slot="{ handleSubmit }">
         <form ref="form" @submit.prevent="handleSubmit(dataSubmit)">
-         
+
           <div class="row">
             <div class="form-group col" data-content="Mensaje">
               <label for="name">Mensaje</label>
@@ -90,7 +90,7 @@
                 {{findBiker(bikerId)}}
               </li>
             </ul>
-            
+
           </div>
 
           <div>
@@ -147,7 +147,7 @@
             field: "gender",
           },
           {
-            label: "Telefono",
+            label: "Teléfono",
             field: "phone",
           },
           {
@@ -216,10 +216,10 @@
           });
 
       },
-      resetModal() {        
+      resetModal() {
         // this.form.bikers = [];
-        this.form.message = '';        
-      },      
+        this.form.message = '';
+      },
       deleteData(id) {
         const swalWithBootstrapButtons = Swal.mixin({
           customClass: {
@@ -232,7 +232,7 @@
         swalWithBootstrapButtons
           .fire({
             title: "Estas Seguro De Eliminar Este Dato?",
-            text: "Esta opcion no se puede reversar",
+            text: "Esta opción no se puede reversar",
             icon: "warning",
             showCancelButton: false,
             confirmButtonText: "Eliminar",

@@ -74,7 +74,7 @@
                 class="form-control-user form-control"
                 :class="errors[0] ? 'is-invalid' : ''"
               >
-                <option :value="null">Seleccione una opcion</option>
+                <option :value="null">Seleccione una opción</option>
                 <option value="1">Activo</option>
                 <option value="2">Inactivo</option>
               </select>
@@ -166,7 +166,7 @@ export default {
       swalWithBootstrapButtons
         .fire({
           title: "Estas Seguro De Eliminar Este Dato?",
-          text: "Esta opcion no se puede reversar",
+          text: "Esta opción no se puede reversar",
           icon: "warning",
           showCancelButton: false,
           confirmButtonText: "Eliminar",

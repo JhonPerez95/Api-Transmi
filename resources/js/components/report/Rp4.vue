@@ -137,7 +137,7 @@ export default {
       parkingsData: [],
       columns: [
         {
-          label: "Ciclo Parqueadero",
+          label: "Bici Estación",
           field: "parking_name",
         },
         {

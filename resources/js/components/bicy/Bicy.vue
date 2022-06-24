@@ -11,7 +11,7 @@
             perPage: 100,
             position: 'top',
             perPageDropdown: [100, 500, 1000],
-        }"
+      }"
       :row-style-class="rowStyleClassFn"
       :sort-options="{
         enabled: true,
@@ -118,8 +118,8 @@
 
             </div>
 
-            <div class="form-group col" data-content="Codigo">
-              <label for="name">Codigo</label>
+            <div class="form-group col" data-content="Código">
+              <label for="name">Código</label>
               <ValidationProvider
                 name="codigo"
                 rules="required|min:1|max:20"
@@ -259,7 +259,7 @@
                   class="form-control-user form-control"
                   :class="errors[0] ? 'is-invalid' : ''"
                 >
-                  <option :value="null">Seleccione una opcion</option>
+                  <option :value="null">Seleccione una opción</option>
                   <option value="1">Activo</option>
                   <option value="2">Inactivo</option>
                 </select>
@@ -385,7 +385,6 @@
               </div>
           </div>
 
-
           <div>
             <button class="btn btn-primary btn-block my-3" type="submit">
               Guardar
@@ -420,9 +419,9 @@ export default {
       previewFrontImage: [],
       previewBackImage: [],
       previewSideImage: [],
-      parkingData: [{ value: null, text: "Selecciona una opcion" }],
-      typeData: [{ value: null, text: "Selecciona una opcion" }],
-      bikersData: [{ value: null, text: "Selecciona una opcion" }],
+      parkingData: [{ value: null, text: "Selecciona una opción" }],
+      typeData: [{ value: null, text: "Selecciona una opción" }],
+      bikersData: [{ value: null, text: "Selecciona una opción" }],
       form: {
         id: "",
         code: "",
@@ -449,7 +448,7 @@ export default {
           field: "parking",
         },
         {
-          label: "Codigo",
+          label: "Código",
           field: "code",
         },
         {
@@ -672,7 +671,7 @@ export default {
       swalWithBootstrapButtons
         .fire({
           title: "Estas Seguro De Eliminar Este Dato?",
-          text: "Esta opcion no se puede reversar",
+          text: "Esta opción no se puede reversar",
           icon: "warning",
           showCancelButton: false,
           confirmButtonText: "Eliminar",
@@ -722,8 +721,8 @@ export default {
         });
         if (option == true) {
 
-          this.parkingData = [{ value: null, text: "Selecciona una opcion" }].concat( res.data.response.indexes.parking.map(el => el) );
-          this.typeData = [{ value: null, text: "Selecciona una opcion" }].concat( res.data.response.indexes.type.map(el => el) );
+          this.parkingData = [{ value: null, text: "Selecciona una opción" }].concat( res.data.response.indexes.parking.map(el => el) );
+          this.typeData = [{ value: null, text: "Selecciona una opción" }].concat( res.data.response.indexes.type.map(el => el) );
 
         }
       }).finally(function() { });

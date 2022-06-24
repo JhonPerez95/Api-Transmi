@@ -9,13 +9,19 @@
                 :columns="columns"
                 :rows="rows"
                 :search-options="{ enabled: true }"
-                :pagination-options="{ enabled: true }"
+                :pagination-options="{
+                    enabled: true,
+                    mode: 'records',
+                    perPage: 100,
+                    position: 'top',
+                    perPageDropdown: [100, 500, 1000],
+                }"
                 :line-numbers="true"
             >
                 <div slot="table-actions"></div>
                 <template slot="table-row" slot-scope="props">
                     <span v-if="props.column.field === 'status'">
-                        <select class="form-control-user form-control" v-on:change="dataAnswer(props.row.service_supports_id)">
+                        <select class="form-control-user form-control" v-on:change="selectdataAnswer($event, props.row.service_supports_id)">
                            <option value="1">Recibido</option>
                            <option value="2">En Proceso</option>
                            <option value="3">Solucionado</option>
@@ -74,14 +80,13 @@
 
     </div>
 
-
-
 </template>
 
 <script>
 
 import toastr from "toastr";
 import { en, es } from "vuejs-datepicker/dist/locale";
+
 export default {
 
     data() {
@@ -127,7 +132,7 @@ export default {
                     field: "answer",
                 },
                 {
-                    label: "Accion",
+                    label: "Acción",
                     field: "boton",
                 },
             ],
@@ -136,7 +141,7 @@ export default {
     methods :{
         getData() {
             this.$api.get(`web/data/servicesupport`).then((res) => {
-                //console.log(res);
+                console.log(res);
                 this.rows = res.data.response.data;
                 //console.log(this.rows);
             });
@@ -150,26 +155,27 @@ export default {
             });
             this.$bvModal.show("modal-answer");
         },
-        dataAnswer(id = false) {
+        selectdataAnswer(event, id){
 
-            let status_id;
-            if(id == false) {
-                status_id = this.form.id;
-            } else {
-                status_id = id;
-            }
-
-            console.log(this.form, id, status_id);
-
-            if (this.form.id) {
-                this.$api.put("web/data/servicesupport/" + status_id, this.form ).then( (res) => {
+            let status = event.target.value;
+            if (status) {
+                this.$api.put("web/data/servicesupport/updateSelect/" + id + "/" + status).then( (res) => {
                     //console.log(res.data.response.data);
                     toastr.success(res.data.response.data);
                 });
             }
+            this.getData();
+        },
+        dataAnswer() {
+            if (this.form.id) {
+                this.$api.put("web/data/servicesupport/" + this.form.id, this.form ).then( (res) => {
+                    //console.log(res.data.response.data);
+                    toastr.success(res.data.response.data);
+                });
+            }
+            this.getData();
             this.$bvModal.hide("modal-answer");
         },
-
     },
     created: function () {
         this.getData();
