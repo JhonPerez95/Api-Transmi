@@ -24,7 +24,7 @@ class ServiceSupportController extends Controller
         try {
             $services = DB::table('service_supports')
                 ->join('parkings','service_supports.parkings_id','parkings.id')
-                ->join('users','service_supports.user_id','users.id')
+                ->join('users','service_supports.users_id','users.id')
                 ->select('service_supports.id AS service_supports_id',
                                  'users.id AS user_id',
                                  'users.name AS user_name',
@@ -36,9 +36,8 @@ class ServiceSupportController extends Controller
                                  'service_supports.description AS description',
                                  'service_supports.status AS status',
                                  'service_supports.answer AS answer',
-                                 'service_supports.created_at AS created_at'
+                                 'service_supports.created_at AS created_at',
                 )->get()->toArray();
-
 
             $dataServices = array();
             foreach($services as $s => $service) {
@@ -170,6 +169,33 @@ class ServiceSupportController extends Controller
             return response()->json(['response' => ['errors' => [$th->getMessage()]], 'message' => 'Internal Error'], 500);
         }
 
+    }
+
+    /**
+     * Update the status of Services help
+     *
+     * @param  \Illuminate\Http\Request $request
+     * @param  int  $id
+     * @param  \App\Models\Service_support  $service_support
+     * @return \Illuminate\Http\Response
+     */
+    public function updateSelect(Request $request, $id, $status)
+    {
+        try {
+            $data = Service_support::find($id);
+
+            if (!$data) {
+                return response()->json(['message' => 'Not Found', 'response' => ['id' => $id]], 404);
+            }
+
+            $data->status = $status;
+            $data->update();
+            return response()->json(['message' => 'Success', 'response' => ["data" => 'Actualizado Correctamente', "errors" => [] ] ], 200);
+
+        } catch (QueryException $th){
+            Log::emergency($th);
+            return response()->json(['response' => ['errors' => [$th->getMessage()]], 'message' => 'Internal Error'], 500);
+        }
     }
 
     /**

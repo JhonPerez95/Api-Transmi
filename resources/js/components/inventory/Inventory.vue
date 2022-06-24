@@ -208,7 +208,7 @@ export default {
   data() {
     return {
       es: es,
-      parkingData: [{ value: null, text: "Selecciona una opcion" }],
+      parkingData: [{ value: null, text: "Selecciona una opción" }],
       selected: [],
       biciesData : [],
       biciesRawData : [],
@@ -336,7 +336,7 @@ export default {
           swalWithBootstrapButtons
               .fire({
                   title: "Estas Seguro De Eliminar Este Dato?",
-                  text: "Esta opcion no se puede reversar",
+                  text: "Esta opción no se puede reversar",
                   icon: "warning",
                   showCancelButton: false,
                   confirmButtonText: "Eliminar",
@@ -358,7 +358,7 @@ export default {
       editData(id, parking_id) {
           this.resetModal();
 
-          //Obtener los codigos con visitas activas de cada cicloparqueadero
+          //Obtener los códigos con visitas activas de cada cicloparqueadero
            this.$api.get("web/data/bicyparking/" + parking_id).then((res) => {
                //console.log('code_new', res.data.response.data);
                this.biciesRawData = res.data.response.data;
@@ -381,7 +381,7 @@ export default {
           this.$bvModal.show("modal-inventary");
       },
       getData() {
-          this.parkingData = [{value: null, text: "Selecciona una opcion"}];
+          this.parkingData = [{value: null, text: "Selecciona una opción"}];
           this.$api.get("web/data/inventory").then((res) => {
               //console.log(res);
               this.rows = res.data.response.data;

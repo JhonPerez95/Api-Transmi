@@ -1,7 +1,7 @@
 <template>
   <div>
     <form ref="form" @submit.stop.prevent="dataSubmit">
-      <b-form-group label="Telefono" label-for="phone-input">
+      <b-form-group label="Teléfono" label-for="phone-input">
         <b-form-input
           ref="phoneInput"
           id="phone-input"

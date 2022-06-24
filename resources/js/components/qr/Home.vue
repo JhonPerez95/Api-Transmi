@@ -9,7 +9,7 @@
         active-nav-item-class="font-weight-bold text-danger"
         content-class="mt-3"
       >
-        <b-tab title="Codigo Individual" active>
+        <b-tab title="Código Individual" active>
           <div v-if="tabComponent == 0">
             <DetailedStickerComponent />
           </div>

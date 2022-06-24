@@ -52,7 +52,7 @@
     >
       <ValidationObserver ref="observer" v-slot="{ handleSubmit }">
         <form ref="form" @submit.prevent="handleSubmit(dataSubmit)">
-          
+
           <div class="row">
             <div class="form-group col" data-content="Nombre">
               <label for="name">Nombre</label>
@@ -91,7 +91,7 @@
           </div>
 
           <div class="form-group">
-            <label for="phone">Telefono</label>
+            <label for="phone">Teléfono</label>
             <ValidationProvider
               name="telefono"
               rules="required|numeric|min:7|max:10|regex:\d+"
@@ -175,7 +175,7 @@
                   class="form-control-user form-control"
                   :class="errors[0] ? 'is-invalid' : ''"
                 >
-                  <option :value="null">Seleccione una opcion</option>
+                  <option :value="null">Seleccione una opción</option>
                   <option value="1">Activo</option>
                   <option value="2">Inactivo</option>
                 </select>
@@ -190,7 +190,7 @@
                   class="form-control-user form-control"
                   :class="errors[0] ? 'is-invalid' : ''"
                 >
-                  <option :value="null">Seleccione una opcion</option>
+                  <option :value="null">Seleccione una opción</option>
                   <option value="1">Administrador</option>
                   <option value="3">Consultor</option>
                   <option value="4">Vigilante</option>
@@ -259,7 +259,7 @@ export default {
           field: "last_name",
         },
         {
-          label: "CC",
+          label: "Cédula Ciudadanía",
           field: "document",
         },
         {
@@ -267,7 +267,7 @@ export default {
           field: "email",
         },
         {
-          label: "Telefono",
+          label: "Teléfono",
           field: "phone",
         },
         {
@@ -299,7 +299,7 @@ export default {
 
       console.log(this.form)
       let userRole = "";
-      
+
 
       if (this.form.id) {
         switch(this.form.prerole_id){
@@ -341,7 +341,7 @@ export default {
       this.form.active = null;
     },
     deleteData(id,prerole_id) {
-      
+
       const swalWithBootstrapButtons = Swal.mixin({
         customClass: {
           confirmButton: "btn btn-success",
@@ -353,7 +353,7 @@ export default {
       swalWithBootstrapButtons
         .fire({
           title: "Estas Seguro De Eliminar Este Dato?",
-          text: "Esta opcion no se puede reversar",
+          text: "Esta opción no se puede reversar",
           icon: "warning",
           showCancelButton: false,
           confirmButtonText: "Eliminar",
@@ -417,7 +417,7 @@ export default {
         }
       });
       this.rows = users;
-      
+
     },
   },
 

@@ -74,7 +74,7 @@
             </ValidationProvider>
           </div>
           <div class="form-group">
-            <label for="code">Codigo</label>
+            <label for="code">Código</label>
             <ValidationProvider
               name="codigo"
               rules="required|min:2|max:10"
@@ -154,7 +154,7 @@
                 class="form-control-user form-control"
                 :class="errors[0] ? 'is-invalid' : ''"
               >
-                <option :value="null">Seleccione una opcion</option>
+                <option :value="null">Seleccione una opción</option>
                 <option value="1">Activo</option>
                 <option value="2">Inactivo</option>
               </select>
@@ -181,8 +181,8 @@ import XLSX from "xlsx";
 export default {
   data() {
     return {
-      typeData: [{ value: null, text: "Selecciona una opcion" }],
-      stationData: [{ value: null, text: "Selecciona una opcion" }],
+      typeData: [{ value: null, text: "Selecciona una opción" }],
+      stationData: [{ value: null, text: "Selecciona una opción" }],
       form: {
         id: "",
         name: "",
@@ -198,7 +198,7 @@ export default {
           field: "name",
         },
         {
-          label: "Codigo",
+          label: "Código",
           field: "code",
         },
         {
@@ -276,7 +276,7 @@ export default {
       swalWithBootstrapButtons
         .fire({
           title: "Estas Seguro De Eliminar Este Dato?",
-          text: "Esta opcion no se puede reversar",
+          text: "Esta opción no se puede reversar",
           icon: "warning",
           showCancelButton: false,
           confirmButtonText: "Eliminar",

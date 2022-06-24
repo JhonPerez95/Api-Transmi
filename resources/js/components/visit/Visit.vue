@@ -253,9 +253,9 @@ export default {
   data() {
     return {
       es: es,
-      parkingData: [{ value: null, text: "Selecciona una opcion" }],
-      statusData: [{ value: null, text: "Selecciona una opcion" }],
-      bikesData: [{ value: null, text: "Selecciona una opcion" }],
+      parkingData: [{ value: null, text: "Selecciona una opción" }],
+      statusData: [{ value: null, text: "Selecciona una opción" }],
+      bikesData: [{ value: null, text: "Selecciona una opción" }],
       form: {
         id: "",
         parkings_id: null,
@@ -277,7 +277,7 @@ export default {
       },
       columns: [
         {
-          label: "Ciclo Parqueadero",
+          label: "Bici Estación",
           field: "parking",
         },
         {
@@ -429,7 +429,7 @@ export default {
       swalWithBootstrapButtons
         .fire({
           title: "Estas Seguro De Eliminar Este Dato?",
-          text: "Esta opcion no se puede reversar",
+          text: "Esta opción no se puede reversar",
           icon: "warning",
           showCancelButton: false,
           confirmButtonText: "Eliminar",
@@ -465,9 +465,9 @@ export default {
     },
     getData() {
 
-      this.parkingData = [{ value: null, text: "Selecciona una opcion" }];
-      this.statusData = [{ value: null, text: "Selecciona una opcion" }];
-      this.bikesData = [{ value: null, text: "Selecciona una opcion" }];
+      this.parkingData = [{ value: null, text: "Selecciona una opción" }];
+      this.statusData = [{ value: null, text: "Selecciona una opción" }];
+      this.bikesData = [{ value: null, text: "Selecciona una opción" }];
 
       this.$api.get("web/data/biker").then((res) => {
         if(res.status == 200){
