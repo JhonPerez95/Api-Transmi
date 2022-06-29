@@ -47,6 +47,29 @@ class VisitController extends Controller
                 'parkings.name as parking', DB::raw('CONCAT(bikers.name, " ", bikers.last_name) as biker'),  'visit_statuses.name as status', 'bicies.code as bicyCode')
                 ->get();
 
+            $dataReturn = array();
+            foreach($data as $s => $service) {
+                $outService = array();
+                $outService['bicies_id'] = $service->bicies_id;
+                $outService['bicyCode'] = $service->bicyCode;
+                $outService['biker'] = $service->biker;
+                $outService['bikers_id'] = $service->bikers_id;
+                $outService['created_at'] = $service->created_at;
+                $outService['date_input'] = date("d-m-Y", strtotime($service->date_input));
+                $outService['date_output'] = date("d-m-Y", strtotime($service->date_output));
+                $outService['duration'] = $service->duration;
+                $outService['number'] = $service->number;
+                $outService['parking'] = $service->parking;
+                $outService['parkings_id'] = $service->parkings_id;
+                $outService['status'] = $service->status;
+                $outService['time_input'] = $service->time_input;
+                $outService['time_output'] = $service->time_output;
+                $outService['updated_at'] = $service->updated_at;
+                $outService['visit_statuses_id'] = $service->visit_statuses_id;
+
+                $dataReturn[] = $outService;
+            }
+
             $parking = DB::table('parkings')
                 ->select('parkings.name as text', 'parkings.id as value')
                 ->where('parkings.active', '=', 1)
@@ -72,7 +95,8 @@ class VisitController extends Controller
                 [
                     'message' => "Sucess",
                     'response' => [
-                        'visits' => $data,
+                        //'visits' => $data,
+                        'data' => $dataReturn,
                         'indexes' => [
                             'status' => $status, 'biker' => $biker, 'parking' => $parking, 'active' => $active
                         ]

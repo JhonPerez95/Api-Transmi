@@ -20,12 +20,12 @@ class Biker extends Model
     use HasFactory;
     protected $guarded = [];
 
-    
+
     public function bicies(){
         return $this->hasMany(Bicy::class,'bikers_id','id');
     }
 
-    
+
     public function notifyBicyStorage($bicy_id, $parking_id, $visit_id)
     {
         $parking = Parking::find($parking_id);
@@ -67,12 +67,12 @@ class Biker extends Model
         $currentTime = date('H:i');
         $content = "Su código de confirmación de registro en la Bici Estación de TransMilenio es: {$code}. Hora {$currentTime}";
 
-        $content = "Señor(a) {$parent->name}, con el siguiente código podrá autorizar al menor {$biker->name} {$biker->last_name} para que se registre en el sistema de Bici Estación de TransMilenio y los datos del menor sean tratados de conformidad con la política de tratamiento que podrá consultar en la página www.transmilenio.gov.co. 
+        $content = "Señor(a) {$parent->name}, con el siguiente código podrá autorizar al menor {$biker->name} {$biker->last_name} para que se registre en el sistema de Bici Estación de TransMilenio y los datos del menor sean tratados de conformidad con la política de tratamiento que podrá consultar en la página www.transmilenio.gov.co.
 Código: {$code} Hora: {$currentTime}";
 
         Biker::Notify(['phone'=>$phone, 'message'=>$content]);
         return response()->json(['message'=>'Success','response'=>['code'=>$code]]);
-        
+
     }
 
     public static function notifySuccesfullAuthorization($opt){
@@ -116,7 +116,7 @@ Hora: {$currentTime}";
         ->join('parkings','parkings_id','parkings.id')
         ->select('bicies.*','parkings.name as parking')
         ->first();
-        
+
         $content = "Usted ha registrado con éxito la bicicleta {$bicy->brand} color {$bicy->color} en el Sistema de Bici Estaciones de TransMilenio, Bici Estación {$bicy->parking} código de Registro {$bicy->code}$bicy_id. Hora {$currentTime}";
         return Biker::Notify(['phone'=> $this->phone, 'message'=>$content]);
     }
@@ -128,7 +128,7 @@ Hora: {$currentTime}";
         $content = "Usted ha actualizado con éxito la bicicleta {$bicy->brand} color {$bicy->color} en el Sistema de Bici Estaciones de TransMilenio, Bici Estación {$bicy->parking}. Código de Registro {$bicy->code}{$bicy->id}.";
         return Biker::Notify(['phone'=> $this->phone, 'message'=>$content]);
     }
-    
+
 
     public static function notifyParkingUnderMaintenance($parkingMaintenance_id, $filters = []){
 
@@ -151,7 +151,7 @@ Hora: {$currentTime}";
         return [$responses, $bikers];
     }
     public function _notifyParkingUnderMaintenance($parkingMaintenance){
-     
+
         $startDatetime = DateTime::createFromFormat('Y-m-d', $parkingMaintenance->start_date);
         $startDayName = $this->translateDayName($startDatetime->format('D'));
         $startMonthName = $this->translateMonthName($startDatetime->format('M'));
@@ -161,7 +161,7 @@ Hora: {$currentTime}";
         $endDayName = $this->translateDayName($endDatetime->format('D'));
         $endMonthName = $this->translateMonthName($endDatetime->format('M'));
         $endDay = $endDatetime->format('d');
-        
+
         $creationDatetime = DateTime::createFromFormat('Y-m-d H:i:s', $parkingMaintenance->created_at);
         $creationTime = $creationDatetime->format('H:i');
 
@@ -190,7 +190,7 @@ Hora: {$currentTime}";
         }
         return [$responses, $bikers];
 
-    }    
+    }
     public function _notifyParkingAvailable($parkingMaintenance){
         $currentTime = date('H:i');
         $content = "Estimado usuario(a), la Bici Estación {$parkingMaintenance->parking->name} ya está disponible para su uso. Hora {$currentTime}";
@@ -213,7 +213,7 @@ Hora: {$currentTime}";
         }
         return [$responses, $bikers];
 
-        
+
     }
     public function _notifyBeingBlocked(){
         $currentTime = date('H:i');
@@ -271,7 +271,7 @@ Hora: {$currentTime}";
         $payload = [
             'cmd'    => 'sendsms',
             'login'  => 'andersonlopez284@gmail.com',
-            'passwd' => 'cfh5crdf',
+            'passwd' => 'Anderson125',
             'dest'   => '57' . $opt['phone'],
             'concat'   => 'true',
             'msg'    => $opt['message'],

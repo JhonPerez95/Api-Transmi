@@ -30,6 +30,26 @@ class InventoryController extends Controller
                 ->orderBy('inventories.id')
                 ->get();
 
+            $dataServices = array();
+            foreach($data as $s => $service) {
+                $outService = array();
+                $outService['active'] = $service->active;
+                $outService['activeButNotRegistered'] = $service->activeButNotRegistered;
+                $outService['created_at'] = date("d-m-Y", strtotime($service->created_at));
+                $outService['date'] = date("d-m-Y", strtotime($service->date));
+                $outService['time_active'] = $service->time_active;
+                $outService['id'] = $service->id;
+                $outService['nonActiveButRegistered'] = $service->nonActiveButRegistered;
+                $outService['parking'] = $service->parking;
+                $outService['parking_id'] = $service->parking_id;
+                $outService['parkings_id'] = $service->parkings_id;
+                $outService['totalRegistered'] = $service->totalRegistered;
+                $outService['updated_at'] = $service->updated_at;
+                $outService['users_id'] = $service->users_id;
+
+                $dataServices[] = $outService;
+            }
+
             $parking = DB::table('parkings')
                 ->select('parkings.name as text', 'parkings.id as value')
                 ->where('parkings.active', '=', 1)
@@ -46,7 +66,7 @@ class InventoryController extends Controller
             ];
 
             return response()->json(['message'=>'Success', 'response' => [
-                    'data' => $data,
+                    'data' => $dataServices,
                     'indexes' => [
                         'parkings' => $parking
                     ],
@@ -314,7 +334,6 @@ class InventoryController extends Controller
                 ->select('type_bicies.name as text', 'type_bicies.id as value')
                 ->where('type_bicies.active', '=', 1)
             ->get();
-
 
             $bicies = $inventory->bicies;
 

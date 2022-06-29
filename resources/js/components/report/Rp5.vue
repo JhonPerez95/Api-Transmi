@@ -82,6 +82,7 @@ export default {
     dataSubmit(event) {
       this.$api.get(`/web/data/reports/visits/abandonedBicies`)
           .then((res) => {
+              //console.log(res);
               if (res.status == 200) {
                   //console.log(res.data.response.data);
                 this.rows = res.data.response.data;

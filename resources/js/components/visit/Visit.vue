@@ -296,7 +296,7 @@ export default {
           label: "Fecha Ingreso",
           field: "date_input",
         },
-                {
+        {
           label: "Hora Ingreso",
           field: "time_input",
         },
@@ -371,9 +371,7 @@ export default {
 
       // console.log(this.form); return;
       if (this.form.id) {
-        this.$api
-          .put("web/data/visit/" + this.form.id, this.form)
-          .then((res) => {
+        this.$api.put("web/data/visit/" + this.form.id, this.form).then((res) => {
             if (res.status == 200) {
               this.getData();
               toastr.success("Dato Actualizado");
@@ -476,16 +474,15 @@ export default {
       });
 
       this.$api.get("web/data/visit").then((res) => {
-        this.rows = res.data.response.visits.map(el=>{
-          el.nicely_entry = `${el.date_input} ${el.time_input}`;
-          el.nicely_exit = el.duration == 0  ? "" :  `${el.date_output} ${el.time_output}`; return el;});
-          res.data.response.indexes.status.forEach((element) => {
+          console.log(res.data.response.data);
+        this.rows = res.data.response.data;
+        res.data.response.indexes.status.forEach((element) => {
           this.statusData.push(element);
         });
         res.data.response.indexes.parking.forEach((element) => {
           this.parkingData.push(element);
         });
-      }).finally(function() { });
+      });
     },
     getParkingVisitsConsecutive(){
       if(!this.form.parkings_id){
@@ -536,7 +533,7 @@ export default {
     },
     exportVisit(){
         // Acquire Data (reference to the HTML table)
-        var table_elt = document.getElementById("tableVisit");
+        var table_elt = document.getElementById("tableVisit", {raw : true});
 
         // Extract Data (create a workbook object from the table)
         var workbook = XLSX.utils.table_to_book(table_elt);
