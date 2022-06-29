@@ -43,6 +43,40 @@ class BicyController extends Controller
                 ->select('bicies.*', 'parkings.name as parking', 'type_bicies.name as type', 'bikers.document as document')
                 ->get();
 
+            $dataServices = array();
+            foreach($data as $s => $service) {
+                $outService = array();
+                $outService['active'] = $service->active;
+                $outService['bikers_id'] = $service->bikers_id;
+                $outService['brand'] = $service->brand;
+                $outService['code'] = $service->code;
+                $outService['color'] = $service->color;
+                $outService['created_at'] = date("d-m-Y", strtotime($service->created_at));
+                $outService['date'] = date("d-m-Y", strtotime($service->created_at));
+                $outService['dateUp'] = date("d-m-Y", strtotime($service->updated_at));
+                $outService['description'] = $service->description;
+                $outService['document'] = $service->document;
+                $outService['id'] = $service->id;
+                $outService['id_image_back'] = $service->id_image_back;
+                $outService['id_image_front'] = $service->id_image_front;
+                $outService['id_image_side'] = $service->id_image_side;
+                $outService['parking'] = $service->parking;
+                $outService['parkings_id'] = $service->parkings_id;
+                $outService['serial'] = $service->serial;
+                $outService['time'] = substr($service->created_at, 10, 9);
+                $outService['timeUp'] = substr($service->updated_at, 10, 9);
+                $outService['tires'] = $service->tires;
+                $outService['type'] = $service->type;
+                $outService['type_bicies_id'] = $service->type_bicies_id;
+                $outService['updated_at'] = date("d-m-Y", strtotime($service->updated_at));
+                $outService['url_image_back'] = $service->url_image_back;
+                $outService['url_image_front'] = $service->url_image_front;
+                $outService['url_image_side'] = $service->url_image_side;
+                $outService['_id'] = $service->id;
+
+                $dataServices[] = $outService;
+            }
+
             $parking = DB::table('parkings')
                 ->select('parkings.name as text', 'parkings.id as value')
                 ->where('parkings.active', '=', 1)
@@ -65,7 +99,7 @@ class BicyController extends Controller
             [
                 'message' => "Sucess",
                 'response' => [
-                    'bicies' => $data,
+                    'bicies' => $dataServices,
                     'indexes' => [
                         'parking' => $parking, 'type' => $typeBicies, 'active' => $active
                     ]

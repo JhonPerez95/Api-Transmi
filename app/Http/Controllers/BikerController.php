@@ -19,8 +19,6 @@ use function PHPUnit\Framework\objectEquals;
 
 class BikerController extends Controller
 {
-
-
     private $client;
 
 
@@ -31,7 +29,6 @@ class BikerController extends Controller
             $this->client = (preg_match("/api\//", $route)) ? "app" : "web";
         }
     }
-
 
     /**
      * Display a listing of the resource.
@@ -55,6 +52,39 @@ class BikerController extends Controller
                 )
                 ->whereRaw("phone != ''")
                 ->get();
+
+            $dataReturn = array();
+            foreach($data as $s => $service) {
+                $outService = array();
+                $outService['active'] = $service->active;
+                $outService['auth'] = $service->auth;
+                $outService['birth'] = date("d-m-Y", strtotime($service->birth));
+                $outService['code'] = $service->code;
+                $outService['confirmation'] = $service->confirmation;
+                $outService['created_at'] = date("d-m-Y", strtotime($service->created_at));
+                $outService['document'] = $service->document;
+                $outService['email'] = $service->email;
+                $outService['gender'] = $service->gender;
+                $outService['genders_id'] = $service->genders_id;
+                $outService['id'] = $service->id;
+                $outService['id_img'] = $service->id_img;
+                $outService['job'] = $service->job;
+                $outService['jobs_id'] = $service->jobs_id;
+                $outService['last_name'] = $service->last_name;
+                $outService['levels_id'] = $service->levels_id;
+                $outService['name'] = $service->name;
+                $outService['neighborhood'] = $service->neighborhood;
+                $outService['neighborhoods_id'] = $service->neighborhoods_id;
+                $outService['parkings_id'] = $service->parkings_id;
+                $outService['phone'] = $service->phone;
+                $outService['register'] = date("d-m-Y", strtotime($service->register));
+                $outService['type'] = $service->type;
+                $outService['type_documents_id'] = $service->type_documents_id;
+                $outService['updated_at'] = date("d-m-Y", strtotime($service->updated_at));
+                $outService['url_img'] = $service->url_img;
+
+                $dataReturn[] = $outService;
+            }
 
             $type = DB::table('type_documents')
                 ->select('type_documents.name as text', 'type_documents.id as value')
@@ -95,7 +125,7 @@ class BikerController extends Controller
             [
                 'message' => "Sucess",
                 'response' => [
-                    'users' => $data,
+                    'users' => $dataReturn,
                     'indexes' => [
                         'type' => $type, 'gender' => $gender, 'job' => $job, 'level' => $level, 'active' => $active, 'parkings' => $parkings
                     ]

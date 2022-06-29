@@ -569,6 +569,7 @@
       },
       sendMessage(){
         this.$api.get("web/data/biker/verificationCode/" + this.form.phone).then((res) => {
+            console.log(res);
           if(res.status == 200){
             toastr.success("Código de verificación enviado");
           }else{
@@ -703,6 +704,7 @@
       },
       getData() {
         this.$api.get("web/data/biker").then((res) => {
+          //console.log(res);
           this.rows = res.data.response.users;
 
           this.resetSelects();

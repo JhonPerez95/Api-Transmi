@@ -181,6 +181,7 @@ export default {
 
       this.$api.get(`/web/data/reports/visits/dailyByMonths?begining_date=${date_input}&end_date=${date_output}`)
           .then((res) => {
+              //console.log(res);
               if (res.status == 200) {
                 this.parkingsData = res.data.indexes.parkings;
                 console.log(this.parkingsData);

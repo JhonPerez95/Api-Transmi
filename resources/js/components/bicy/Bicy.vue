@@ -621,8 +621,7 @@ export default {
           }
         });
       } else {
-        this.$api
-          .post("web/data/bicy", data, {
+        this.$api.post("web/data/bicy", data, {
             headers: {
               "Content-Type": "multipart/form-data",
             },
@@ -713,17 +712,16 @@ export default {
     },
     getData(option = false) {
       this.$api.get("web/data/bicy").then((res) => {
+        //console.log(res);
         this.rows = res.data.response.bicies.map(el => {
           el._id = `0000${el.id}`.substr(-4,4);
-          [el.date,el.time] = el.created_at.split(' ');
-          [el.dateUp,el.timeUp] = el.updated_at.split(' ');
+          //[el.date,el.time] = el.created_at.split(' ');
+          //[el.dateUp,el.timeUp] = el.updated_at.split(' ');
           return el;
         });
         if (option == true) {
-
           this.parkingData = [{ value: null, text: "Selecciona una opción" }].concat( res.data.response.indexes.parking.map(el => el) );
           this.typeData = [{ value: null, text: "Selecciona una opción" }].concat( res.data.response.indexes.type.map(el => el) );
-
         }
       }).finally(function() { });
       this.$api.get("web/data/biker").then((res) => {

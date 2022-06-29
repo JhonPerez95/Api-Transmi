@@ -193,6 +193,7 @@ export default {
 
       this.$api.get(`/web/data/reports/visits/hourlyByDays?begining_date=${date_input}&end_date=${date_output}${bikerDocument}`)
         .then((res) => {
+          //console.log(res);
           if (res.status == 200) {
             this.rows = res.data.response.data.map((el) => {
               const parking = this.parkingsData.find(

@@ -118,8 +118,8 @@ export default {
       }
       elm.classList.add('bg-info');
 
-      this.$api.get(`/web/data/reports/visits/webMapService?parkings_id=${id}`)
-          .then((res) => {
+      this.$api.get(`/web/data/reports/visits/webMapService?parkings_id=${id}`).then((res) => {
+              //console.log(res);
               if (res.status == 200) {
                 this.rows = res.data.response.data.map(el => {
                   el.full_date_input = `${el.date_input} ${el.time_input}`;

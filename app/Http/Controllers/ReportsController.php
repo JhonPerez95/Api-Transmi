@@ -29,7 +29,6 @@ class ReportsController extends Controller
             ]
         ];
 
-
         try {
 
             $validator = Validator::make($request->all(), $validation['rules'], $validation['messages']);
@@ -58,7 +57,6 @@ class ReportsController extends Controller
                 if(!array_key_exists($key,$output)){
                     $output[$key] = ['in'=>0, 'out'=>0];
                 }
-
                 $output[$key]['in']++;
 
                 if(!$record->date_output){continue;}
@@ -69,12 +67,10 @@ class ReportsController extends Controller
                     $outkey = "{$record->date_output}@{$record->parkings_id}";
 
                     if(!array_key_exists($outkey,$output)){
-                        $output[$outkey] = ['in'=>0, 'out'=>0];
+                        $output[$outkey] = ['in' => 0, 'out' => 0];
                     }
-
                     $output[$outkey]['out']++;
                 }
-
             };
 
             // Sorting & formatting
@@ -83,11 +79,10 @@ class ReportsController extends Controller
             foreach($output as $key => $value){
                 $exploded = explode('@',$key);
 
-                $value['date'] = $exploded[0];
+                $value['date'] = date("d-m-Y", strtotime($exploded[0]));
                 $value['parking_id'] = $exploded[1];
 
                 $data[] = $value;
-
             }
 
             $parkings = Parking::all();
@@ -122,7 +117,20 @@ class ReportsController extends Controller
                 )
             ->get();
 
-            return response()->json(['message'=>'Success', 'response'=>['data' => $bicies, 'errors'=>[]]],200);
+            $dataServices = array();
+            foreach($bicies as $s => $service) {
+                $outService = array();
+                $outService['bicy_code'] = $service->bicy_code;
+                $outService['biker_document'] = $service->biker_document;
+                $outService['date_input'] = date("d-m-Y", strtotime($service->date_input));
+                $outService['duration'] = $service->duration;
+                $outService['parking_name'] = $service->parking_name;
+                $outService['visit_num'] = $service->visit_num;
+
+                $dataServices[] = $outService;
+            }
+
+            return response()->json(['message'=>'Success', 'response'=>['data' => $dataServices, 'errors'=>[]]],200);
 
         } catch (QueryException $th) {
             Log::emergency($th);
@@ -144,7 +152,6 @@ class ReportsController extends Controller
                 'end_date.date_format' => 'El campo fecha final es de tipo fecha (AAAA-MM-DD)',
             ]
         ];
-
 
         try {
 
@@ -184,7 +191,6 @@ class ReportsController extends Controller
                 ->get()->toArray();
             }
 
-
             $output = array();
 
             foreach($records as $i => $record){
@@ -206,18 +212,15 @@ class ReportsController extends Controller
                     if(!array_key_exists($outkey,$output)){
                         $output[$outkey] = ['in'=>0, 'out'=>0];
                     }
-
                     $output[$outkey]['out']++;
-                }
-
-            };
+                }            };
 
             // Sorting & formating
             $data = array();
             ksort($output);
             foreach($output as $key => $value){
                 $exploded = explode("@",$key);
-                $value['date_input'] = $exploded[0];
+                $value['date_input'] = date("d-m-Y", strtotime($exploded[0]));
                 $value['time_input'] = $exploded[1] . ":00";
                 $value['parking_id'] = $exploded[2];
 
@@ -246,7 +249,6 @@ class ReportsController extends Controller
                 'end_date.date_format' => 'El campo fecha final es de tipo fecha (AAAA-MM-DD)',
             ]
         ];
-
 
         try {
 
@@ -297,7 +299,22 @@ class ReportsController extends Controller
                 ->get()->toArray();
             }
 
-            return response()->json(['message'=>'success', 'response'=>['data'=>$records]],200);
+            $dataServices = array();
+            foreach($records as $s => $service) {
+                $outService = array();
+                $outService['biker_document'] = $service->biker_document;
+                $outService['date_input'] = date("d-m-Y", strtotime($service->date_input));
+                $outService['date_output'] = date("d-m-Y", strtotime($service->date_output));
+                $outService['duration'] = $service->duration;
+                $outService['parking'] = $service->parking;
+                $outService['time_input'] = $service->time_input;
+                $outService['time_output'] = $service->time_output;
+                $outService['visit_num'] = $service->visit_num;
+
+                $dataServices[] = $outService;
+            }
+
+            return response()->json(['message'=>'success', 'response'=>['data' => $dataServices]],200);
 
         } catch (QueryException $th) {
             Log::emergency($th);
@@ -400,7 +417,6 @@ class ReportsController extends Controller
             ]
         ];
 
-
         try {
 
             $validator = Validator::make($request->all(), $validation['rules'], $validation['messages']);
@@ -440,9 +456,7 @@ class ReportsController extends Controller
                     'visits.new as visit_observations'
                 )
                 ->get();
-
             }
-
 
             return response()->json(['message' => 'Success', 'response' => ["data" => $visits,"errors" => []],], 201);
 
@@ -486,7 +500,8 @@ class ReportsController extends Controller
                 ->select(
                     'bikers.document as biker_document',
                     'parkings.name as parking',
-                    'visits.date_input', 'visits.time_input',
+                    'visits.date_input',
+                    'visits.time_input',
                     DB::raw("CONCAT( parkings.code,'-',   REPLACE(visits.date_input, '-', '' ),  IF(LENGTH(visits.number) = 1 ,  CONCAT('00',visits.number),  IF(LENGTH(visits.number) = 2 ,  CONCAT('0',visits.number) ,  visits.number  ) ) ) as visit_num"),
                     DB::raw("
                         IF(
@@ -508,21 +523,31 @@ class ReportsController extends Controller
                 )
             ->get()->toArray();
 
+            $dataServices = array();
+            foreach($records as $s => $service) {
+                $outService = array();
+                $outService['biker_document'] = $service->biker_document;
+                $outService['date_input'] = date("d-m-Y", strtotime($service->date_input));
+                if($service->date_output){
+                    $outService['date_output'] = date("d-m-Y", strtotime($service->date_output));
+                }
+                $outService['duration'] = $service->duration;
+                $outService['parking'] = $service->parking;
+                $outService['visit_num'] = $service->visit_num;
 
-            $activeVisits = DB::table('visits')
-                ->where('visits.parkings_id',  $Parking->id)
-                ->where('visits.duration',  0)
-            ->get();
+                $dataServices[] = $outService;
+            }
+
+            $activeVisits = DB::table('visits')->where('visits.parkings_id',  $Parking->id)->where('visits.duration', 0)->get();
 
             $vacancy = ($Parking->capacity - $activeVisits->count() );
 
-            return response()->json(['message'=>'success', 'response'=>['data'=>$records , 'vacancy'=> $vacancy  ]],200);
+            return response()->json(['message'=>'success', 'response'=>['data' => $dataServices, 'data1' => $records, 'vacancy' => $vacancy ]],200);
 
         } catch (QueryException $th) {
             Log::emergency($th);
             return response()->json(['message' => 'Internal Error', 'response' => ["errors" => [$th->getMessage()]]], 500);
         }
-
     }
 
     public function pernoctas(Request $request){

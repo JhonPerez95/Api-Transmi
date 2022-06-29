@@ -51,7 +51,8 @@ class ServiceSupportController extends Controller
                 $outService['description'] = $service->description;
                 $outService['status'] = $service->status;
                 $outService['answer'] = $service->answer;
-                $outService['created_at'] = substr($service->created_at, 0, 10);
+                $date_created_at = substr($service->created_at, 0, 10);
+                $outService['created_at'] = date("d-m-Y", strtotime($date_created_at));
                 $outService['time'] = substr($service->created_at, 10, 9);
 
                 $dataServices[] = $outService;
