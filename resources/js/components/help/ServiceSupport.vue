@@ -27,6 +27,13 @@
                            <option value="3">Solucionado</option>
                            <option value="4">Rechazado</option>
                         </select>
+<!--                        {{props.row.status}}-->
+
+<!--                        <select>-->
+<!--                           <option v-for="(item , index) in categories" v-bind:key="index" :selected= "item.id == 30" >-->
+<!--                                {{item.title}}-->
+<!--                           </option>-->
+<!--                        </select>-->
                     </span>
 
                     <span v-else-if="props.column.field === 'boton'">

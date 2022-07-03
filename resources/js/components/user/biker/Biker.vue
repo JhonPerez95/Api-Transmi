@@ -235,7 +235,7 @@
           </div>
 
           <div class="row">
-            <div class="form-group col" data-content="Ocupacion">
+            <div class="form-group col" data-content="Ocupación">
               <label for="name">Ocupación</label>
               <ValidationProvider
                 name="ocupacion"

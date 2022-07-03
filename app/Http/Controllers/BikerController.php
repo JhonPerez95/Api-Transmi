@@ -260,8 +260,8 @@ class BikerController extends Controller
                 'confirmation.required' => 'El campo verificación es requerido',
                 'confirmation.exists' => 'El código de verificación no ha sido encontrado o ya ha sido procesado.',
 
-                'job.required' => 'El campo ocupacion es requerido',
-                'job.exists' => 'El campo ocupacion no acerta ningún registro existente',
+                'job.required' => 'El campo ocupación es requerido',
+                'job.exists' => 'El campo ocupación no acerta ningún registro existente',
 
                 'parkings_id.required' => 'El campo parqueadero es requerido',
                 'parkings_id.exists' => 'El campo parqueadero no acerta ningún registro existente',
@@ -577,8 +577,8 @@ class BikerController extends Controller
                     'confirmation.required' => 'El campo verificación es requerido',
                     'confirmation.exists' => 'El código de verificación no ha sido encontrado o ya ha sido procesado.',
 
-                    'job.required' => 'El campo ocupacion es requerido',
-                    'job.exists' => 'El campo ocupacion no acerta ningún registro existente',
+                    'job.required' => 'El campo ocupación es requerido',
+                    'job.exists' => 'El campo ocupación no acerta ningún registro existente',
 
                     'neighborhood.required' => 'El campo Barrio es requerido',
                     'neighborhood.min' => 'El campo Barrio debe tener un mínimo de 2 caracteres',
@@ -837,8 +837,8 @@ class BikerController extends Controller
                 'confirmation.required' => 'El campo verificación es requerido',
                 'confirmation.exists' => 'El código de verificación no ha sido encontrado o ya ha sido procesado.',
 
-                'jobs_id.required' => 'El campo ocupacion es requerido',
-                'jobs_id.exists' => 'El campo ocupacion no acerta ningún registro existente',
+                'jobs_id.required' => 'El campo ocupación es requerido',
+                'jobs_id.exists' => 'El campo ocupación no acerta ningún registro existente',
 
                 'parkings_id.required' => 'El campo parqueadero es requerido',
                 'parkings_id.exists' => 'El campo parqueadero no acerta ningún registro existente',
