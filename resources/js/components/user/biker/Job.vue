@@ -36,7 +36,7 @@
       hide-footer
       id="modal-job"
       ref="modal"
-      title="Ocupacion"
+      title="Ocupación"
       @show="resetModal"
       @hidden="resetModal"
       @ok="handleOk"

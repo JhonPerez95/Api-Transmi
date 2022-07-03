@@ -143,7 +143,7 @@
             field: "birth",
           },
           {
-            label: "Genero",
+            label: "Género",
             field: "gender",
           },
           {
@@ -155,7 +155,7 @@
             field: "email",
           },
           {
-            label: "Ocupacion",
+            label: "Ocupación",
             field: "job",
           },
           {

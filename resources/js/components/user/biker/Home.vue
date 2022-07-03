@@ -19,7 +19,7 @@
             <TypeDocumentComponent />
           </div>
         </b-tab>
-        <b-tab title="Generos">
+        <b-tab title="Géneros">
           <div v-if="tabComponent == 2">
             <GenderComponent />
           </div>
