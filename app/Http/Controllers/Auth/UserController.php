@@ -43,8 +43,8 @@ class UserController extends Controller
     }
 
     public function create(Request $request){}
-    
-    public function show($id){ 
+
+    public function show($id){
 
         $user = User::role($this->role)->where(['id'=>$id])->select('users.*', DB::raw("{$this->role_id} as role_id"), DB::raw("{$this->role_id} as prerole_id") )->first();
         if(!$user){
@@ -85,7 +85,7 @@ class UserController extends Controller
                 'document.required'=> 'El campo documento es requerido',
                 'document.unique'=> 'El documento ingresado ya existe.',
                 'document.digits_between'=>'El campo documento debe tener un mínimo de 5 y un máximo de 20 caracteres numericos',
-                
+
                 'email.required'=> 'El campo email es requerido',
                 'email.email'=>'El campo email debe ser de tipo email',
                 'email.unique'=> 'El email ingresado ya existe.',
@@ -99,12 +99,12 @@ class UserController extends Controller
             ]
         ];
         try {
-        
+
             $validator = Validator::make($request->all(), $validation['rules'], $validation['messages']);
             if ($validator->fails()) {
                 return response()->json(['response' => ['errors'=>$validator->errors()->all()], 'message' => 'Bad Request'], 400);
             }
-        
+
             $lastName = ($request->last_name)? $request->last_name : "";
 
             $user = User::create([
@@ -117,7 +117,7 @@ class UserController extends Controller
                 'service' => $this->service
             ]);
 
-            $role = Role::find($request->role_id);                
+            $role = Role::find($request->role_id);
             $user->assignRole($role->name);
 
             return response()->json(['message' => 'User Created'], 201);
@@ -127,7 +127,7 @@ class UserController extends Controller
     }
 
     public function update(Request $request, $id){
-        
+
         $validation = [
             "rules" => [
                 'name' => 'required|min:3|max:50',
@@ -142,10 +142,10 @@ class UserController extends Controller
                 'name.required' => 'El campo nombre es requerido',
                 'name.min' => 'El campo nombre debe tener mínimo 3 caracteres',
                 'name.max' => 'El campo nombre debe tener máximo 50 caracteres',
-                
+
                 'last_name.min' => 'El campo apellido debe tener mínimo 3 caracteres',
                 'last_name.max' => 'El campo apellido debe tener máximo 50 caracteres',
-                
+
                 'phone.required'=> 'El campo telefono es requerido',
                 'phone.digits_between'=>'El campo telefono debe tener un mínimo de 7 y un máximo de 10 caracteres numericos',
 
@@ -172,7 +172,7 @@ class UserController extends Controller
             if(!$user){
                 return response()->json(['message'=>'Not Found', 'response'=>['id'=>$id]],404);
             }
-        
+
             $validator = Validator::make($request->all(), $validation['rules'], $validation['messages']);
             if ($validator->fails()) {
                 return response()->json(['response' => ['errors'=>$validator->errors()->all()], 'message' => 'Bad Request'], 400);
@@ -195,9 +195,9 @@ class UserController extends Controller
 
             $saving = $user->save();
 
-            
+
             $user->removeRole($this->role);
-            $role = Role::find($request->role_id);                
+            $role = Role::find($request->role_id);
             $user->assignRole($role->name);
 
             if(!$saving){
@@ -280,14 +280,14 @@ class UserController extends Controller
             ]
         ];
         try {
-        
+
             $validator = Validator::make($request->all(), $validation['rules'], $validation['messages']);
             if ($validator->fails()) {
                 return response()->json(['response' => ['errors'=>$validator->errors()->all()], 'message' => 'Bad Request'], 400);
             }
-            
+
             $vef = VerificationCode::validate($request->code, $request->email);
-            
+
             if(!$vef){
                 return response()->json(['response' => ['errors'=>['El código de verificación no acerta las credenciales con las que fue registrado.']], 'message' => 'Bad Request'], 400);
             }

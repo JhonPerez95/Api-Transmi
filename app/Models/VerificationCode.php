@@ -29,7 +29,7 @@ class VerificationCode extends Model
                 break;
             }
         }
-        $vefCode = VerificationCode::create(['code'=>$code, 'verification'=>$verification]);
+        $vefCode = VerificationCode::create(['code' => $code, 'verification' => $verification]);
         return ['code'=>$vefCode->code];
 
     }

@@ -19,5 +19,11 @@ class GenderSeeder extends Seeder
             'name'  => 'Masculino',
             'users_id'  => 1
         ]);
+
+        $data = Gender::create([
+            'code'  => 'F',
+            'name'  => 'Femenino',
+            'users_id'  => 1
+        ]);
     }
 }

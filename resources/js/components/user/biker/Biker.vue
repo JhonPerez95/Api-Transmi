@@ -589,7 +589,6 @@
         }else{
           birthDate = this.form.birth;
         }
-
         // const level = this.form.levels_id.substring(8,9);
 
         data.append("name", this.form.name);
@@ -619,16 +618,14 @@
             }
           });
         } else {
-          this.$api.post("web/data/biker", data, {
-              headers: {
-                "Content-Type": "multipart/form-data",
-              },
-            }).then((res) => {
+          this.$api.post("web/data/biker", data, { headers: { "Content-Type": "multipart/form-data" } }).then((res) => {
               if (res.status == 201) {
                 console.log(res);
                 this.getData();
                 toastr.success("Dato Guardado");
                 this.$bvModal.hide("modal-biker");
+              } else {
+                  toastr.success(res.response.errors);
               }
             });
         }
