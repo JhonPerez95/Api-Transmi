@@ -251,7 +251,6 @@ class BicyController extends Controller
             return response()->json(['message' => 'Not Found', 'response' => ['errors' => ['Ciclista No encontrado']]], 404);
         }
 
-
         $validation = [
             "rules" => [
                 'code' => 'sometimes|min:1|max:20|unique:bicies',
@@ -316,8 +315,6 @@ class BicyController extends Controller
             if (!$request->code) {
                 $request->request->add(['code' => $this->create($request->parkings_id, true, true)]);
             }
-
-
 
             $image_back = $request->file('image_back')->getRealPath();
             $image_side = $request->file('image_side')->getRealPath();

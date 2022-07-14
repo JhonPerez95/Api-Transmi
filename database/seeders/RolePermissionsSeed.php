@@ -82,14 +82,11 @@ class RolePermissionsSeed extends Seeder
             $querierUserUpdate = Permission::create(['name' => 'QuerierUserController@update']);
             $querierUserDestroy = Permission::create(['name' => 'QuerierUserController@destroy']);
 
-
-
             $typeDocumentIndex = Permission::create(['name' => 'TypeDocumentController@index']);
             $typeDocumentShow = Permission::create(['name' => 'TypeDocumentController@show']);
             $typeDocumentStore = Permission::create(['name' => 'TypeDocumentController@store']);
             $typeDocumentUpdate = Permission::create(['name' => 'TypeDocumentController@update']);
             $typeDocumentDestroy = Permission::create(['name' => 'TypeDocumentController@destroy']);
-
 
             $bicyStatusIndex = Permission::create(['name' => 'BicyStatusController@index']);
             $bicyStatusShow = Permission::create(['name' => 'BicyStatusController@show']);

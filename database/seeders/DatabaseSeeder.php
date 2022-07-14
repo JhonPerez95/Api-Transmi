@@ -20,23 +20,23 @@ class DatabaseSeeder extends Seeder
         $this->call([
             TypeParkingSeeder::class,
             StationSeeder::class,
-            ParkingSeeder::class,
+            //ParkingSeeder::class,
             TypeDocumentSeeder::class,
             GenderSeeder::class,
-            JobSeeder::class,
+            //JobSeeder::class,
             NeighborhoodSeeder::class,
-            ParentsSeeder::class,
-            ParametersSeeder::class,
+            //ParentsSeeder::class,
+            //ParametersSeeder::class,
             LevelSeeder::class,
             BikerSeeder::class,
             TypeBicySeeder::class,
             BicyStatusSeeder::class,
-            BicySeeder::class,
+            //BicySeeder::class,
             VisitStatusSeeder::class,
             RolePermissionsSeed::class,
             UserAppSeeder::class,
-            VisitSeeder::class,
-            ServiceSupportSeeder::class
+            //VisitSeeder::class,
+            //ServiceSupportSeeder::class
         ]);
         Schema::enableForeignKeyConstraints();
     }

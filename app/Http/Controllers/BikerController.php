@@ -135,7 +135,6 @@ class BikerController extends Controller
         );
     }
 
-
     public function export()
     {
         print_r('entro a export');
@@ -196,16 +195,24 @@ class BikerController extends Controller
         return $phValid;
     }
 
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
     public function store(Request $request)
     {
 
-        log::info("==TRACE== biker@STORE");
-        log::info($request->all());
+//        log::info("==TRACE== biker@STORE");
+//        log::info($request->all());
+
+
+//        if ($request->debug) {
+//            return response()->json(['message' => 'Internal Error', 'response' => ['data' => ['raw' => $request->all(), 'json' => json_encode($request->all())], 'errors' => []]], 500);
+//        }
 
         $validateImage = true;
-        if ($request->debug) {
-            return response()->json(['message' => 'Internal Error', 'response' => ['data' => ['raw' => $request->all(), 'json' => json_encode($request->all())], 'errors' => []]], 500);
-        }
 
         $validation = [
             "rules" => [
@@ -216,15 +223,15 @@ class BikerController extends Controller
                 'birth' =>  'required|date',
                 'phone' => 'required|digits_between:7,10|unique:bikers',
                 'email' => 'required|email|min:8|max:60|unique:bikers',
-                'confirmation' =>   'required|exists:verification_codes,code',
-                'job' =>    'required|exists:jobs,id',
-                'neighborhood' =>   'required|min:2|max:160',
-                'level' =>  'required|in:1,2,3,4,5,6',
-                'register' =>   'required|date',
-                'active' =>  'required|in:1,2,3',
-                'auth' =>   'required|in:1,2',
-                'gender' =>     'required|exists:genders,id',
-                'parkings_id' =>     'required|exists:parkings,id',
+                'confirmation' => 'required',
+                'job' =>  'required|exists:jobs,id',
+                'neighborhood' => 'required|min:2|max:160',
+                'level' => 'required|in:1,2,3,4,5,6',
+                'register' => 'required|date',
+                'active' => 'required|in:1,2,3',
+                'auth' => 'required|in:1,2',
+                'gender' => 'required|exists:genders,id',
+                'parkings_id' => 'required|exists:parkings,id',
             ],
             "messages" => [
                 'name.required' => 'El campo nombre es requerido',
@@ -250,7 +257,6 @@ class BikerController extends Controller
                 'birth.required' => 'El campo fecha de nacimiento es requerido',
                 'birth.date' => 'El campo fecha de nacimiento es de tipo fecha',
 
-
                 'email.required' => 'El campo email es requerido',
                 'email.email' => 'El campo email debe ser de tipo email',
                 'email.max' => 'El campo email debe tener un máximo de 60 caracteres',
@@ -258,7 +264,6 @@ class BikerController extends Controller
                 'email.unique' => 'El email ingresado ya existe.',
 
                 'confirmation.required' => 'El campo verificación es requerido',
-                'confirmation.exists' => 'El código de verificación no ha sido encontrado o ya ha sido procesado.',
 
                 'job.required' => 'El campo ocupación es requerido',
                 'job.exists' => 'El campo ocupación no acerta ningún registro existente',
@@ -295,19 +300,13 @@ class BikerController extends Controller
                 // Photo validation
                 $phtValidation = $this->photoValidation($request);
 
-
-                if ($validator->fails()) {
+                if ($validator->fails() ) {
                     return response()->json(['message' => 'Bad Request', 'response' => ['errors' => array_merge($validator->errors()->all(), $phtValidation)]], 400);
                 } else {
-                    if (count($phtValidation)) {
+                    if (count($phtValidation) ) {
                         return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $phtValidation]], 400);
                     }
                 }
-
-                // $statusResponse = Storage::disk('local')->putFileAs('testingUpload', $request->file('photo'), 'testing.png');
-                // if (!$statusResponse) {
-                //     return response()->json(['message' => 'Internal Error', 'response' => ["errors" => ["Error en la manipulación de archivos."]]], 500);
-                // }
             } else {
                 if ($validator->fails()) {
                     return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $validator->errors()->all()]], 400);
@@ -321,7 +320,12 @@ class BikerController extends Controller
             }
 
             $counter = Parameter::where(['name' => 'biker_counter'])->first();
-            $code = 'CP' . substr("00000" . ($counter->value + 1), -5, 5);
+            if($counter == null) {
+                $counter = 0;
+                $code = 'CP' . substr("00000" . ($counter + 1), -5, 5);
+            } else {
+                $code = 'CP' . substr("00000" . ($counter->value + 1), -5, 5);
+            }
 
             $ph = $request->file('photo')->getRealPath();
 
@@ -333,7 +337,6 @@ class BikerController extends Controller
             } catch (\Throwable $th) {
                 return response()->json(['message' => 'Bad Request', 'response' => ['message' => 'Problema al guardar la imagen', 'error' => $th]], 500);
             }
-
 
             $biker = Biker::create([
                 'name' => $request->name,
@@ -697,8 +700,6 @@ class BikerController extends Controller
             } catch (\Throwable $th) {
                 return response()->json(['message' => 'Bad Request', 'response' => ['msg' => 'Error a eliminar la imagen del ciclista', 'error' => $th]], 500);
             }
-
-
 
             $data->email = '';
             $data->phone = '';

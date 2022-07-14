@@ -396,7 +396,8 @@ export default {
     },
     async getData() {
       let users = [];
-      await this.$api.get(`web/user`).then((res) => {
+      await this.$api.get("web/user").then((res) => {
+          console.log(res);
         if (res.status == 200) {
           users = users.concat(res.data.response.users);
         }
@@ -412,6 +413,7 @@ export default {
         }
       });
       await this.$api.get("web/data/parking").then((res) => {
+          console.log(res);
         if (res.status == 200) {
           this.parkingData = res.data.response.parkings.map((el)=>{ return {value : el.id, text : el.name} });
         }
