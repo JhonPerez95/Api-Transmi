@@ -320,12 +320,10 @@ class BikerController extends Controller
             }
 
             $counter = Parameter::where(['name' => 'biker_counter'])->first();
-            if($counter == null) {
-                $counter = 0;
-                $code = 'CP' . substr("00000" . ($counter + 1), -5, 5);
-            } else {
-                $code = 'CP' . substr("00000" . ($counter->value + 1), -5, 5);
-            }
+            $code = 'CP' . substr("00000" . ($counter->value + 1), -5, 5);
+
+            $counter->value = $counter->value + 1;
+            $counter->save();
 
             $ph = $request->file('photo')->getRealPath();
 
@@ -333,8 +331,7 @@ class BikerController extends Controller
                 Cloudder::upload($ph, null,  array("folder" => "biker"));
                 $publicId = Cloudder::getPublicId();
                 $url =  Cloudder::secureShow($publicId);
-                //$urlImg =   str_replace('_150', '_520', $url);
-                $urlImg =   $url;
+                $urlImg =   str_replace('_150', '_520', $url);
             } catch (\Throwable $th) {
                 return response()->json(['message' => 'Bad Request', 'response' => ['message' => 'Problema al guardar la imagen', 'error' => $th]], 500);
             }
@@ -361,13 +358,10 @@ class BikerController extends Controller
                 'id_img' => $publicId,
             ]);
 
-            $counter->value = $counter->value + 1;
-            $counter->save();
-
-            $biker->notifySignup($request->parkings_id);
+            //$biker->notifySignup($request->parkings_id);
             return response()->json(['message' => 'User Created', 'response' => ["data" => $biker, "errors" => []],], 200);
         } catch (QueryException $th) {
-            Log::emergency($th);
+            //Log::emergency($th);
             return response()->json(['message' => 'Internal Error', 'response' => ["errors" => [$th->getMessage()]]], 500);
         }
     }
