@@ -327,14 +327,14 @@ class BikerController extends Controller
 
             $ph = $request->file('photo')->getRealPath();
 
-            try {
+//            try {
                 Cloudder::upload($ph, null,  array("folder" => "biker"));
                 $publicId = Cloudder::getPublicId();
                 $url =  Cloudder::secureShow($publicId);
                 $urlImg =   str_replace('_150', '_520', $url);
-            } catch (\Throwable $th) {
-                return response()->json(['message' => 'Bad Request', 'response' => ['message' => 'Problema al guardar la imagen', 'error' => $th]], 500);
-            }
+//            } catch (\Throwable $th) {
+//                return response()->json(['message' => 'Bad Request', 'response' => ['message' => 'Problema al guardar la imagen', 'error' => $th]], 500);
+//            }
 
             $biker = Biker::create([
                 'name' => $request->name,
@@ -359,7 +359,7 @@ class BikerController extends Controller
             ]);
 
             //$biker->notifySignup($request->parkings_id);
-            return response()->json(['message' => 'User Created', 'response' => ["data" => $biker, "errors" => []],], 200);
+            return response()->json(['message' => 'User Created', 'response' => ["data" => $biker, "errors" => []] ], 201);
         } catch (QueryException $th) {
             //Log::emergency($th);
             return response()->json(['message' => 'Internal Error', 'response' => ["errors" => [$th->getMessage()]]], 500);
@@ -667,7 +667,7 @@ class BikerController extends Controller
             $data->id_img = $publicId;
             $data->update();
 
-            return response()->json(['message' => 'User Updated', 'response' => ["errors" => []]], 200);
+            return response()->json(['message' => 'User Updated', 'response' => ["errors" => []]], 201);
         } catch (QueryException $th) {
             Log::emergency($th);
             return response()->json(['message' => 'Internal Error', 'response' => ["errors" => [$th->getMessage()]]], 500);
