@@ -212,9 +212,9 @@ class BicyController extends Controller
                 return $phValid;
             }
 
-            if (!$photo->isValid()) {
-                $phValid[] = 'El campo fotografía es inválido';
-            }
+//            if (!$photo->isValid()) {
+//                $phValid[] = 'El campo fotografía es inválido';
+//            }
 
             if (!in_array($photo->getClientOriginalExtension(), $extensiones)) {
                 $phValid[] = 'El campo fotografía recibe imágenes de formato jpg, jpeg y png.';
@@ -230,15 +230,15 @@ class BicyController extends Controller
 
     private function savePhotoInCloud($photo)
     {
-        try {
+        //try {
             Cloudder::upload($photo, null,  array("folder" => "bicy"));
             $publicId = Cloudder::getPublicId();
             $url =  Cloudder::secureShow($publicId);
             $urlImg =   str_replace('_150', '_520', $url);
             return array($urlImg, $publicId);
-        } catch (\Throwable $th) {
+        //} catch (\Throwable $th) {
             return response()->json(['message' => 'Bad Request', 'response' => ['message' => 'Problema al guardar la imagen', 'error' => $th]], 500);
-        }
+        //}
     }
 
     public function store(Request $request)
@@ -254,12 +254,12 @@ class BicyController extends Controller
             "rules" => [
                 'code' => 'sometimes|min:1|max:20|unique:bicies',
                 'document' => 'required',
-                'parkings_id' =>   'required|exists:parkings,id',
+                'parkings_id' => 'required|exists:parkings,id',
                 'brand' =>  'required',
                 'color' => 'required',
                 'serial' => 'required|unique:bicies',
                 'tires' => 'required',
-                'type_bicies_id' =>   'required|exists:type_bicies,id',
+                'type_bicies_id' => 'required|exists:type_bicies,id',
                 'active' =>  'required|in:1,2,3',
             ],
             "messages" => [
@@ -286,7 +286,7 @@ class BicyController extends Controller
 
             $validator = Validator::make($request->all(), $validation['rules'], $validation['messages']);
 
-            if (true) {
+            if ($validateImage) {
                 // Photo validation
                 $phtValidation = $this->photoValidation($request->file('image_back'));
                 $phtValidation2 = $this->photoValidation($request->file('image_side'));

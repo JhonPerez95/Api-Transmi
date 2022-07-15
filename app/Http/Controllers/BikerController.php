@@ -51,6 +51,7 @@ class BikerController extends Controller
                     DB::raw('SUBSTRING(bikers.levels_id, 9,9) AS levels_id')
                 )
                 ->whereRaw("phone != ''")
+                ->orderBy("bikers.id")
                 ->get();
 
             $dataReturn = array();
