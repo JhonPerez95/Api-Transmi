@@ -34,9 +34,9 @@ class VerificationCode extends Model
 
     }
 
-    public static function validate($code,$verification = null){
+    public static function validate($code, $verification = null){
         VerificationCode::expiredCodes();
-        $query = ($verification)? ['code'=>$code, 'verification'=>$verification] : ['code'=>$code];
+        $query = ($verification)? ['code' => $code, 'verification' => $verification] : ['code' => $code];
 
         $vefCode = VerificationCode::where($query)->first();
 

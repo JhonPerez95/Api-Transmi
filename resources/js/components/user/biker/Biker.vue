@@ -611,7 +611,7 @@
 
         if (this.form.id) {
           this.$api.post("web/data/biker/" + this.form.id, data).then((res) => {
-            if (res.status == 200) {
+            if (res.status == 201) {
               this.getData();
               toastr.success("Dato Actualizado");
               this.$bvModal.hide("modal-biker");
@@ -624,8 +624,6 @@
                 this.getData();
                 toastr.success("Dato Guardado");
                 this.$bvModal.hide("modal-biker");
-              } else {
-                  toastr.success(res.response.errors);
               }
             });
         }
