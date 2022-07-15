@@ -17,7 +17,7 @@ class ParametersSeeder extends Seeder
         Parameter::truncate();
         Parameter::create([
             'name'=>'biker_counter',
-            'value'=>'8' 
+            'value'=>'1'
         ]);
     }
 }
