@@ -37,7 +37,8 @@ class ServiceSupportController extends Controller
                                  'service_supports.status AS status',
                                  'service_supports.answer AS answer',
                                  'service_supports.created_at AS created_at',
-                )->get()->toArray();
+                )->orderBy('service_supports.id')
+                ->get()->toArray();
 
             $dataServices = array();
             foreach($services as $s => $service) {

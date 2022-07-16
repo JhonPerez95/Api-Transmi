@@ -117,7 +117,8 @@ Hora: {$currentTime}";
         ->select('bicies.*','parkings.name as parking')
         ->first();
 
-        $content = "Usted ha registrado con éxito la bicicleta {$bicy->brand} color {$bicy->color} en el Sistema de Bici Estaciones de TransMilenio, Bici Estación {$bicy->parking} código de Registro {$bicy->code}$bicy_id. Hora {$currentTime}";
+        //$content = "Usted ha registrado con éxito la bicicleta {$bicy->brand} color {$bicy->color} en el Sistema de Bici Estaciones de TransMilenio, Bici Estación {$bicy->parking} código de Registro {$bicy->code}$bicy_id. Hora {$currentTime}";
+        $content = "Usted ha registrado con éxito la bicicleta {$bicy->brand} color {$bicy->color} en el Sistema de Bici Estaciones de TransMilenio, Bici Estación {$bicy->parking} código de Registro {$bicy->code}. Hora {$currentTime}";
         return Biker::Notify(['phone'=> $this->phone, 'message'=>$content]);
     }
     public function notifyBicyUpdate($bicy_id){

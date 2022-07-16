@@ -9,4 +9,7 @@ class Parking extends Model
 {
     use HasFactory;
     protected $guarded = [];
+    protected $fillable = [
+        'name', 'code', 'capacity', 'active', 'type_parkings_id', 'bike_count', 'stations_id'
+    ];
 }

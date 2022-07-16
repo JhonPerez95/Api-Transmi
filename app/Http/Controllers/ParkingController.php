@@ -23,6 +23,7 @@ class ParkingController extends Controller
                 ->join('type_parkings', 'parkings.type_parkings_id', '=', 'type_parkings.id')
                 ->join('stations', 'parkings.stations_id', '=', 'stations.id')
                 ->select('parkings.*', 'type_parkings.name as type', 'stations.name as station')
+                ->orderBy('parkings.id')
                 ->get();
 
             $station = DB::table('stations')
@@ -111,7 +112,6 @@ class ParkingController extends Controller
             ]
         ];
 
-
         try {
             $validator = Validator::make($request->all(), $validation['rules'], $validation['messages']);
 
@@ -187,28 +187,28 @@ class ParkingController extends Controller
                     'name.required' => 'El campo nombre es requerido',
                     'name.min' => 'El campo nombre debe tener mínimo 4 caracteres',
                     'name.max' => 'El campo nombre debe tener máximo 100 caracteres',
-    
+
                     'code.required' => 'El campo codigo es requerido',
                     'code.unique' => 'El codigo ingresado ya existe.',
                     'code.max' => 'El campo codigo debe tener máximo 2 caracteres',
                     'code.min' => 'El campo codigo debe tener mínimo 10 caracteres',
-    
+
                     'capacity.required' => 'El campo capacidad es requerido',
                     'capacity.max' => 'El campo capacidad debe tener máximo 1 caracteres',
                     'capacity.min' => 'El campo capacidad debe tener mínimo 30 caracteres',
-    
+
                     'type_parkings_id.required' => 'El campo tipo de parqueadero es requerido',
                     'type_parkings_id.exists' => 'El campo tipo de parqueadero no acerta ningún registro existente',
-    
+
                     'stations_id.required' => 'El campo troncal es requerido',
                     'stations_id.exists' => 'El campo troncal no acerta ningún registro existente',
-    
+
                     'active.required' => 'El campo estado del ciclista es requerido',
                     'active.in' => 'El campo estado del ciclista recibe los valores Activo, Inactivo y Bloqueado',
                 ]
             ];
 
-            
+
             if($data->code != $request->code){
                 $validation['rules']['code'] = 'required|min:2|max:10|unique:parkings';
             }else{
@@ -220,7 +220,7 @@ class ParkingController extends Controller
              if ($validator->fails()) {
                  return response()->json(['response' => ['errors' => $validator->errors()->all()], 'message' => 'Bad Request'], 400);
              }
-     
+
             $data->name = $request->name;
             $data->code = $request->code;
             $data->capacity = $request->capacity;
