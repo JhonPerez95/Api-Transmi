@@ -621,12 +621,8 @@ export default {
           }
         });
       } else {
-        this.$api.post("web/data/bicy", data, {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          })
-          .then((res) => {
+        this.$api.post("web/data/bicy", data, { headers: { "Content-Type": "multipart/form-data" } }).then((res) => {
+            console.log(res);
             if (res.status == 201) {
               this.getData(false);
               toastr.success("Dato Guardado");

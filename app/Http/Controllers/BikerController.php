@@ -164,7 +164,6 @@ class BikerController extends Controller
         $phValid = [];
 
         if (!$request->hasFile('photo')) {
-
             // While updating, resending the image won't be required
             if (!$updating) {
                 $phValid[] = 'El campo fotografía es requerido';
@@ -178,10 +177,6 @@ class BikerController extends Controller
             if (count($arrayingImage) > 1) {
                 $phValid[] = 'Se ha recibido más de una imágen para el ciclista';;
                 return $phValid;
-            }
-
-            if (!$ph->isValid()) {
-                $phValid[] = 'El campo fotografía es inválido';
             }
 
             if (!in_array($ph->getClientOriginalExtension(), $extensiones)) {
@@ -204,16 +199,11 @@ class BikerController extends Controller
      */
     public function store(Request $request)
     {
-
 //        log::info("==TRACE== biker@STORE");
 //        log::info($request->all());
-
-
 //        if ($request->debug) {
 //            return response()->json(['message' => 'Internal Error', 'response' => ['data' => ['raw' => $request->all(), 'json' => json_encode($request->all())], 'errors' => []]], 500);
 //        }
-
-        $validateImage = true;
 
         $validation = [
             "rules" => [
@@ -294,23 +284,18 @@ class BikerController extends Controller
         ];
 
         try {
-
             $validator = Validator::make($request->all(), $validation['rules'], $validation['messages']);
 
+            if ($validator->fails() ) {
+                return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $validator->errors() ]], 400);
+            }
+
+            $validateImage = true;
             if ($validateImage) {
                 // Photo validation
                 $phtValidation = $this->photoValidation($request);
-
-                if ($validator->fails() ) {
-                    return response()->json(['message' => 'Bad Request', 'response' => ['errors' => array_merge($validator->errors()->all(), $phtValidation)]], 400);
-                } else {
-                    if (count($phtValidation) ) {
-                        return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $phtValidation]], 400);
-                    }
-                }
-            } else {
-                if ($validator->fails()) {
-                    return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $validator->errors()->all()]], 400);
+                if (count($phtValidation)) {
+                    return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $phtValidation]], 400);
                 }
             }
 
@@ -359,7 +344,8 @@ class BikerController extends Controller
                 'id_img' => $publicId,
             ]);
 
-            //$biker->notifySignup($request->parkings_id);
+            $biker->notifySignup($request->parkings_id);
+
             return response()->json(['message' => 'User Created', 'response' => ["data" => $biker, "errors" => []] ], 201);
         } catch (QueryException $th) {
             //Log::emergency($th);

@@ -41,6 +41,7 @@ class BicyController extends Controller
                 ->join('type_bicies', 'bicies.type_bicies_id', '=', 'type_bicies.id')
                 ->join('bikers', 'bicies.bikers_id', '=', 'bikers.id')
                 ->select('bicies.*', 'parkings.name as parking', 'type_bicies.name as type', 'bikers.document as document')
+                ->orderBy('bicies.id')
                 ->get();
 
             $dataServices = array();
@@ -123,6 +124,7 @@ class BicyController extends Controller
                     'bicies.bikers_id AS bickers_id',
                 )->where('visits.parkings_id', '=', $id)
                 ->where('visits.duration', '=', 0)
+                ->orderBy('visits.id')
                 ->get()->toArray();
 
             $dataBicies = array();
@@ -195,15 +197,12 @@ class BicyController extends Controller
     private function photoValidation($photo, $updating = false)
     {
         $phValid = [];
-
         if (!$photo) {
-
             // While updating, resending the image won't be required
             if (!$updating) {
                 $phValid[] = 'El campo fotografía es requerido';
             }
         } else {
-
             $arrayingImage = (gettype($photo) != 'array') ? [$photo] : $photo;
             $extensiones = ["jpg", "png", "jpeg"];
 
@@ -211,10 +210,6 @@ class BicyController extends Controller
                 $phValid[] = 'Se ha recibido más de una imágen para el ciclista';;
                 return $phValid;
             }
-
-//            if (!$photo->isValid()) {
-//                $phValid[] = 'El campo fotografía es inválido';
-//            }
 
             if (!in_array($photo->getClientOriginalExtension(), $extensiones)) {
                 $phValid[] = 'El campo fotografía recibe imágenes de formato jpg, jpeg y png.';
@@ -230,29 +225,28 @@ class BicyController extends Controller
 
     private function savePhotoInCloud($photo)
     {
-        //try {
+        try {
             Cloudder::upload($photo, null,  array("folder" => "bicy"));
             $publicId = Cloudder::getPublicId();
             $url =  Cloudder::secureShow($publicId);
             $urlImg =   str_replace('_150', '_520', $url);
             return array($urlImg, $publicId);
-        //} catch (\Throwable $th) {
+        } catch (\Throwable $th) {
             return response()->json(['message' => 'Bad Request', 'response' => ['message' => 'Problema al guardar la imagen', 'error' => $th]], 500);
-        //}
+        }
     }
 
     public function store(Request $request)
     {
-        $validateImage = true;
-
-        $biker = Biker::where('document', $request->document)->first();
+        $biker = Biker::where('document', $request->document)->first(); //Validamos si el documento existe en el sistema
         if (!$biker) {
             return response()->json(['message' => 'Not Found', 'response' => ['errors' => ['Ciclista No encontrado']]], 404);
         }
 
+        //Validaciones
         $validation = [
             "rules" => [
-                'code' => 'sometimes|min:1|max:20|unique:bicies',
+                'code' => 'required|min:1|max:20|unique:bicies',
                 'document' => 'required',
                 'parkings_id' => 'required|exists:parkings,id',
                 'brand' =>  'required',
@@ -283,45 +277,37 @@ class BicyController extends Controller
         ];
 
         try {
-
             $validator = Validator::make($request->all(), $validation['rules'], $validation['messages']);
 
-            if ($validateImage) {
-                // Photo validation
-                $phtValidation = $this->photoValidation($request->file('image_back'));
-                $phtValidation2 = $this->photoValidation($request->file('image_side'));
-                $phtValidation3 = $this->photoValidation($request->file('image_front'));
-                if ($validator->fails()) {
-                    return response()->json(['response' => ['errors' => array_merge($validator->errors()->all(), $phtValidation, $phtValidation2, $phtValidation3)], 'message' => 'Bad Request'], 400);
-                } else {
-                    if (count($phtValidation)) {
-                        return response()->json(['response' => ['errors' => $phtValidation], 'message' => 'Bad Request'], 400);
-                    }
-                }
-
-                // $testingImage = $request->hasFile('image_front') ? $request->file('image_front') : ( $request->hasFile('image_back') ? $request->file('image_back') : $request->file('image_side') );
-                // $statusResponse = Storage::disk('local')->putFileAs('testingUpload', $testingImage, 'testing.png');
-                // if (!$statusResponse) {
-                //     return response()->json(['message' => 'Internal Error', 'response' => ["errors" => ["Error en la manipulación de archivos."]]], 500);
-                // }
-
-            } else {
-                if ($validator->fails()) {
-                    return response()->json(['response' => ['errors' => $validator->errors()->all()], 'message' => 'Bad Request'], 400);
-                }
+            if ($validator->fails()) { //Si hay algun error se mostrará el mensaje
+                return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $validator->errors() ] ], 400);
             }
 
-            if (!$request->code) {
-                $request->request->add(['code' => $this->create($request->parkings_id, true, true)]);
+            // Photos validation
+            $phtValidation = [];
+            if($request->hasFile('image_back')) {
+                $phtValidation[] = $this->photoValidation($request->file('image_back'));
+                $image_back = $request->file('image_back')->getRealPath();
+                list($url_image_back, $id_image_back) = $this->savePhotoInCloud($image_back);
+            }
+            if($request->hasFile('image_side')) {
+                $phtValidation[] = $this->photoValidation($request->file('image_side'));
+                $image_side = $request->file('image_side')->getRealPath();
+                list($url_image_side, $id_image_side) = $this->savePhotoInCloud($image_side);
+            }
+            if($request->hasFile('image_front')) {
+                $phtValidation[] = $this->photoValidation($request->file('image_front'));
+                $image_front = $request->file('image_front')->getRealPath();
+                list($url_image_front, $id_image_front) = $this->savePhotoInCloud($image_front);
             }
 
-            $image_back = $request->file('image_back')->getRealPath();
-            $image_side = $request->file('image_side')->getRealPath();
-            $image_front = $request->file('image_front')->getRealPath();
+            if (!empty($phtValidation[0])) {
+                return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $phtValidation[0]] ], 400);
+            }
 
-            list($url_image_back, $id_image_back) = $this->savePhotoInCloud($image_back);
-            list($url_image_side, $id_image_side) = $this->savePhotoInCloud($image_side);
-            list($url_image_front, $id_image_front) = $this->savePhotoInCloud($image_front);
+            $Parking = Parking::find($request->parkings_id);
+            $Parking->bike_count = $Parking->bike_count + 1;
+            $Parking->save();
 
             $Bicy = Bicy::create([
                 'code' => $request->code,
@@ -342,35 +328,6 @@ class BicyController extends Controller
                 'id_image_front' => $id_image_front
             ]);
 
-            $Parking = Parking::find($request->parkings_id);
-            $Parking->bike_count = $Parking->bike_count + 1;
-            $Parking->save();
-
-            //? Usefull while deving, maybe not so much on production, can't harm tho'
-            // $existingPhotos = Storage::allFiles("public/bicies/bicy{$Bicy->id}");
-            // Storage::delete($existingPhotos);
-
-            // if($validateImage){
-
-            //     if($request->hasFile('image_back')){
-            //         $hash = sha1(date('H:i:s'));
-            //         $statusResponse = Storage::disk('local')->putFileAs("public/bicies/bicy{$Bicy['id']}", $request->file('image_back') , "back_$hash.png");
-            //     }
-            //     if($request->hasFile('image_side')){
-            //         $hash = sha1(date('H:i:s'));
-            //         $statusResponse = Storage::disk('local')->putFileAs("public/bicies/bicy{$Bicy['id']}", $request->file('image_side') , "side_$hash.png");
-            //     }
-            //     if($request->hasFile('image_front')){
-            //         $hash = sha1(date('H:i:s'));
-            //         $statusResponse = Storage::disk('local')->putFileAs("public/bicies/bicy{$Bicy['id']}", $request->file('image_front') , "front_$hash.png");
-            //     }
-
-            // }
-
-            if ($Bicy) {
-                $smsResponse = $biker->notifyBicySignin($Bicy->id);
-            }
-
             $stickerOrder = DetailedStickerOrder::create([
                 'bicies_id' => $Bicy->id,
                 'parkings_id' => $request->parkings_id,
@@ -378,7 +335,11 @@ class BicyController extends Controller
                 'active' => '1',
             ]);
 
-            return response()->json(['message' => 'Bicy Created', 'response' => ["data" => $Bicy]], 200);
+            if ($Bicy) {
+                $smsResponse = $biker->notifyBicySignin($Bicy->id);
+            }
+
+            return response()->json(['message' => 'Bicy Created', 'response' => ["data" => $Bicy]], 201);
         } catch (QueryException $th) {
             Log::emergency($th);
             return response()->json(['message' => 'Internal Error', 'response' => ["errors" => [$th->getMessage()]]], 500);

@@ -45,6 +45,7 @@ class VisitController extends Controller
                     DB::raw('IF(visits.duration = 0 , NULL ,SUBSTRING(visits.time_output,1,5)) as time_output'),
                     DB::raw('SUBSTRING(visits.time_input,1,5) as time_input'),
                 'parkings.name as parking', DB::raw('CONCAT(bikers.name, " ", bikers.last_name) as biker'),  'visit_statuses.name as status', 'bicies.code as bicyCode')
+                ->orderBy('visits.id')
                 ->get();
 
             $dataReturn = array();
