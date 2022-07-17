@@ -151,13 +151,12 @@ class BikerController extends Controller
         //
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-
+   /**
+    * Store a newly created resource in storage.
+    *
+    * @param  \Illuminate\Http\Request  $request
+    * @return \Illuminate\Http\Response
+    */
     private function photoValidation($request, $updating = false)
     {
         $phValid = [];
@@ -196,12 +195,6 @@ class BikerController extends Controller
      */
     public function store(Request $request)
     {
-//        log::info("==TRACE== biker@STORE");
-//        log::info($request->all());
-//        if ($request->debug) {
-//            return response()->json(['message' => 'Internal Error', 'response' => ['data' => ['raw' => $request->all(), 'json' => json_encode($request->all())], 'errors' => []]], 500);
-//        }
-
         $validation = [
             "rules" => [
                 'name' => 'required|min:2|max:100',
@@ -341,7 +334,6 @@ class BikerController extends Controller
 
             return response()->json(['message' => 'User Created', 'response' => ["data" => $biker, "errors" => []] ], 201);
         } catch (QueryException $th) {
-            //Log::emergency($th);
             return response()->json(['message' => 'Internal Error', 'response' => ["errors" => [$th->getMessage()]]], 500);
         }
     }
@@ -391,7 +383,6 @@ class BikerController extends Controller
                 ->select('bicies.*')
                 ->get();
             $bicies = array();
-
 
             foreach ($_bicies as $bicy) {
 
