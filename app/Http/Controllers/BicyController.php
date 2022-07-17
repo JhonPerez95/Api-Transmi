@@ -12,13 +12,13 @@ use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Route;
 use Cloudder;
 
 class BicyController extends Controller
 {
+    private $client;
 
     public function __construct()
     {
@@ -150,40 +150,41 @@ class BicyController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create($parking_id, $fromInside = false, $avoidIncreasingCount = false)
-    {
-        $Parking = Parking::find($parking_id);
-        $aumentar = 1;
+    public function create(){
+    //public function create($parking_id, $fromInside = false, $avoidIncreasingCount = false)
 
-        while (true) {
-            $code = $Parking->code . substr("0000" . ($Parking->bike_count + $aumentar), -4, 4);
-
-            $exists = Bicy::where(['code' => $code])->first();
-
-            if ($exists) {
-                $aumentar++;
-            } else {
-                break;
-            }
-        }
-
-        if ($aumentar !== 1) {
-            $Parking->bike_count = $Parking->bike_count + $aumentar;
-            $Parking->save();
-        }
-
-        if ($fromInside) {
-
-            // From inside does not add up
-            if ($aumentar == 1 && !$avoidIncreasingCount) {
-                $Parking->bike_count = $Parking->bike_count + $aumentar;
-                $Parking->save();
-            }
-
-            return $code;
-        } else {
-            return response()->json(['message' => 'Success', 'response' => ['data' => ['consecutive' => $code], 'indexes' => [], 'errors' => []]], 200);
-        }
+//        $Parking = Parking::find($parking_id);
+//        $aumentar = 1;
+//
+//        while (true) {
+//            $code = $Parking->code . substr("0000" . ($Parking->bike_count + $aumentar), -4, 4);
+//
+//            $exists = Bicy::where(['code' => $code])->first();
+//
+//            if ($exists) {
+//                $aumentar++;
+//            } else {
+//                break;
+//            }
+//        }
+//
+//        if ($aumentar !== 1) {
+//            $Parking->bike_count = $Parking->bike_count + $aumentar;
+//            $Parking->save();
+//        }
+//
+//        if ($fromInside) {
+//
+//            // From inside does not add up
+//            if ($aumentar == 1 && !$avoidIncreasingCount) {
+//                $Parking->bike_count = $Parking->bike_count + $aumentar;
+//                $Parking->save();
+//            }
+//
+//            return $code;
+//        } else {
+//            return response()->json(['message' => 'Success', 'response' => ['data' => ['consecutive' => $code], 'indexes' => [], 'errors' => []]], 200);
+//        }
     }
 
     /**
@@ -192,8 +193,6 @@ class BicyController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-
-
     private function photoValidation($photo, $updating = false)
     {
         $phValid = [];
@@ -256,7 +255,8 @@ class BicyController extends Controller
                 'serial' => 'required|unique:bicies',
                 'tires' => 'required',
                 'type_bicies_id' => 'required|exists:type_bicies,id',
-                'active' =>  'required|in:1,2,3',
+                //'active' =>  'required|in:1,2,3',
+                'active' =>  'required',
             ],
             "messages" => [
                 'code.required' => 'El campo codigo es requerido',
@@ -274,7 +274,7 @@ class BicyController extends Controller
                 'type_bicies_id.required' => 'El campo tipo es requerido',
                 'type_bicies_id.exists' => 'El campo tipo no acerta ningún registro existente',
                 'active.required' => 'El campo estado de la bicicleta es requerido',
-                'active.in' => 'El campo estado de la bicicleta es recibe los valores Activo, Inactivo y Bloqueado',
+                //'active.in' => 'El campo estado de la bicicleta es recibe los valores Activo, Inactivo y Bloqueado',
             ]
         ];
 
@@ -282,31 +282,31 @@ class BicyController extends Controller
             $validator = Validator::make($request->all(), $validation['rules'], $validation['messages']);
 
             if ($validator->fails()) { //Si hay algun error se mostrará el mensaje
-                return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $validator->errors() ] ], 400);
+                return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $validator->errors() ]], 400);
             }
 
             // Photos validation
-            $phtValidation = [];
-            if($request->hasFile('image_back')) {
-                $phtValidation[] = $this->photoValidation($request->file('image_back'));
-                $image_back = $request->file('image_back')->getRealPath();
-                list($url_image_back, $id_image_back) = $this->savePhotoInCloud($image_back);
-                //return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $phtValidation[0] . ' image_back: ' . $image_back ] ], 400);
-            }
-            if($request->hasFile('image_side')) {
-                $phtValidation[] = $this->photoValidation($request->file('image_side'));
-                $image_side = $request->file('image_side')->getRealPath();
-                list($url_image_side, $id_image_side) = $this->savePhotoInCloud($image_side);
-            }
-            if($request->hasFile('image_front')) {
-                $phtValidation[] = $this->photoValidation($request->file('image_front'));
-                $image_front = $request->file('image_front')->getRealPath();
-                list($url_image_front, $id_image_front) = $this->savePhotoInCloud($image_front);
-            }
-
-            if (!empty($phtValidation[0])) {
-                return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $phtValidation[0]] ], 400);
-            }
+//            $phtValidation = [];
+//            if($request->hasFile('image_back')) {
+//                $phtValidation[] = $this->photoValidation($request->file('image_back'));
+//                $image_back = $request->file('image_back')->getRealPath();
+//                list($url_image_back, $id_image_back) = $this->savePhotoInCloud($image_back);
+//                //return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $phtValidation[0] . ' image_back: ' . $image_back ] ], 400);
+//            }
+//            if($request->hasFile('image_side')) {
+//                $phtValidation[] = $this->photoValidation($request->file('image_side'));
+//                $image_side = $request->file('image_side')->getRealPath();
+//                list($url_image_side, $id_image_side) = $this->savePhotoInCloud($image_side);
+//            }
+//            if($request->hasFile('image_front')) {
+//                $phtValidation[] = $this->photoValidation($request->file('image_front'));
+//                $image_front = $request->file('image_front')->getRealPath();
+//                list($url_image_front, $id_image_front) = $this->savePhotoInCloud($image_front);
+//            }
+//
+//            if (!empty($phtValidation[0])) {
+//                return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $phtValidation[0]] ], 400);
+//            }
 
             $Parking = Parking::find($request->parkings_id);
             $Parking->bike_count = $Parking->bike_count + 1;
@@ -323,12 +323,18 @@ class BicyController extends Controller
                 'type_bicies_id' => $request->type_bicies_id,
                 'parkings_id' => $request->parkings_id,
                 'active' => $request->active,
-                'url_image_back' => $url_image_back,
-                'url_image_side' => $url_image_side,
-                'url_image_front' => $url_image_front,
-                'id_image_back' => $id_image_back,
-                'id_image_side' => $id_image_side,
-                'id_image_front' => $id_image_front
+                'url_image_back' => 'prueba',
+                'url_image_side' => 'prueba',
+                'url_image_front' => 'prueba',
+                'id_image_back' => 'prueba',
+                'id_image_side' => 'prueba',
+                'id_image_front' => 'prueba',
+//                'url_image_back' => $url_image_back,
+//                'url_image_side' => $url_image_side,
+//                'url_image_front' => $url_image_front,
+//                'id_image_back' => $id_image_back,
+//                'id_image_side' => $id_image_side,
+//                'id_image_front' => $id_image_front
             ]);
 
             $stickerOrder = DetailedStickerOrder::create([
@@ -344,7 +350,7 @@ class BicyController extends Controller
 
             return response()->json(['message' => 'Bicy Created', 'response' => ["data" => $Bicy]], 201);
         } catch (QueryException $th) {
-            Log::emergency($th);
+            //Log::emergency($th);
             return response()->json(['message' => 'Internal Error', 'response' => ["errors" => [$th->getMessage()]]], 400);
         }
     }
@@ -355,7 +361,7 @@ class BicyController extends Controller
      * @param  \App\Models\Bicy  $Bicy
      * @return \Illuminate\Http\Response
      */
-    public function show($id, $detailed = false)
+    /*public function show($id, $detailed = false)
     {
         if ($this->client == 'app') {
             $data = Bicy::where(['bicies.code' => $id])
@@ -378,7 +384,6 @@ class BicyController extends Controller
 
         $isDisabled = $existVisit ? true : false;
 
-
         if ($detailed) {
             $biker = $data->biker;
             return response()->json(['message' => "Sucess", 'response' => ['bicy' => $data, 'biker' => $biker , 'visit'=> $isDisabled ]], 200);
@@ -390,7 +395,7 @@ class BicyController extends Controller
     public function detailedShow($id)
     {
         return $this->show($id, true);
-    }
+    }*/
 
     /**
      * Show the form for editing the specified resource.
@@ -398,7 +403,7 @@ class BicyController extends Controller
      * @param  \App\Models\Bicy  $Bicy
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    /*public function edit($id)
     {
         $data = DB::table('bicies')
             ->join('bikers', 'bicies.bikers_id', '=', 'bikers.id')
@@ -414,9 +419,9 @@ class BicyController extends Controller
             'bicies' => $data,
             'errors' => []
         ]], 200);
-    }
+    }*/
 
-    private function updatePhotoInCloud($photo, $id_photo)
+    /*private function updatePhotoInCloud($photo, $id_photo)
     {
         try {
             Cloudder::upload($photo, null,  array("folder" => "bicy"));
@@ -430,7 +435,7 @@ class BicyController extends Controller
         } catch (\Throwable $th) {
             return response()->json(['message' => 'Bad Request', 'response' => ['message' => 'Problema al guardar la imagen', 'error' => $th]], 500);
         }
-    }
+    }*/
 
     /**
      * Update the specified resource in storage.
@@ -439,7 +444,7 @@ class BicyController extends Controller
      * @param  \App\Models\Bicy  $Bicy
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id = false)
+    /*public function update(Request $request, $id = false)
     {
         $validateImage = true;
 
@@ -551,7 +556,7 @@ class BicyController extends Controller
             Log::emergency($th);
             return response()->json(['message' => 'Internal Error', 'response' => ["errors" => [$th->getMessage()]]], 500);
         }
-    }
+    }*/
 
     /**
      * Remove the specified resource from storage.
@@ -559,7 +564,7 @@ class BicyController extends Controller
      * @param  \App\Models\Bicy  $Bicy
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Request $request, $id)
+    /*public function destroy(Request $request, $id)
     {
         // return response()->json(['message' => 'Bad Request', 'response' => ['errors' => ['La eliminación de registros de bicicleta no es una funcionalidad del sistema.']]], 400);
         try {
@@ -567,7 +572,6 @@ class BicyController extends Controller
             if (!$data) {
                 return response()->json(['message' => "Not Found", 'response' => ['errors' => ["Bicicleta no encontrado."]]], 404);
             }
-
 
             //? Solution A, deactivate foreign key checks in order for it not to throw because of inventory or visits records
             Schema::disableForeignKeyConstraints();
@@ -604,7 +608,6 @@ class BicyController extends Controller
 
     public function checkBiciesExpirations()
     {
-
         $currentDate = date('Y-m-d H:i:s');
         $limitDate = date('Y-m-d H:i:s', strtotime($currentDate . " - 30 days"));
         $bicies = Bicy::where("bicies.updated_at", "<", $limitDate)
@@ -666,9 +669,7 @@ class BicyController extends Controller
         $bicies = DB::table('bicies')
             ->join('bikers', 'bicies.bikers_id', '=', 'bikers.id')
             ->join('type_documents', 'bikers.type_documents_id', '=', 'type_documents.id')
-
             ->select('bicies.id', 'bicies.code', 'type_documents.code as document_type', 'bikers.document as document')
-
             ->whereIn('bicies.id',  $ids)
             ->get();
 
@@ -800,8 +801,6 @@ class BicyController extends Controller
             DB::commit();
         }
 
-
-
         return response()->json(['message' => 'Success', 'response' => ['data' => ['bicies' => $Bicies], 'indexes' => [], 'errors' => ['storeErrors' => $storeErrors]]], 200);
-    }
+    }*/
 }
