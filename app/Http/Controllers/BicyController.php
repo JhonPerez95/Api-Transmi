@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Route;
 use Cloudder;
 
+setTimeout(timeout,100000);
+
 class BicyController extends Controller
 {
     private $client;
@@ -222,19 +224,12 @@ class BicyController extends Controller
         return $phValid;
     }
 
-//    private function savePhotoInCloud($photo)
-//    {
-//        //try {
-//            Cloudder::upload($photo, null,  array("folder" => "bicy"));
-//            $publicId = Cloudder::getPublicId();
-//            $url =  Cloudder::secureShow($publicId);
-//            $urlImg =   str_replace('_150', '_520', $url);
-//            return array($urlImg, $publicId);
-//        //} catch (\Throwable $th) {
-//            //return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $th, 'message' => 'Problema al guardar la imagen']], 500);
-//        //}
-//    }
-
+   /**
+    * Store a newly created resource in storage.
+    *
+    * @param  \Illuminate\Http\Request  $request
+    * @return \Illuminate\Http\Response
+    */
     public function store(Request $request)
     {
         $biker = Biker::where('document', $request->document)->first(); //Validamos si el documento existe en el sistema
@@ -288,6 +283,7 @@ class BicyController extends Controller
             if($request->hasFile('image_back')) {
                 $phtValidation[] = $this->photoValidation($request->file('image_back'));
                 $image_back = $request->file('image_back')->getRealPath();
+                //return response()->json(['message' => 'Bicy Created', 'response' => ["data" => $image_back]], 201);
 
                 Cloudder::upload($image_back, null,  array("folder" => "biker"));
                 $publicId = Cloudder::getPublicId();
@@ -353,7 +349,6 @@ class BicyController extends Controller
 
             return response()->json(['message' => 'Bicy Created', 'response' => ["data" => $Bicy]], 201);
         } catch (QueryException $th) {
-            //Log::emergency($th);
             return response()->json(['message' => 'Internal Error', 'response' => ["errors" => [$th->getMessage()]]], 400);
         }
     }
@@ -364,7 +359,7 @@ class BicyController extends Controller
      * @param  \App\Models\Bicy  $Bicy
      * @return \Illuminate\Http\Response
      */
-    public function show($id, $detailed = false)
+   /* public function show($id, $detailed = false)
     {
         if ($this->client == 'app') {
             $data = Bicy::where(['bicies.code' => $id])
@@ -398,7 +393,7 @@ class BicyController extends Controller
     public function detailedShow($id)
     {
         return $this->show($id, true);
-    }
+    }*/
 
     /**
      * Show the form for editing the specified resource.
@@ -406,39 +401,39 @@ class BicyController extends Controller
      * @param  \App\Models\Bicy  $Bicy
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
-    {
-        $data = DB::table('bicies')
-            ->join('bikers', 'bicies.bikers_id', '=', 'bikers.id')
-            ->select('bicies.*', 'bikers.document as document')
-            ->where('bicies.id', '=', $id)
-            ->first();
-
-        if (!$data) {
-            return response()->json(['message' => "Not Found", 'response' => ['errors' => ["Bicicleta no encontrada."]]], 404);
-        }
-
-        return response()->json(['message' => 'Success', 'response' => [
-            'bicies' => $data,
-            'errors' => []
-        ]], 200);
-    }
-
-    private function updatePhotoInCloud($photo, $id_photo)
-    {
-        try {
-            Cloudder::upload($photo, null,  array("folder" => "bicy"));
-            $publicId = Cloudder::getPublicId();
-            $url =  Cloudder::secureShow($publicId);
-            $urlImg =   str_replace('_150', '_520', $url);
-
-            Cloudder::delete($id_photo);
-            Cloudder::destroyImage($id_photo);
-            return array($urlImg, $publicId);
-        } catch (\Throwable $th) {
-            return response()->json(['message' => 'Bad Request', 'response' => ['message' => 'Problema al guardar la imagen', 'error' => $th]], 500);
-        }
-    }
+//    public function edit($id)
+//    {
+//        $data = DB::table('bicies')
+//            ->join('bikers', 'bicies.bikers_id', '=', 'bikers.id')
+//            ->select('bicies.*', 'bikers.document as document')
+//            ->where('bicies.id', '=', $id)
+//            ->first();
+//
+//        if (!$data) {
+//            return response()->json(['message' => "Not Found", 'response' => ['errors' => ["Bicicleta no encontrada."]]], 404);
+//        }
+//
+//        return response()->json(['message' => 'Success', 'response' => [
+//            'bicies' => $data,
+//            'errors' => []
+//        ]], 200);
+//    }
+//
+//    private function updatePhotoInCloud($photo, $id_photo)
+//    {
+//        try {
+//            Cloudder::upload($photo, null,  array("folder" => "bicy"));
+//            $publicId = Cloudder::getPublicId();
+//            $url =  Cloudder::secureShow($publicId);
+//            $urlImg =   str_replace('_150', '_520', $url);
+//
+//            Cloudder::delete($id_photo);
+//            Cloudder::destroyImage($id_photo);
+//            return array($urlImg, $publicId);
+//        } catch (\Throwable $th) {
+//            return response()->json(['message' => 'Bad Request', 'response' => ['message' => 'Problema al guardar la imagen', 'error' => $th]], 500);
+//        }
+//    }
 
     /**
      * Update the specified resource in storage.
@@ -567,238 +562,238 @@ class BicyController extends Controller
      * @param  \App\Models\Bicy  $Bicy
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Request $request, $id)
-    {
-        try {
-            $data = Bicy::find($id);
-            if (!$data) {
-                return response()->json(['message' => "Not Found", 'response' => ['errors' => ["Bicicleta no encontrado."]]], 404);
-            }
-
-            //? Solution A, deactivate foreign key checks in order for it not to throw because of inventory or visits records
-            Schema::disableForeignKeyConstraints();
-
-            $stickers = DetailedStickerOrder::where(['bicies_id' => $data->id])->get();
-            foreach ($stickers as $sticker) { //? Stickers can be deleted
-                $sticker->delete();
-            }
-
-            // Eliminando imagen de Cloudinary
-            try {
-                Cloudder::delete($data->id_image_back);
-                Cloudder::destroyImage($data->id_image_back);
-
-                Cloudder::delete($data->id_image_side);
-                Cloudder::destroyImage($data->id_image_side);
-
-                Cloudder::delete($data->id_image_front);
-                Cloudder::destroyImage($data->id_image_front);
-
-            } catch (\Throwable $th) {
-                return response()->json(['message' => 'Bad Request', 'response' => ['msg' => 'Error a eliminar la imagen del ciclista', 'error' => $th]], 500);
-            }
-            $data->delete();
-
-            Schema::enableForeignKeyConstraints();
-            return response()->json(['message' => 'Bicy Deleted',  'response' => ['errors' => []]], 200);
-        } catch (QueryException $th) {
-            Log::emergency($th);
-            Schema::enableForeignKeyConstraints();
-            return response()->json(['message' => 'Internal Error', 'response' => ['errors' => [$th->getMessage()]]], 500);
-        }
-    }
-
-    public function checkBiciesExpirations()
-    {
-        $currentDate = date('Y-m-d H:i:s');
-        $limitDate = date('Y-m-d H:i:s', strtotime($currentDate . " - 30 days"));
-        $bicies = Bicy::where("bicies.updated_at", "<", $limitDate)
-            ->where('bicies.active', 1)
-            ->join('visits', 'bicies.id', 'visits.bicies_id')
-            ->where('visits.duration', '0') // If it's still inside
-            ->groupBy('bicies.id', 'bicies.bikers_id')
-            ->select('bicies.id', 'bicies.bikers_id', DB::raw('max(visits.updated_at) as lastAction'), DB::raw("max(visits.updated_at) < '$limitDate' as inactive"), 'visits.parkings_id')
-            ->get();
-
-        //Actual processed bicies
-        $_bicies = array();
-        $smsResponses = [];
-        foreach ($bicies as $bici) {
-            $bici->biker;
-
-            // If it hasn't been already notified
-            if (!$bici->abandonNotification()->where('active', '1')->first()) {
-                $smsResponses[] = $bici->biker->notifyBikeExpiration($bici->id, $bici->parkings_id);
-                $_bicies[] = $bici;
-            }
-        }
-
-        return response()->json(['message' => 'sucess', 'response' => ['data' => ['LIMIT DATE' => $limitDate, 'BICIES' => $_bicies, 'SMSRESPONSES' => $smsResponses],  'errors' => []]], 200);
-    }
-
-    public function  checkAbandonedBicies()
-    {
-        $currentDate = date('Y-m-d H:i:s');
-        $limitDate = date('Y-m-d H:i:s', strtotime($currentDate . " - 37 days"));
-        $notificationLimitDate = date('Y-m-d H:i:s', strtotime($currentDate . " - 7 days"));
-        $bicies = Bicy::where("bicies.updated_at", "<", $limitDate)
-            ->where('bicies.active', 1)
-            ->join('visits', 'bicies.id', 'visits.bicies_id')
-            ->where('visits.duration', '0') // If it's still inside
-            ->groupBy('bicies.id', 'bicies.bikers_id')
-            ->select('bicies.id', 'bicies.bikers_id', DB::raw('max(visits.updated_at) as lastAction'), DB::raw("max(visits.updated_at) < '$limitDate' as inactive"), 'visits.parkings_id')
-            ->get();
-
-        //Actual processed bicies
-        $_bicies = array();
-        $smsResponses = [];
-        foreach ($bicies as $bici) {
-            $bici->biker;
-            // If it has been already notified
-            if ($bici->abandonNotification()->where('active', '1')->where('created_at', '<', $notificationLimitDate)->first()) {
-                $_bicies[] = $bici;
-                $smsResponses[] = $bici->biker->notifyBikeAbandoning($bici->id, $bici->parkings_id);
-            }
-        }
-
-        return response()->json(['message' => 'sucess', 'response' => ['data' => ['LIMIT DATE' => $limitDate, 'BICIES' => $_bicies, 'SMSRESPONSES' => $smsResponses],  'errors' => []]], 200);
-    }
-
-    public function returnQRInfo(Request $request)
-    {
-        $ids = explode(',', $request->code);
-
-        $bicies = DB::table('bicies')
-            ->join('bikers', 'bicies.bikers_id', '=', 'bikers.id')
-            ->join('type_documents', 'bikers.type_documents_id', '=', 'type_documents.id')
-            ->select('bicies.id', 'bicies.code', 'type_documents.code as document_type', 'bikers.document as document')
-            ->whereIn('bicies.id',  $ids)
-            ->get();
-
-        if (!$bicies->count()) {
-            return response()->json(['message' => 'Not Found', 'response' => ['errors' => ['No se ha encontrado ninguna bicicleta bajo la información provista.']]], 404);
-        }
-
-        $data = array();
-        foreach ($bicies as $bicy) {
-            $data[$bicy->id] = $bicy;
-        }
-
-        return response()->json(['message' => 'Success', 'response' => ['data' => $data, 'errors' => []]], 200);
-    }
-
-    public function massiveStore(Request $request)
-    {
-
-        $validation = [
-            "rules" => [
-                // 'code' => 'required|min:1|max:20|unique:bicies',
-                'document' => 'required|exists:bikers,document',
-                'parkings_id' =>   'required|exists:parkings,id',
-                'brand' =>  'required',
-                'color' => 'required',
-                'tires' => 'required',
-                'type_bicies_id' =>   'required|exists:type_bicies,id',
-                'active' =>  'required|in:1,2,3',
-            ],
-            "messages" => [
-                'code.required' => 'El campo codigo es requerido',
-                'code.min' => 'El campo codigo debe tener mínimo 1 caracteres',
-                'code.max' => 'El campo codigo debe tener máximo 20 caracteres',
-                'code.unique' => 'El codigo ingresado ya existe.',
-                'brand.required' => 'El campo marca es requerido',
-                'color.required' => 'El campo color es requerido',
-                'document.required' => 'El campo documento del ciclista es requerido',
-                'document.exists' => 'El campo documento del ciclista no acerta ningún registro existente',
-                'tires.required' => 'El campo llanta es requerido',
-                'parkings_id.required' => 'El campo Bici Estación es requerido',
-                'parkings_id.exists' => 'El campo Bici Estación no acerta ningún registro existente',
-                'type_bicies_id.required' => 'El campo tipo es requerido',
-                'type_bicies_id.exists' => 'El campo tipo no acerta ningún registro existente',
-                'active.required' => 'El campo estado de la bicicleta es requerido',
-                'active.in' => 'El campo estado de la bicicleta es recibe los valores Activo, Inactivo y Bloqueado',
-            ]
-        ];
-
-        $bicies = [];
-        $errors = [];
-        foreach (file($request->file('csv')) as $i => $line) {
-            if ($i == 0) {
-                continue;
-            } //? Titles Line
-            $info = explode(',', $line);
-            if (!count($info)) {
-                $errors[] = "El contenido es inválido para la línea '$line'";
-            }
-            $bicy = [
-                'brand' => $info[0],
-                'color' => $info[1],
-                'document' => $info[2],
-                'tires' => $info[3],
-                'parkings_id' => $info[4],
-                'type_bicies_id' => $info[5],
-                'active' => 1,
-            ];
-
-            $validator = Validator::make($bicy, $validation['rules'], $validation['messages']);
-            if ($validator->fails()) {
-                $_errors = [];
-                foreach ($validator->errors()->all() as $value) {
-                    // $_errors[] = "$value , mientras validando la línea " . ($i +1) . " , '$line' ";
-                    $_errors[] = "$value , mientras validando la línea " . ($i + 1);
-                }
-                $errors = array_merge($errors,  $_errors);
-            }
-
-            $bicies[] = $bicy;
-        }
-
-        if (count($errors)) {
-            return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $errors]], 200);
-        }
-
-        $storeErrors = [];
-        $Bicies = [];
-        $Bikers = [];
-        $Line = 0;
-        DB::beginTransaction();
-        try {
-            foreach ($bicies as $i => $bicy) {
-                $Line = $i;
-
-                $code = $this->create($bicy['parkings_id'], true);
-                if (!$code) {
-                    $storeErrors[] = 'No se ha conseguido asignar el código consecutivo a la bicicleta';
-                    continue;
-                }
-
-                $bicy['code'] = $code;
-
-                if (!array_key_exists($bicy['document'], $Bikers)) {
-                    $Biker[$bicy['document']] = Biker::where(['document' => $bicy['document']])->first();
-                }
-
-                $bicy['bikers_id'] = $Biker[$bicy['document']]->id;
-                $Bicy = Bicy::create($bicy);
-                $Bicies[] = $Bicy;
-            }
-        } catch (QueryException $e) {
-            $code = $e->getCode();
-            $str = $e->getMessage();
-            if ($code == 1062 || $code == 23000) {
-                preg_match("/Duplicate entry '(.*?)' for key '(.*?)'/", $str, $matches);
-                $storeErrors[] = "Valor({$matches[1]}) duplicado para el campo '{$matches[2]}', en la línea $Line";
-            } else {
-                $storeErrors[] = $str;
-            }
-        }
-
-        if (count($storeErrors)) {
-            DB::rollback();
-        } else {
-            DB::commit();
-        }
-
-        return response()->json(['message' => 'Success', 'response' => ['data' => ['bicies' => $Bicies], 'indexes' => [], 'errors' => ['storeErrors' => $storeErrors]]], 200);
-    }
+//    public function destroy(Request $request, $id)
+//    {
+//        try {
+//            $data = Bicy::find($id);
+//            if (!$data) {
+//                return response()->json(['message' => "Not Found", 'response' => ['errors' => ["Bicicleta no encontrado."]]], 404);
+//            }
+//
+//            //? Solution A, deactivate foreign key checks in order for it not to throw because of inventory or visits records
+//            Schema::disableForeignKeyConstraints();
+//
+//            $stickers = DetailedStickerOrder::where(['bicies_id' => $data->id])->get();
+//            foreach ($stickers as $sticker) { //? Stickers can be deleted
+//                $sticker->delete();
+//            }
+//
+//            // Eliminando imagen de Cloudinary
+//            try {
+//                Cloudder::delete($data->id_image_back);
+//                Cloudder::destroyImage($data->id_image_back);
+//
+//                Cloudder::delete($data->id_image_side);
+//                Cloudder::destroyImage($data->id_image_side);
+//
+//                Cloudder::delete($data->id_image_front);
+//                Cloudder::destroyImage($data->id_image_front);
+//
+//            } catch (\Throwable $th) {
+//                return response()->json(['message' => 'Bad Request', 'response' => ['msg' => 'Error a eliminar la imagen del ciclista', 'error' => $th]], 500);
+//            }
+//            $data->delete();
+//
+//            Schema::enableForeignKeyConstraints();
+//            return response()->json(['message' => 'Bicy Deleted',  'response' => ['errors' => []]], 200);
+//        } catch (QueryException $th) {
+//            Log::emergency($th);
+//            Schema::enableForeignKeyConstraints();
+//            return response()->json(['message' => 'Internal Error', 'response' => ['errors' => [$th->getMessage()]]], 500);
+//        }
+//    }
+//
+//    public function checkBiciesExpirations()
+//    {
+//        $currentDate = date('Y-m-d H:i:s');
+//        $limitDate = date('Y-m-d H:i:s', strtotime($currentDate . " - 30 days"));
+//        $bicies = Bicy::where("bicies.updated_at", "<", $limitDate)
+//            ->where('bicies.active', 1)
+//            ->join('visits', 'bicies.id', 'visits.bicies_id')
+//            ->where('visits.duration', '0') // If it's still inside
+//            ->groupBy('bicies.id', 'bicies.bikers_id')
+//            ->select('bicies.id', 'bicies.bikers_id', DB::raw('max(visits.updated_at) as lastAction'), DB::raw("max(visits.updated_at) < '$limitDate' as inactive"), 'visits.parkings_id')
+//            ->get();
+//
+//        //Actual processed bicies
+//        $_bicies = array();
+//        $smsResponses = [];
+//        foreach ($bicies as $bici) {
+//            $bici->biker;
+//
+//            // If it hasn't been already notified
+//            if (!$bici->abandonNotification()->where('active', '1')->first()) {
+//                $smsResponses[] = $bici->biker->notifyBikeExpiration($bici->id, $bici->parkings_id);
+//                $_bicies[] = $bici;
+//            }
+//        }
+//
+//        return response()->json(['message' => 'sucess', 'response' => ['data' => ['LIMIT DATE' => $limitDate, 'BICIES' => $_bicies, 'SMSRESPONSES' => $smsResponses],  'errors' => []]], 200);
+//    }
+//
+//    public function  checkAbandonedBicies()
+//    {
+//        $currentDate = date('Y-m-d H:i:s');
+//        $limitDate = date('Y-m-d H:i:s', strtotime($currentDate . " - 37 days"));
+//        $notificationLimitDate = date('Y-m-d H:i:s', strtotime($currentDate . " - 7 days"));
+//        $bicies = Bicy::where("bicies.updated_at", "<", $limitDate)
+//            ->where('bicies.active', 1)
+//            ->join('visits', 'bicies.id', 'visits.bicies_id')
+//            ->where('visits.duration', '0') // If it's still inside
+//            ->groupBy('bicies.id', 'bicies.bikers_id')
+//            ->select('bicies.id', 'bicies.bikers_id', DB::raw('max(visits.updated_at) as lastAction'), DB::raw("max(visits.updated_at) < '$limitDate' as inactive"), 'visits.parkings_id')
+//            ->get();
+//
+//        //Actual processed bicies
+//        $_bicies = array();
+//        $smsResponses = [];
+//        foreach ($bicies as $bici) {
+//            $bici->biker;
+//            // If it has been already notified
+//            if ($bici->abandonNotification()->where('active', '1')->where('created_at', '<', $notificationLimitDate)->first()) {
+//                $_bicies[] = $bici;
+//                $smsResponses[] = $bici->biker->notifyBikeAbandoning($bici->id, $bici->parkings_id);
+//            }
+//        }
+//
+//        return response()->json(['message' => 'sucess', 'response' => ['data' => ['LIMIT DATE' => $limitDate, 'BICIES' => $_bicies, 'SMSRESPONSES' => $smsResponses],  'errors' => []]], 200);
+//    }
+//
+//    public function returnQRInfo(Request $request)
+//    {
+//        $ids = explode(',', $request->code);
+//
+//        $bicies = DB::table('bicies')
+//            ->join('bikers', 'bicies.bikers_id', '=', 'bikers.id')
+//            ->join('type_documents', 'bikers.type_documents_id', '=', 'type_documents.id')
+//            ->select('bicies.id', 'bicies.code', 'type_documents.code as document_type', 'bikers.document as document')
+//            ->whereIn('bicies.id',  $ids)
+//            ->get();
+//
+//        if (!$bicies->count()) {
+//            return response()->json(['message' => 'Not Found', 'response' => ['errors' => ['No se ha encontrado ninguna bicicleta bajo la información provista.']]], 404);
+//        }
+//
+//        $data = array();
+//        foreach ($bicies as $bicy) {
+//            $data[$bicy->id] = $bicy;
+//        }
+//
+//        return response()->json(['message' => 'Success', 'response' => ['data' => $data, 'errors' => []]], 200);
+//    }
+//
+//    public function massiveStore(Request $request)
+//    {
+//
+//        $validation = [
+//            "rules" => [
+//                // 'code' => 'required|min:1|max:20|unique:bicies',
+//                'document' => 'required|exists:bikers,document',
+//                'parkings_id' =>   'required|exists:parkings,id',
+//                'brand' =>  'required',
+//                'color' => 'required',
+//                'tires' => 'required',
+//                'type_bicies_id' =>   'required|exists:type_bicies,id',
+//                'active' =>  'required|in:1,2,3',
+//            ],
+//            "messages" => [
+//                'code.required' => 'El campo codigo es requerido',
+//                'code.min' => 'El campo codigo debe tener mínimo 1 caracteres',
+//                'code.max' => 'El campo codigo debe tener máximo 20 caracteres',
+//                'code.unique' => 'El codigo ingresado ya existe.',
+//                'brand.required' => 'El campo marca es requerido',
+//                'color.required' => 'El campo color es requerido',
+//                'document.required' => 'El campo documento del ciclista es requerido',
+//                'document.exists' => 'El campo documento del ciclista no acerta ningún registro existente',
+//                'tires.required' => 'El campo llanta es requerido',
+//                'parkings_id.required' => 'El campo Bici Estación es requerido',
+//                'parkings_id.exists' => 'El campo Bici Estación no acerta ningún registro existente',
+//                'type_bicies_id.required' => 'El campo tipo es requerido',
+//                'type_bicies_id.exists' => 'El campo tipo no acerta ningún registro existente',
+//                'active.required' => 'El campo estado de la bicicleta es requerido',
+//                'active.in' => 'El campo estado de la bicicleta es recibe los valores Activo, Inactivo y Bloqueado',
+//            ]
+//        ];
+//
+//        $bicies = [];
+//        $errors = [];
+//        foreach (file($request->file('csv')) as $i => $line) {
+//            if ($i == 0) {
+//                continue;
+//            } //? Titles Line
+//            $info = explode(',', $line);
+//            if (!count($info)) {
+//                $errors[] = "El contenido es inválido para la línea '$line'";
+//            }
+//            $bicy = [
+//                'brand' => $info[0],
+//                'color' => $info[1],
+//                'document' => $info[2],
+//                'tires' => $info[3],
+//                'parkings_id' => $info[4],
+//                'type_bicies_id' => $info[5],
+//                'active' => 1,
+//            ];
+//
+//            $validator = Validator::make($bicy, $validation['rules'], $validation['messages']);
+//            if ($validator->fails()) {
+//                $_errors = [];
+//                foreach ($validator->errors()->all() as $value) {
+//                    // $_errors[] = "$value , mientras validando la línea " . ($i +1) . " , '$line' ";
+//                    $_errors[] = "$value , mientras validando la línea " . ($i + 1);
+//                }
+//                $errors = array_merge($errors,  $_errors);
+//            }
+//
+//            $bicies[] = $bicy;
+//        }
+//
+//        if (count($errors)) {
+//            return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $errors]], 200);
+//        }
+//
+//        $storeErrors = [];
+//        $Bicies = [];
+//        $Bikers = [];
+//        $Line = 0;
+//        DB::beginTransaction();
+//        try {
+//            foreach ($bicies as $i => $bicy) {
+//                $Line = $i;
+//
+//                $code = $this->create($bicy['parkings_id'], true);
+//                if (!$code) {
+//                    $storeErrors[] = 'No se ha conseguido asignar el código consecutivo a la bicicleta';
+//                    continue;
+//                }
+//
+//                $bicy['code'] = $code;
+//
+//                if (!array_key_exists($bicy['document'], $Bikers)) {
+//                    $Biker[$bicy['document']] = Biker::where(['document' => $bicy['document']])->first();
+//                }
+//
+//                $bicy['bikers_id'] = $Biker[$bicy['document']]->id;
+//                $Bicy = Bicy::create($bicy);
+//                $Bicies[] = $Bicy;
+//            }
+//        } catch (QueryException $e) {
+//            $code = $e->getCode();
+//            $str = $e->getMessage();
+//            if ($code == 1062 || $code == 23000) {
+//                preg_match("/Duplicate entry '(.*?)' for key '(.*?)'/", $str, $matches);
+//                $storeErrors[] = "Valor({$matches[1]}) duplicado para el campo '{$matches[2]}', en la línea $Line";
+//            } else {
+//                $storeErrors[] = $str;
+//            }
+//        }
+//
+//        if (count($storeErrors)) {
+//            DB::rollback();
+//        } else {
+//            DB::commit();
+//        }
+//
+//        return response()->json(['message' => 'Success', 'response' => ['data' => ['bicies' => $Bicies], 'indexes' => [], 'errors' => ['storeErrors' => $storeErrors]]], 200);
+//    }
 }
