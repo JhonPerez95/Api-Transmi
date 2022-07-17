@@ -325,18 +325,16 @@ class BicyController extends Controller
                 'type_bicies_id' => $request->type_bicies_id,
                 'parkings_id' => $request->parkings_id,
                 'active' => $request->active,
-//                'url_image_back' => 'prueba',
-//                'url_image_side' => 'prueba',
-//                'url_image_front' => 'prueba',
-//                'id_image_back' => 'prueba',
-//                'id_image_side' => 'prueba',
-//                'id_image_front' => 'prueba',
                 'url_image_back' => $url_image_back,
-                'url_image_side' => $url_image_side,
-                'url_image_front' => $url_image_front,
+//                'url_image_side' => $url_image_side,
+//                'url_image_front' => $url_image_front,
+                'url_image_side' => 'prueba',
+                'url_image_front' => 'prueba',
+                'id_image_side' => 'prueba',
+                'id_image_front' => 'prueba',
                 'id_image_back' => $id_image_back,
-                'id_image_side' => $id_image_side,
-                'id_image_front' => $id_image_front
+//                'id_image_side' => $id_image_side,
+//                'id_image_front' => $id_image_front
             ]);
 
             $stickerOrder = DetailedStickerOrder::create([
