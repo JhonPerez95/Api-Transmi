@@ -289,9 +289,9 @@ class BicyController extends Controller
                 $phtValidation[] = $this->photoValidation($request->file('image_back'));
                 $image_back = $request->file('image_back')->getRealPath();
                 //list($url_image_back, $id_image_back) = $this->savePhotoInCloud($image_back);
-                $resp = $this->savePhotoInCloud($image_back);
+                //$resp = $this->savePhotoInCloud($image_back);
 
-                return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $phtValidation[0] . ' resp: ' . $resp ] ], 400);
+                return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $phtValidation[0] . ' image_back: ' . $image_back ] ], 400);
             }
             if($request->hasFile('image_side')) {
                 $phtValidation[] = $this->photoValidation($request->file('image_side'));
