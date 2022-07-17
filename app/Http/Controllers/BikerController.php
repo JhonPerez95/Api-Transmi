@@ -21,7 +21,6 @@ class BikerController extends Controller
 {
     private $client;
 
-
     public function __construct()
     {
         if (Route::getCurrentRoute()) {
@@ -162,7 +161,6 @@ class BikerController extends Controller
     private function photoValidation($request, $updating = false)
     {
         $phValid = [];
-
         if (!$request->hasFile('photo')) {
             // While updating, resending the image won't be required
             if (!$updating) {
@@ -170,7 +168,6 @@ class BikerController extends Controller
             }
         } else {
             $ph = $request->file('photo');
-
             $arrayingImage = (gettype($ph) != 'array') ? [$ph] : $ph;
             $extensiones = ["jpg", "png", "jpeg"];
 
