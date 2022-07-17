@@ -225,15 +225,15 @@ class BicyController extends Controller
 
     private function savePhotoInCloud($photo)
     {
-        try {
+        //try {
             Cloudder::upload($photo, null,  array("folder" => "bicy"));
             $publicId = Cloudder::getPublicId();
             $url =  Cloudder::secureShow($publicId);
             $urlImg =   str_replace('_150', '_520', $url);
             return array($urlImg, $publicId);
-        } catch (\Throwable $th) {
-            return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $th, 'message' => 'Problema al guardar la imagen']], 500);
-        }
+        //} catch (\Throwable $th) {
+            //return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $th, 'message' => 'Problema al guardar la imagen']], 500);
+        //}
     }
 
     public function store(Request $request)
@@ -243,7 +243,7 @@ class BicyController extends Controller
             return response()->json(['message' => 'Not Found', 'response' => ['errors' => ['Ciclista No encontrado']]], 404);
         }
 
-        return response()->json(['message' => 'Bicy Created', 'response' => ["data" => 'Camilito Nijo']], 201);
+        //return response()->json(['message' => 'Bicy Created', 'response' => ["data" => 'Camilito Mijo']], 201);
 
         //Validaciones
         $validation = [
@@ -290,19 +290,18 @@ class BicyController extends Controller
             if($request->hasFile('image_back')) {
                 $phtValidation[] = $this->photoValidation($request->file('image_back'));
                 $image_back = $request->file('image_back')->getRealPath();
-                //list($url_image_back, $id_image_back) = $this->savePhotoInCloud($image_back);
-                //$resp = $this->savePhotoInCloud($image_back);
+                list($url_image_back, $id_image_back) = $this->savePhotoInCloud($image_back);
                 //return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $phtValidation[0] . ' image_back: ' . $image_back ] ], 400);
             }
             if($request->hasFile('image_side')) {
                 $phtValidation[] = $this->photoValidation($request->file('image_side'));
                 $image_side = $request->file('image_side')->getRealPath();
-                //list($url_image_side, $id_image_side) = $this->savePhotoInCloud($image_side);
+                list($url_image_side, $id_image_side) = $this->savePhotoInCloud($image_side);
             }
             if($request->hasFile('image_front')) {
                 $phtValidation[] = $this->photoValidation($request->file('image_front'));
                 $image_front = $request->file('image_front')->getRealPath();
-                //list($url_image_front, $id_image_front) = $this->savePhotoInCloud($image_front);
+                list($url_image_front, $id_image_front) = $this->savePhotoInCloud($image_front);
             }
 
             if (!empty($phtValidation[0])) {
@@ -315,7 +314,7 @@ class BicyController extends Controller
 
             $Bicy = Bicy::create([
                 'code' => $request->code,
-                'description' => ($request->description) ? $request->description : '',
+                'description' => $request->description ? $request->description : '',
                 'brand' => $request->brand,
                 'bikers_id' => $biker->id,
                 'color' => $request->color,
@@ -324,12 +323,12 @@ class BicyController extends Controller
                 'type_bicies_id' => $request->type_bicies_id,
                 'parkings_id' => $request->parkings_id,
                 'active' => $request->active,
-//                'url_image_back' => $url_image_back,
-//                'url_image_side' => $url_image_side,
-//                'url_image_front' => $url_image_front,
-//                'id_image_back' => $id_image_back,
-//                'id_image_side' => $id_image_side,
-//                'id_image_front' => $id_image_front
+                'url_image_back' => $url_image_back,
+                'url_image_side' => $url_image_side,
+                'url_image_front' => $url_image_front,
+                'id_image_back' => $id_image_back,
+                'id_image_side' => $id_image_side,
+                'id_image_front' => $id_image_front
             ]);
 
             $stickerOrder = DetailedStickerOrder::create([
