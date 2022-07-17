@@ -314,10 +314,10 @@ class BikerController extends Controller
             $ph = $request->file('photo')->getRealPath();
 
 //            try {
-                Cloudder::upload($ph, null,  array("folder" => "biker"));
-                $publicId = Cloudder::getPublicId();
-                $url =  Cloudder::secureShow($publicId);
-                $urlImg =   str_replace('_150', '_520', $url);
+            Cloudder::upload($ph, null,  array("folder" => "biker"));
+            $publicId = Cloudder::getPublicId();
+            $url =  Cloudder::secureShow($publicId);
+            $urlImg =   str_replace('_150', '_520', $url);
 //            } catch (\Throwable $th) {
 //                return response()->json(['message' => 'Bad Request', 'response' => ['message' => 'Problema al guardar la imagen', 'error' => $th]], 500);
 //            }
