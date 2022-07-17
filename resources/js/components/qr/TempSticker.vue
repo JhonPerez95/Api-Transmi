@@ -22,18 +22,18 @@
           <span v-else>
             {{ props.formattedRow[props.column.field] }}
           </span>
-          
+
         </template>
       </vue-good-table>
     </div>
 
 
-    <b-modal hide-footer id="addDataModel" :size="editing ? 'xl' : ''" ref="modal" title="Crear Orden de Stickers" 
+    <b-modal hide-footer id="addDataModel" :size="editing ? 'xl' : ''" ref="modal" title="Crear Orden de Stickers"
          ok="handleOk" @show="resetModal" @hidden="resetModal" >
 
       <ValidationObserver ref="observer" v-slot="{ handleSubmit }">
         <form ref="form" @submit.prevent="handleSubmit(dataSubmit)">
-          
+
           <div :class="editing?'row':''">
             <div class="form-group col" data-content="Cicloparqueadero">
               <label for="name">Bici Estación</label>
@@ -191,7 +191,7 @@ export default {
           this.form.printed = data.printed;
           this.form.initial_consecutive = data.initial_consecutive;
           this.form.parking_code = data.parking_code;
-          
+
         }else{
           toastr.error('Se ha presentado un problema al consultar la información');
         }
@@ -218,11 +218,11 @@ export default {
       this.$bvModal.show('addDataModel');
     },
     dataSubmit(){
-      
+
       if(this.editing || this.form.id){
         this.$api.put('web/data/stickers/'+this.form.id, { printed : this.form.print }).then(res =>{
           if(res.status == 200){
-            let routeData = this.$router.resolve({name: 'printQr', 
+            let routeData = this.$router.resolve({name: 'printQr',
               query: {parkingCode: this.form.parking_code, initial_consecutive: this.form.initial_consecutive, print : this.form.print }
             });
             window.open(routeData.href, '_blank');
@@ -231,9 +231,8 @@ export default {
             toastr.error('Se ha presentado un error al guardar el registro.');
           }
         });
-      
-      }else{
-      
+
+      } else {
         const form = {
           parkings_id : this.form.parkings_id,
           quantity : this.form.quantity,
@@ -248,7 +247,7 @@ export default {
           toastr.error('Se ha presentado un error al guardar el registro.');
         }
       });
-      
+
       }
     },
     displayRecovPaswModal(){
