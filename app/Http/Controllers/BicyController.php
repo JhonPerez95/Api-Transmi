@@ -283,6 +283,8 @@ class BicyController extends Controller
                 return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $validator->errors() ] ], 400);
             }
 
+            return response()->json(['message' => 'Bad Request', 'response' => ['errors' => 'Esrte es un mensaje de error de prueba' ] ], 400);
+
             // Photos validation
             $phtValidation = [];
             if($request->hasFile('image_back')) {
@@ -342,7 +344,7 @@ class BicyController extends Controller
             return response()->json(['message' => 'Bicy Created', 'response' => ["data" => $Bicy]], 201);
         } catch (QueryException $th) {
             Log::emergency($th);
-            return response()->json(['message' => 'Internal Error', 'response' => ["errors" => [$th->getMessage()]]], 500);
+            return response()->json(['message' => 'Internal Error', 'response' => ["errors" => [$th->getMessage()]]], 400);
         }
     }
 
@@ -438,11 +440,9 @@ class BicyController extends Controller
      */
     public function update(Request $request, $id = false)
     {
-
         $validateImage = true;
 
         try {
-
             if (!$id) {
                 $id = $request->input('id');
             }
@@ -455,7 +455,6 @@ class BicyController extends Controller
             if (!$biker) {
                 return response()->json(['message' => 'Not Found', 'response' => ['errors' => ['Ciclista No encontrado']]], 400);
             }
-
 
             $codeRules = ($request->code != $data->code) ? 'min:1|max:20|unique:bicies' : 'min:1|max:20';
             $serialRules = ($request->serial != $data->serial) ? '|unique:bicies' : '';
@@ -500,7 +499,6 @@ class BicyController extends Controller
                     return response()->json(['response' => ['errors' => $validator->errors()->all()], 'message' => 'Bad Request'], 400);
                 }
             }
-
 
             if (!$request->file('image_back')) {
                 $url_image_back =  $data->url_image_back;

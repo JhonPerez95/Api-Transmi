@@ -58,13 +58,11 @@ class ProvisionalStickerOrdersController extends Controller
         ];
 
         try {
-
             $validator = Validator::make($request->all(), $validation['rules'], $validation['messages']);
 
             if ($validator->fails()) {
                 return response()->json(['response' => ['errors' => $validator->errors()->all() ], 'message' => 'Bad Request'], 400);
-            } 
-
+            }
 
             $previous = ProvisionalStickerOrder::where(['parkings_id'=>$request->parkings_id])
                 ->orderBy('created_at','desc')
@@ -95,11 +93,10 @@ class ProvisionalStickerOrdersController extends Controller
      */
     public function show($id)
     {
-
         $data = ProvisionalStickerOrder::where(['provisional_sticker_orders.id'=>$id])
             ->join('parkings','provisional_sticker_orders.parkings_id','parkings.id')
             ->select('provisional_sticker_orders.*', 'parkings.name as parking', 'parkings.code as parking_code')
-        ->first();
+            ->first();
         return response()->json(['message'=>'Success', 'response'=>[ 'data'=>$data, 'errors'=>[]]],200);
 
         $data = ProvisionalStickerOrder::where(['parkings_id'=>$id])->get();
@@ -128,7 +125,6 @@ class ProvisionalStickerOrdersController extends Controller
      */
     public function update(Request $request, $id)
     {
-        
         $request->request->add(['order_id'=>$id]);
 
          $validation = [
@@ -152,7 +148,7 @@ class ProvisionalStickerOrdersController extends Controller
 
             if ($validator->fails()) {
                 return response()->json(['response' => ['errors' => $validator->errors()->all() ], 'message' => 'Bad Request'], 400);
-            } 
+            }
 
             $order = ProvisionalStickerOrder::find($id);
 
