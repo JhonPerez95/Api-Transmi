@@ -242,8 +242,6 @@ class BicyController extends Controller
             return response()->json(['message' => 'Not Found', 'response' => ['errors' => ['Ciclista No encontrado']]], 404);
         }
 
-        //return response()->json(['message' => 'Bicy Created', 'response' => ["data" => 'Camilito Mijo']], 201);
-
         //Validaciones
         $validation = [
             "rules" => [
@@ -290,17 +288,22 @@ class BicyController extends Controller
             if($request->hasFile('image_back')) {
                 $phtValidation[] = $this->photoValidation($request->file('image_back'));
                 $image_back = $request->file('image_back')->getRealPath();
-                list($url_image_back, $id_image_back) = $this->savePhotoInCloud($image_back);
+
+                Cloudder::upload($image_back, null,  array("folder" => "biker"));
+                $publicId = Cloudder::getPublicId();
+                $url_image_back =  Cloudder::secureShow($publicId);
+                $id_image_back =   str_replace('_150', '_520', $url_image_back);
+                //list($url_image_back, $id_image_back) = $this->savePhotoInCloud($image_back);
             }
             if($request->hasFile('image_side')) {
                 $phtValidation[] = $this->photoValidation($request->file('image_side'));
                 $image_side = $request->file('image_side')->getRealPath();
-                list($url_image_side, $id_image_side) = $this->savePhotoInCloud($image_side);
+                //list($url_image_side, $id_image_side) = $this->savePhotoInCloud($image_side);
             }
             if($request->hasFile('image_front')) {
                 $phtValidation[] = $this->photoValidation($request->file('image_front'));
                 $image_front = $request->file('image_front')->getRealPath();
-                list($url_image_front, $id_image_front) = $this->savePhotoInCloud($image_front);
+                //list($url_image_front, $id_image_front) = $this->savePhotoInCloud($image_front);
             }
 
             if (!empty($phtValidation[0])) {
@@ -402,7 +405,7 @@ class BicyController extends Controller
      * @param  \App\Models\Bicy  $Bicy
      * @return \Illuminate\Http\Response
      */
-    /*public function edit($id)
+    public function edit($id)
     {
         $data = DB::table('bicies')
             ->join('bikers', 'bicies.bikers_id', '=', 'bikers.id')
@@ -418,7 +421,7 @@ class BicyController extends Controller
             'bicies' => $data,
             'errors' => []
         ]], 200);
-    }*/
+    }
 
     /*private function updatePhotoInCloud($photo, $id_photo)
     {
