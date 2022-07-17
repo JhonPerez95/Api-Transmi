@@ -232,7 +232,7 @@ class BicyController extends Controller
             $urlImg =   str_replace('_150', '_520', $url);
             return array($urlImg, $publicId);
         } catch (\Throwable $th) {
-            return response()->json(['message' => 'Bad Request', 'response' => ['message' => 'Problema al guardar la imagen', 'error' => $th]], 500);
+            return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $th, 'message' => 'Problema al guardar la imagen']], 500);
         }
     }
 
@@ -283,14 +283,15 @@ class BicyController extends Controller
                 return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $validator->errors() ] ], 400);
             }
 
-            return response()->json(['message' => 'Bad Request', 'response' => ['errors' => 'Esrte es un mensaje de error de prueba' ] ], 400);
-
             // Photos validation
             $phtValidation = [];
             if($request->hasFile('image_back')) {
                 $phtValidation[] = $this->photoValidation($request->file('image_back'));
                 $image_back = $request->file('image_back')->getRealPath();
-                list($url_image_back, $id_image_back) = $this->savePhotoInCloud($image_back);
+                //list($url_image_back, $id_image_back) = $this->savePhotoInCloud($image_back);
+                $resp = $this->savePhotoInCloud($image_back);
+
+                return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $phtValidation[0] . ' resp: ' . $resp ] ], 400);
             }
             if($request->hasFile('image_side')) {
                 $phtValidation[] = $this->photoValidation($request->file('image_side'));
