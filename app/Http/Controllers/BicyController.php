@@ -243,6 +243,8 @@ class BicyController extends Controller
             return response()->json(['message' => 'Not Found', 'response' => ['errors' => ['Ciclista No encontrado']]], 404);
         }
 
+        return response()->json(['message' => 'Bicy Created', 'response' => ["data" => 'Camilito Nijo']], 201);
+
         //Validaciones
         $validation = [
             "rules" => [
