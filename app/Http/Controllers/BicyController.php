@@ -290,18 +290,17 @@ class BicyController extends Controller
                 $image_back = $request->file('image_back')->getRealPath();
                 //list($url_image_back, $id_image_back) = $this->savePhotoInCloud($image_back);
                 //$resp = $this->savePhotoInCloud($image_back);
-
-                return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $phtValidation[0] . ' image_back: ' . $image_back ] ], 400);
+                //return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $phtValidation[0] . ' image_back: ' . $image_back ] ], 400);
             }
             if($request->hasFile('image_side')) {
                 $phtValidation[] = $this->photoValidation($request->file('image_side'));
                 $image_side = $request->file('image_side')->getRealPath();
-                list($url_image_side, $id_image_side) = $this->savePhotoInCloud($image_side);
+                //list($url_image_side, $id_image_side) = $this->savePhotoInCloud($image_side);
             }
             if($request->hasFile('image_front')) {
                 $phtValidation[] = $this->photoValidation($request->file('image_front'));
                 $image_front = $request->file('image_front')->getRealPath();
-                list($url_image_front, $id_image_front) = $this->savePhotoInCloud($image_front);
+                //list($url_image_front, $id_image_front) = $this->savePhotoInCloud($image_front);
             }
 
             if (!empty($phtValidation[0])) {
@@ -323,12 +322,12 @@ class BicyController extends Controller
                 'type_bicies_id' => $request->type_bicies_id,
                 'parkings_id' => $request->parkings_id,
                 'active' => $request->active,
-                'url_image_back' => $url_image_back,
-                'url_image_side' => $url_image_side,
-                'url_image_front' => $url_image_front,
-                'id_image_back' => $id_image_back,
-                'id_image_side' => $id_image_side,
-                'id_image_front' => $id_image_front
+//                'url_image_back' => $url_image_back,
+//                'url_image_side' => $url_image_side,
+//                'url_image_front' => $url_image_front,
+//                'id_image_back' => $id_image_back,
+//                'id_image_side' => $id_image_side,
+//                'id_image_front' => $id_image_front
             ]);
 
             $stickerOrder = DetailedStickerOrder::create([
