@@ -94,7 +94,6 @@ Route::middleware(['auth:sanctum', PermissionsChecker::class])->group(function (
         Route::post('roles/authRoleTo/{id}', [RolesController::class,'authRoleTo']);
         Route::post('roles/unauthorizeRoleTo/{id}', [RolesController::class,'unauthorizeRoleTo']);
 
-
         Route::get('bicy/detailed/{id}', [BicyController::class,'detailedShow']);
         Route::resource('bicy', BicyController::class)->except(['create']);
         Route::get('bicy/{parking_id}/create',[BicyController::class,'create']);

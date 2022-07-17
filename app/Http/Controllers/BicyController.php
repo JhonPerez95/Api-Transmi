@@ -222,18 +222,18 @@ class BicyController extends Controller
         return $phValid;
     }
 
-    private function savePhotoInCloud($photo)
-    {
-        //try {
-            Cloudder::upload($photo, null,  array("folder" => "bicy"));
-            $publicId = Cloudder::getPublicId();
-            $url =  Cloudder::secureShow($publicId);
-            $urlImg =   str_replace('_150', '_520', $url);
-            return array($urlImg, $publicId);
-        //} catch (\Throwable $th) {
-            //return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $th, 'message' => 'Problema al guardar la imagen']], 500);
-        //}
-    }
+//    private function savePhotoInCloud($photo)
+//    {
+//        //try {
+//            Cloudder::upload($photo, null,  array("folder" => "bicy"));
+//            $publicId = Cloudder::getPublicId();
+//            $url =  Cloudder::secureShow($publicId);
+//            $urlImg =   str_replace('_150', '_520', $url);
+//            return array($urlImg, $publicId);
+//        //} catch (\Throwable $th) {
+//            //return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $th, 'message' => 'Problema al guardar la imagen']], 500);
+//        //}
+//    }
 
     public function store(Request $request)
     {
@@ -293,17 +293,24 @@ class BicyController extends Controller
                 $publicId = Cloudder::getPublicId();
                 $url_image_back =  Cloudder::secureShow($publicId);
                 $id_image_back =   str_replace('_150', '_520', $url_image_back);
-                //list($url_image_back, $id_image_back) = $this->savePhotoInCloud($image_back);
             }
             if($request->hasFile('image_side')) {
                 $phtValidation[] = $this->photoValidation($request->file('image_side'));
                 $image_side = $request->file('image_side')->getRealPath();
-                //list($url_image_side, $id_image_side) = $this->savePhotoInCloud($image_side);
+
+                Cloudder::upload($image_side, null,  array("folder" => "biker"));
+                $publicId = Cloudder::getPublicId();
+                $url_image_side =  Cloudder::secureShow($publicId);
+                $id_image_side =   str_replace('_150', '_520', $url_image_side);
             }
             if($request->hasFile('image_front')) {
                 $phtValidation[] = $this->photoValidation($request->file('image_front'));
                 $image_front = $request->file('image_front')->getRealPath();
-                //list($url_image_front, $id_image_front) = $this->savePhotoInCloud($image_front);
+
+                Cloudder::upload($image_front, null,  array("folder" => "biker"));
+                $publicId = Cloudder::getPublicId();
+                $url_image_front =  Cloudder::secureShow($publicId);
+                $id_image_front =   str_replace('_150', '_520', $url_image_front);
             }
 
             if (!empty($phtValidation[0])) {
@@ -326,15 +333,11 @@ class BicyController extends Controller
                 'parkings_id' => $request->parkings_id,
                 'active' => $request->active,
                 'url_image_back' => $url_image_back,
-//                'url_image_side' => $url_image_side,
-//                'url_image_front' => $url_image_front,
-                'url_image_side' => 'prueba',
-                'url_image_front' => 'prueba',
-                'id_image_side' => 'prueba',
-                'id_image_front' => 'prueba',
+                'url_image_side' => $url_image_side,
+                'url_image_front' => $url_image_front,
                 'id_image_back' => $id_image_back,
-//                'id_image_side' => $id_image_side,
-//                'id_image_front' => $id_image_front
+                'id_image_side' => $id_image_side,
+                'id_image_front' => $id_image_front
             ]);
 
             $stickerOrder = DetailedStickerOrder::create([
@@ -361,7 +364,7 @@ class BicyController extends Controller
      * @param  \App\Models\Bicy  $Bicy
      * @return \Illuminate\Http\Response
      */
-    /*public function show($id, $detailed = false)
+    public function show($id, $detailed = false)
     {
         if ($this->client == 'app') {
             $data = Bicy::where(['bicies.code' => $id])
@@ -395,7 +398,7 @@ class BicyController extends Controller
     public function detailedShow($id)
     {
         return $this->show($id, true);
-    }*/
+    }
 
     /**
      * Show the form for editing the specified resource.
@@ -421,7 +424,7 @@ class BicyController extends Controller
         ]], 200);
     }
 
-    /*private function updatePhotoInCloud($photo, $id_photo)
+    private function updatePhotoInCloud($photo, $id_photo)
     {
         try {
             Cloudder::upload($photo, null,  array("folder" => "bicy"));
@@ -435,7 +438,7 @@ class BicyController extends Controller
         } catch (\Throwable $th) {
             return response()->json(['message' => 'Bad Request', 'response' => ['message' => 'Problema al guardar la imagen', 'error' => $th]], 500);
         }
-    }*/
+    }
 
     /**
      * Update the specified resource in storage.
@@ -444,7 +447,7 @@ class BicyController extends Controller
      * @param  \App\Models\Bicy  $Bicy
      * @return \Illuminate\Http\Response
      */
-    /*public function update(Request $request, $id = false)
+    public function update(Request $request, $id = false)
     {
         $validateImage = true;
 
@@ -556,7 +559,7 @@ class BicyController extends Controller
             Log::emergency($th);
             return response()->json(['message' => 'Internal Error', 'response' => ["errors" => [$th->getMessage()]]], 500);
         }
-    }*/
+    }
 
     /**
      * Remove the specified resource from storage.
@@ -564,9 +567,8 @@ class BicyController extends Controller
      * @param  \App\Models\Bicy  $Bicy
      * @return \Illuminate\Http\Response
      */
-    /*public function destroy(Request $request, $id)
+    public function destroy(Request $request, $id)
     {
-        // return response()->json(['message' => 'Bad Request', 'response' => ['errors' => ['La eliminación de registros de bicicleta no es una funcionalidad del sistema.']]], 400);
         try {
             $data = Bicy::find($id);
             if (!$data) {
@@ -682,7 +684,6 @@ class BicyController extends Controller
             $data[$bicy->id] = $bicy;
         }
 
-
         return response()->json(['message' => 'Success', 'response' => ['data' => $data, 'errors' => []]], 200);
     }
 
@@ -739,7 +740,6 @@ class BicyController extends Controller
                 'active' => 1,
             ];
 
-
             $validator = Validator::make($bicy, $validation['rules'], $validation['messages']);
             if ($validator->fails()) {
                 $_errors = [];
@@ -763,7 +763,6 @@ class BicyController extends Controller
         $Line = 0;
         DB::beginTransaction();
         try {
-
             foreach ($bicies as $i => $bicy) {
                 $Line = $i;
 
@@ -784,7 +783,6 @@ class BicyController extends Controller
                 $Bicies[] = $Bicy;
             }
         } catch (QueryException $e) {
-
             $code = $e->getCode();
             $str = $e->getMessage();
             if ($code == 1062 || $code == 23000) {
@@ -802,5 +800,5 @@ class BicyController extends Controller
         }
 
         return response()->json(['message' => 'Success', 'response' => ['data' => ['bicies' => $Bicies], 'indexes' => [], 'errors' => ['storeErrors' => $storeErrors]]], 200);
-    }*/
+    }
 }
