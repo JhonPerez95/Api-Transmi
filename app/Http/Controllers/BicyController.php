@@ -16,8 +16,6 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Route;
 use Cloudder;
 
-setTimeout(timeout,100000);
-
 class BicyController extends Controller
 {
     private $client;
@@ -279,40 +277,61 @@ class BicyController extends Controller
             }
 
             // Photos validation
-            $phtValidation = [];
-            if($request->hasFile('image_back')) {
-                $phtValidation[] = $this->photoValidation($request->file('image_back'));
-                $image_back = $request->file('image_back')->getRealPath();
-                //return response()->json(['message' => 'Bicy Created', 'response' => ["data" => $image_back]], 201);
+            $files = array();
+            $files[] = $request->file('image_back')->getRealPath();
+            $files[] = $request->file('image_side')->getRealPath();
+            $files[] = $request->file('image_front')->getRealPath();
 
-                Cloudder::upload($image_back, null,  array("folder" => "biker"));
-                $publicId = Cloudder::getPublicId();
-                $url_image_back =  Cloudder::secureShow($publicId);
-                $id_image_back =   str_replace('_150', '_520', $url_image_back);
-            }
-            if($request->hasFile('image_side')) {
-                $phtValidation[] = $this->photoValidation($request->file('image_side'));
-                $image_side = $request->file('image_side')->getRealPath();
+            if (count($files) > 0) {
+                $dataServices = array();
+                foreach ($files as $file) {
+                    $url = array();
+                    $urlImg = array();
+                    Cloudder::upload($file, null,  array("folder" => "biker"));
+                    $publicId = Cloudder::getPublicId();
+                    $url =  Cloudder::secureShow($publicId);
+                    $urlImg =   str_replace('_150', '_520', $url);
 
-                Cloudder::upload($image_side, null,  array("folder" => "biker"));
-                $publicId = Cloudder::getPublicId();
-                $url_image_side =  Cloudder::secureShow($publicId);
-                $id_image_side =   str_replace('_150', '_520', $url_image_side);
-            }
-            if($request->hasFile('image_front')) {
-                $phtValidation[] = $this->photoValidation($request->file('image_front'));
-                $image_front = $request->file('image_front')->getRealPath();
-
-                Cloudder::upload($image_front, null,  array("folder" => "biker"));
-                $publicId = Cloudder::getPublicId();
-                $url_image_front =  Cloudder::secureShow($publicId);
-                $id_image_front =   str_replace('_150', '_520', $url_image_front);
+                    $dataServices[] = $url;
+                    $dataServices[] = $urlImg;
+                }
             }
 
-            if (!empty($phtValidation[0])) {
-                return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $phtValidation[0]] ], 400);
-            }
+            //return response()->json(['message' => 'Bicy Created', 'response' => ["data" => $dataServices]], 201);
 
+//            $phtValidation = [];
+//            if($request->hasFile('image_back')) {
+//                $phtValidation[] = $this->photoValidation($request->file('image_back'));
+//                $image_back = $request->file('image_back')->getRealPath();
+//                //return response()->json(['message' => 'Bicy Created', 'response' => ["data" => $image_back]], 201);
+//
+//                Cloudder::upload($image_back, null,  array("folder" => "biker"));
+//                $publicId = Cloudder::getPublicId();
+//                $url_image_back =  Cloudder::secureShow($publicId);
+//                $id_image_back =   str_replace('_150', '_520', $url_image_back);
+//            }
+//            if($request->hasFile('image_side')) {
+//                $phtValidation[] = $this->photoValidation($request->file('image_side'));
+//                $image_side = $request->file('image_side')->getRealPath();
+//
+//                Cloudder::upload($image_side, null,  array("folder" => "biker"));
+//                $publicId = Cloudder::getPublicId();
+//                $url_image_side =  Cloudder::secureShow($publicId);
+//                $id_image_side =   str_replace('_150', '_520', $url_image_side);
+//            }
+//            if($request->hasFile('image_front')) {
+//                $phtValidation[] = $this->photoValidation($request->file('image_front'));
+//                $image_front = $request->file('image_front')->getRealPath();
+//
+//                Cloudder::upload($image_front, null,  array("folder" => "biker"));
+//                $publicId = Cloudder::getPublicId();
+//                $url_image_front =  Cloudder::secureShow($publicId);
+//                $id_image_front =   str_replace('_150', '_520', $url_image_front);
+//            }
+//
+//            if (!empty($phtValidation[0])) {
+//                return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $phtValidation[0]] ], 400);
+//            }
             $Parking = Parking::find($request->parkings_id);
             $Parking->bike_count = $Parking->bike_count + 1;
             $Parking->save();
@@ -328,12 +347,12 @@ class BicyController extends Controller
                 'type_bicies_id' => $request->type_bicies_id,
                 'parkings_id' => $request->parkings_id,
                 'active' => $request->active,
-                'url_image_back' => $url_image_back,
-                'url_image_side' => $url_image_side,
-                'url_image_front' => $url_image_front,
-                'id_image_back' => $id_image_back,
-                'id_image_side' => $id_image_side,
-                'id_image_front' => $id_image_front
+                'url_image_back' => $dataServices[0],
+                'url_image_side' => $dataServices[2],
+                'url_image_front' => $dataServices[4],
+                'id_image_back' => $dataServices[1],
+                'id_image_side' => $dataServices[3],
+                'id_image_front' => $dataServices[5]
             ]);
 
             $stickerOrder = DetailedStickerOrder::create([
