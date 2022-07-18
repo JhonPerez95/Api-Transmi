@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Route;
 use Cloudder;
 
 
-ini_set('max_execution_time', '100000000000');
+ini_set('max_execution_time', 0);
 
 class BicyController extends Controller
 {
