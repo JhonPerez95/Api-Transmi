@@ -213,9 +213,10 @@ class BicyController extends Controller
                 'tires' => 'required',
                 'type_bicies_id' => 'required|exists:type_bicies,id',
                 'active' =>  'required|in:1,2,3',
-                'image_back' => 'required|mimes:jpg,png,jpeg',
-                'image_side' => 'required|mimes:jpg,png,jpeg',
-                'image_front' => 'required|mimes:jpg,png,jpeg'
+                'image_back' => 'required',
+//                'image_back' => 'required|mimes:jpg,png,jpeg|max:1024',
+//                'image_side' => 'required|mimes:jpg,png,jpeg|max:1024',
+//                'image_front' => 'required|mimes:jpg,png,jpeg|max:1024'
             ],
             "messages" => [
                 'code.required' => 'El campo codigo es requerido',
@@ -237,9 +238,9 @@ class BicyController extends Controller
                 'image_back.required' => 'Requerida la imagen image_back',
                 'image_side.required' => 'Requerida la imagen image_back',
                 'image_front.required' => 'Requerida la imagen image_back',
-                'image_back.mimes' => 'La imagen no cumple con las extensiones jpg,png,jpeg',
-                'image_side.mimes' => 'La imagen no cumple con las extensiones jpg,png,jpeg',
-                'image_front.mimes' => 'La imagen no cumple con las extensiones jpg,png,jpeg'
+                //'image_back.mimes' => 'La imagen no cumple con las extensiones jpg,png,jpeg',
+                //'image_side.mimes' => 'La imagen no cumple con las extensiones jpg,png,jpeg',
+                //'image_front.mimes' => 'La imagen no cumple con las extensiones jpg,png,jpeg'
             ]
         ];
 
