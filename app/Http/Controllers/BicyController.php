@@ -236,8 +236,8 @@ class BicyController extends Controller
                 'active.required' => 'El campo estado de la bicicleta es requerido',
                 'active.in' => 'El campo estado de la bicicleta es recibe los valores Activo, Inactivo y Bloqueado',
                 'image_back.required' => 'Requerida la imagen image_back',
-                'image_side.required' => 'Requerida la imagen image_back',
-                'image_front.required' => 'Requerida la imagen image_back',
+//                'image_side.required' => 'Requerida la imagen image_back',
+//                'image_front.required' => 'Requerida la imagen image_back',
                 //'image_back.mimes' => 'La imagen no cumple con las extensiones jpg,png,jpeg',
                 //'image_side.mimes' => 'La imagen no cumple con las extensiones jpg,png,jpeg',
                 //'image_front.mimes' => 'La imagen no cumple con las extensiones jpg,png,jpeg'
