@@ -213,9 +213,9 @@ class BicyController extends Controller
                 'tires' => 'required',
                 'type_bicies_id' => 'required|exists:type_bicies,id',
                 'active' =>  'required|in:1,2,3',
-                'image_back' => 'required|mimes:jpg,png,jpeg|max:1024',
-                'image_side' => 'required|mimes:jpg,png,jpeg|max:1024',
-                'image_front' => 'required|mimes:jpg,png,jpeg|max:1024'
+                'image_back' => 'required|mimes:jpg,png,jpeg',
+                'image_side' => 'required|mimes:jpg,png,jpeg',
+                'image_front' => 'required|mimes:jpg,png,jpeg'
             ],
             "messages" => [
                 'code.required' => 'El campo codigo es requerido',
