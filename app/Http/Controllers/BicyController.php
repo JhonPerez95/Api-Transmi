@@ -12,6 +12,7 @@ use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Route;
 use Cloudder;
@@ -175,7 +176,6 @@ class BicyController extends Controller
         }
 
         if ($fromInside) {
-
             // From inside does not add up
             if ($aumentar == 1 && !$avoidIncreasingCount) {
                 $Parking->bike_count = $Parking->bike_count + $aumentar;
@@ -186,41 +186,6 @@ class BicyController extends Controller
         } else {
             return response()->json(['message' => 'Success', 'response' => ['data' => ['consecutive' => $code], 'indexes' => [], 'errors' => []]], 200);
         }
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    private function photoValidation($photo, $updating = false)
-    {
-        $phValid = [];
-        if (!$photo) {
-            // While updating, resending the image won't be required
-            if (!$updating) {
-                $phValid[] = 'El campo fotografía es requerido';
-            }
-        } else {
-            $arrayingImage = (gettype($photo) != 'array') ? [$photo] : $photo;
-            $extensiones = ["jpg", "png", "jpeg"];
-
-            if (count($arrayingImage) > 1) {
-                $phValid[] = 'Se ha recibido más de una imágen para el ciclista';;
-                return $phValid;
-            }
-
-            if (!in_array($photo->getClientOriginalExtension(), $extensiones)) {
-                $phValid[] = 'El campo fotografía recibe imágenes de formato jpg, jpeg y png.';
-            }
-
-            if ($photo->getSize() > 10000000) {
-                $phValid[] = 'El campo fotografía tiene un tamaño máximo de 10MB';
-            }
-        }
-
-        return $phValid;
     }
 
    /**
@@ -247,8 +212,10 @@ class BicyController extends Controller
                 'serial' => 'required|unique:bicies',
                 'tires' => 'required',
                 'type_bicies_id' => 'required|exists:type_bicies,id',
-                //'active' =>  'required|in:1,2,3',
-                'active' =>  'required',
+                'active' =>  'required|in:1,2,3',
+                'image_back' => 'required|mimes:jpg,png,jpeg|max:1024',
+                'image_side' => 'required|mimes:jpg,png,jpeg|max:1024',
+                'image_front' => 'required|mimes:jpg,png,jpeg|max:1024'
             ],
             "messages" => [
                 'code.required' => 'El campo codigo es requerido',
@@ -266,7 +233,13 @@ class BicyController extends Controller
                 'type_bicies_id.required' => 'El campo tipo es requerido',
                 'type_bicies_id.exists' => 'El campo tipo no acerta ningún registro existente',
                 'active.required' => 'El campo estado de la bicicleta es requerido',
-                //'active.in' => 'El campo estado de la bicicleta es recibe los valores Activo, Inactivo y Bloqueado',
+                'active.in' => 'El campo estado de la bicicleta es recibe los valores Activo, Inactivo y Bloqueado',
+                'image_back.required' => 'Requerida la imagen image_back',
+                'image_side.required' => 'Requerida la imagen image_back',
+                'image_front.required' => 'Requerida la imagen image_back',
+                'image_back.mimes' => 'La imagen no cumple con las extensiones jpg,png,jpeg',
+                'image_side.mimes' => 'La imagen no cumple con las extensiones jpg,png,jpeg',
+                'image_front.mimes' => 'La imagen no cumple con las extensiones jpg,png,jpeg'
             ]
         ];
 
@@ -297,45 +270,60 @@ class BicyController extends Controller
 //            }
 
             // Photos validation
-            $phtValidation = [];
+//            $phtValidation = [];
+//            if($request->hasFile('image_back')) {
+//                $phtValidation[] = $this->photoValidation($request->file('image_back'));
+//                $files = array();
+//                $files[] = $request->file('image_back')->getRealPath();
+//                foreach ($files as $file) {
+//                    Cloudder::upload($file, null,  array("folder" => "biker"));
+//                    $publicId       = Cloudder::getPublicId();
+//                    $url_image_back = Cloudder::secureShow($publicId);
+//                    $id_image_back  = str_replace('_150', '_520', $url_image_back);
+//                }
+//            }
+//            if($request->hasFile('image_side') && $url_image_back) {
+//                $phtValidation[] = $this->photoValidation($request->file('image_side'));
+//                $files = array();
+//                $files[] = $request->file('image_side')->getRealPath();
+//                foreach ($files as $file) {
+//                    Cloudder::upload($file, null,  array("folder" => "biker"));
+//                    $publicId       = Cloudder::getPublicId();
+//                    $url_image_side = Cloudder::secureShow($publicId);
+//                    $id_image_side  = str_replace('_150', '_520', $url_image_side);
+//                }
+//            }
+//            if($request->hasFile('image_front') && $url_image_side) {
+//                $phtValidation[] = $this->photoValidation($request->file('image_front'));
+//                $files = array();
+//                $files[] = $request->file('image_front')->getRealPath();
+//                foreach ($files as $file) {
+//                    Cloudder::upload($file, null,  array("folder" => "biker"));
+//                    $publicId        = Cloudder::getPublicId();
+//                    $url_image_front = Cloudder::secureShow($publicId);
+//                    $id_image_front  = str_replace('_150', '_520', $url_image_front);
+//                }
+//            }
+
+//            if (!empty($phtValidation[0])) {
+//                return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $phtValidation[0]] ], 400);
+//            }
+
+            $folder = 'images';
             if($request->hasFile('image_back')) {
-                $phtValidation[] = $this->photoValidation($request->file('image_back'));
-                $files = array();
-                $files[] = $request->file('image_back')->getRealPath();
-                foreach ($files as $file) {
-                    Cloudder::upload($file, null,  array("folder" => "biker"));
-                    $publicId       = Cloudder::getPublicId();
-                    $url_image_back = Cloudder::secureShow($publicId);
-                    $id_image_back  = str_replace('_150', '_520', $url_image_back);
-                }
+                $image_path_back = Storage::disk('s3')->put($folder, $request->file('image_back'),'public');
+                $image_path_back = substr($image_path_back, 7);
             }
-            if($request->hasFile('image_side') && $url_image_back) {
-                $phtValidation[] = $this->photoValidation($request->file('image_side'));
-                $files = array();
-                $files[] = $request->file('image_side')->getRealPath();
-                foreach ($files as $file) {
-                    Cloudder::upload($file, null,  array("folder" => "biker"));
-                    $publicId       = Cloudder::getPublicId();
-                    $url_image_side = Cloudder::secureShow($publicId);
-                    $id_image_side  = str_replace('_150', '_520', $url_image_side);
-                }
+            if($request->hasFile('image_side')) {
+                $image_path_side = Storage::disk('s3')->put($folder, $request->file('image_side'),'public');
+                $image_path_side = substr($image_path_side, 7);
             }
-            if($request->hasFile('image_front') && $url_image_side) {
-                $phtValidation[] = $this->photoValidation($request->file('image_front'));
-                $files = array();
-                $files[] = $request->file('image_front')->getRealPath();
-                foreach ($files as $file) {
-                    Cloudder::upload($file, null,  array("folder" => "biker"));
-                    $publicId        = Cloudder::getPublicId();
-                    $url_image_front = Cloudder::secureShow($publicId);
-                    $id_image_front  = str_replace('_150', '_520', $url_image_front);
-                }
+            if($request->hasFile('image_front')) {
+                $image_path_front = Storage::disk('s3')->put($folder, $request->file('image_front'),'public');
+                $image_path_front = substr($image_path_front, 7);
             }
 
-            if (!empty($phtValidation[0])) {
-                return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $phtValidation[0]] ], 400);
-            }
-            //return response()->json(['message' => 'Bicy Created', 'response' => ["data" => $url_image_back, "data2" => $url_image_side, "data3" => $url_image_front]], 201);
+            //return response()->json(['message' => 'Bicy Created', 'response' => ["data" => $image_path_back, "data2" => $image_path_side, "data3" => $image_path_front]], 201);
 
             $Parking = Parking::find($request->parkings_id);
             $Parking->bike_count = $Parking->bike_count + 1;
@@ -352,12 +340,12 @@ class BicyController extends Controller
                 'type_bicies_id'  => $request->type_bicies_id,
                 'parkings_id'     => $request->parkings_id,
                 'active'          => $request->active,
-                'url_image_back'  => $url_image_back,
-                'url_image_side'  => $url_image_side,
-                'url_image_front' => $url_image_front,
-                'id_image_back'   => $id_image_back,
-                'id_image_side'   => $id_image_side,
-                'id_image_front'  => $id_image_front
+                'url_image_back'  => $image_path_back,
+                'url_image_side'  => $image_path_side,
+                'url_image_front' => $image_path_front,
+                'id_image_back'   => $image_path_back,
+                'id_image_side'   => $image_path_side,
+                'id_image_front'  => $image_path_front
             ]);
 
             $stickerOrder = DetailedStickerOrder::create([
