@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\DetailedStickerOrder;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\File;
 use App\Models\Visit;
 use App\Models\Bicy;
 use App\Models\Parking;
@@ -214,9 +215,8 @@ class BicyController extends Controller
                 'type_bicies_id' => 'required|exists:type_bicies,id',
                 'active' =>  'required|in:1,2,3',
                 'image_back' => 'required',
-//                'image_back' => 'required|mimes:jpg,png,jpeg|max:1024',
-//                'image_side' => 'required|mimes:jpg,png,jpeg|max:1024',
-//                'image_front' => 'required|mimes:jpg,png,jpeg|max:1024'
+                'image_side' => 'required',
+                'image_front' => 'required'
             ],
             "messages" => [
                 'code.required' => 'El campo codigo es requerido',
@@ -236,11 +236,8 @@ class BicyController extends Controller
                 'active.required' => 'El campo estado de la bicicleta es requerido',
                 'active.in' => 'El campo estado de la bicicleta es recibe los valores Activo, Inactivo y Bloqueado',
                 'image_back.required' => 'Requerida la imagen image_back',
-//                'image_side.required' => 'Requerida la imagen image_back',
-//                'image_front.required' => 'Requerida la imagen image_back',
-                //'image_back.mimes' => 'La imagen no cumple con las extensiones jpg,png,jpeg',
-                //'image_side.mimes' => 'La imagen no cumple con las extensiones jpg,png,jpeg',
-                //'image_front.mimes' => 'La imagen no cumple con las extensiones jpg,png,jpeg'
+                'image_side.required' => 'Requerida la imagen image_back',
+                'image_front.required' => 'Requerida la imagen image_back'
             ]
         ];
 
@@ -250,7 +247,6 @@ class BicyController extends Controller
             if ($validator->fails()) { //Si hay algun error se mostrará el mensaje
                 return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $validator->errors() ]], 400);
             }
-
 //            $files = array();
 //            $files[] = $request->file('image_back')->getRealPath();
 //            $files[] = $request->file('image_side')->getRealPath();
@@ -271,9 +267,7 @@ class BicyController extends Controller
 //            }
 
             // Photos validation
-//            $phtValidation = [];
 //            if($request->hasFile('image_back')) {
-//                $phtValidation[] = $this->photoValidation($request->file('image_back'));
 //                $files = array();
 //                $files[] = $request->file('image_back')->getRealPath();
 //                foreach ($files as $file) {
@@ -284,7 +278,6 @@ class BicyController extends Controller
 //                }
 //            }
 //            if($request->hasFile('image_side') && $url_image_back) {
-//                $phtValidation[] = $this->photoValidation($request->file('image_side'));
 //                $files = array();
 //                $files[] = $request->file('image_side')->getRealPath();
 //                foreach ($files as $file) {
@@ -295,7 +288,6 @@ class BicyController extends Controller
 //                }
 //            }
 //            if($request->hasFile('image_front') && $url_image_side) {
-//                $phtValidation[] = $this->photoValidation($request->file('image_front'));
 //                $files = array();
 //                $files[] = $request->file('image_front')->getRealPath();
 //                foreach ($files as $file) {
@@ -310,19 +302,46 @@ class BicyController extends Controller
 //                return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $phtValidation[0]] ], 400);
 //            }
 
-            $folder = 'images';
-            if($request->hasFile('image_back')) {
-                $image_path_back = Storage::disk('s3')->put($folder, $request->file('image_back'),'public');
-                $image_path_back = substr($image_path_back, 7);
+            if($request->image_front){
+                $image = base64_decode($request->image_front);
+                //$imageName = rand(111111111, 999999999) . '.png';
+                $imageName = 'image_front' . time() . '.png';
+                $resAWS = Storage::disk('s3')->put('images/' . $imageName, $image, 'public'); // old : $file
+                if($resAWS){
+                    $image_path_front = 'https://transmiapp-bucket-s3.s3.amazonaws.com/images/'.$imageName;
+                }
             }
-            if($request->hasFile('image_side')) {
-                $image_path_side = Storage::disk('s3')->put($folder, $request->file('image_side'),'public');
-                $image_path_side = substr($image_path_side, 7);
+            if($request->image_back) {
+                $image = base64_decode($request->image_back);
+                $imageName = 'image_back' . time() . '.png';
+                $resAWS = Storage::disk('s3')->put('images/' . $imageName, $image, 'public');
+                if($resAWS){
+                    $image_path_back = 'https://transmiapp-bucket-s3.s3.amazonaws.com/images/'.$imageName;
+                }
             }
-            if($request->hasFile('image_front')) {
-                $image_path_front = Storage::disk('s3')->put($folder, $request->file('image_front'),'public');
-                $image_path_front = substr($image_path_front, 7);
+            if($request->image_side) {
+                $image = base64_decode($request->image_side);
+                $imageName = 'image_side' . time() . '.png';
+                $resAWS = Storage::disk('s3')->put('images/' . $imageName, $image, 'public');
+                if($resAWS){
+                    $image_path_side = 'https://transmiapp-bucket-s3.s3.amazonaws.com/images/'.$imageName;
+                }
             }
+
+//            return response()->json(['message' => 'Bicy Created', 'response' => ["image_path_front" => $image_path_front, "image_path_back" => $image_path_back, "image_path_side" => $image_path_side ]], 201);
+
+//            if($request->hasFile('image_back')) {
+//                $image_path_back = Storage::disk('s3')->put($folder, $request->file('image_back'),'public');
+//                $image_path_back = substr($image_path_side, 7);
+//            }
+//            if($request->hasFile('image_side')) {
+//                $image_path_side = Storage::disk('s3')->put($folder, $request->file('image_side'),'public');
+//                $image_path_side = substr($image_path_side, 7);
+//            }
+//            if($request->hasFile('image_front')) {
+//                $image_path_front = Storage::disk('s3')->put($folder, $request->file('image_front'),'public');
+//                $image_path_front = substr($image_path_front, 7);
+//            }
 
             //return response()->json(['message' => 'Bicy Created', 'response' => ["data" => $image_path_back, "data2" => $image_path_side, "data3" => $image_path_front]], 201);
 
