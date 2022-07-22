@@ -302,7 +302,7 @@ class BicyController extends Controller
 //                return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $phtValidation[0]] ], 400);
 //            }
 
-            if($request->image_front){
+            if($request->image_front) {
                 $image = base64_decode($request->image_front);
                 //$imageName = rand(111111111, 999999999) . '.png';
                 $imageName = 'image_front' . time() . '.png';
@@ -328,22 +328,22 @@ class BicyController extends Controller
                 }
             }
 
-//            return response()->json(['message' => 'Bicy Created', 'response' => ["image_path_front" => $image_path_front, "image_path_back" => $image_path_back, "image_path_side" => $image_path_side ]], 201);
+//          return response()->json(['message' => 'Bicy Created', 'response' => ["image_path_front" => $image_path_front, "image_path_back" => $image_path_back, "image_path_side" => $image_path_side ]], 201);
 
-//            if($request->hasFile('image_back')) {
-//                $image_path_back = Storage::disk('s3')->put($folder, $request->file('image_back'),'public');
-//                $image_path_back = substr($image_path_side, 7);
-//            }
-//            if($request->hasFile('image_side')) {
-//                $image_path_side = Storage::disk('s3')->put($folder, $request->file('image_side'),'public');
-//                $image_path_side = substr($image_path_side, 7);
-//            }
-//            if($request->hasFile('image_front')) {
-//                $image_path_front = Storage::disk('s3')->put($folder, $request->file('image_front'),'public');
-//                $image_path_front = substr($image_path_front, 7);
-//            }
+            if($request->hasFile('image_back')) {
+                $image_path_back = Storage::disk('s3')->put('images/', $request->file('image_back'),'public');
+                $image_path_back = substr($image_path_side, 7);
+            }
+            if($request->hasFile('image_side')) {
+                $image_path_side = Storage::disk('s3')->put('images/', $request->file('image_side'),'public');
+                $image_path_side = substr($image_path_side, 7);
+            }
+            if($request->hasFile('image_front')) {
+                $image_path_front = Storage::disk('s3')->put('images/', $request->file('image_front'),'public');
+                $image_path_front = substr($image_path_front, 7);
+            }
 
-            //return response()->json(['message' => 'Bicy Created', 'response' => ["data" => $image_path_back, "data2" => $image_path_side, "data3" => $image_path_front]], 201);
+//          return response()->json(['message' => 'Bicy Created', 'response' => ["data" => $request->hasFile('image_back')]], 201);
 
             $Parking = Parking::find($request->parkings_id);
             $Parking->bike_count = $Parking->bike_count + 1;
