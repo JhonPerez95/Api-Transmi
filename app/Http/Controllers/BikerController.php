@@ -67,7 +67,6 @@ class BikerController extends Controller
                 $outService['gender'] = $service->gender;
                 $outService['genders_id'] = $service->genders_id;
                 $outService['id'] = $service->id;
-                $outService['id_img'] = $service->id_img;
                 $outService['job'] = $service->job;
                 $outService['jobs_id'] = $service->jobs_id;
                 $outService['last_name'] = $service->last_name;
@@ -151,42 +150,6 @@ class BikerController extends Controller
         //
     }
 
-   /**
-    * Store a newly created resource in storage.
-    *
-    * @param  \Illuminate\Http\Request  $request
-    * @return \Illuminate\Http\Response
-    */
-    private function photoValidation($request, $updating = false)
-    {
-        $phValid = [];
-        if (!$request->hasFile('photo')) {
-            // While updating, resending the image won't be required
-            if (!$updating) {
-                $phValid[] = 'El campo fotografía es requerido';
-            }
-        } else {
-            $ph = $request->file('photo');
-            $arrayingImage = (gettype($ph) != 'array') ? [$ph] : $ph;
-            $extensiones = ["jpg", "png", "jpeg"];
-
-            if (count($arrayingImage) > 1) {
-                $phValid[] = 'Se ha recibido más de una imágen para el ciclista';;
-                return $phValid;
-            }
-
-            if (!in_array($ph->getClientOriginalExtension(), $extensiones)) {
-                $phValid[] = 'El campo fotografía recibe imágenes de formato jpg, jpeg y png.';
-            }
-
-            if ($ph->getSize() > 10000000) {
-                $phValid[] = 'El campo fotografía tiene un tamaño máximo de 10MB';
-            }
-        }
-
-        return $phValid;
-    }
-
     /**
      * Store a newly created resource in storage.
      *
@@ -213,6 +176,7 @@ class BikerController extends Controller
                 'auth' => 'required|in:1,2',
                 'gender' => 'required|exists:genders,id',
                 'parkings_id' => 'required|exists:parkings,id',
+
             ],
             "messages" => [
                 'name.required' => 'El campo nombre es requerido',
@@ -280,15 +244,6 @@ class BikerController extends Controller
                 return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $validator->errors() ]], 400);
             }
 
-            $validateImage = true;
-            if ($validateImage) {
-                // Photo validation
-                $phtValidation = $this->photoValidation($request);
-                if (count($phtValidation)) {
-                    return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $phtValidation]], 400);
-                }
-            }
-
             $vef = VerificationCode::validate($request->confirmation, $request->phone);
 
             if (!$vef) {
@@ -301,12 +256,20 @@ class BikerController extends Controller
             $counter->value = $counter->value + 1;
             $counter->save();
 
-            $ph = $request->file('photo')->getRealPath();
-
-            Cloudder::upload($ph, null,  array("folder" => "biker"));
-            $publicId = Cloudder::getPublicId();
-            $url =  Cloudder::secureShow($publicId);
-            $urlImg =   str_replace('_150', '_520', $url);
+            //Guardado de imagene
+            if($request->hasFile('photo')) { //Si viene desde la web
+                $image_path_front = Storage::disk('s3')->put('images', $request->file('photo'),'public');
+                $id_path    = $image_path_front;
+                $urlImg   = 'https://transmiapp-bucket-s3.s3.amazonaws.com/'. $image_path_front;
+            } else if($request->photo !== "null") { //Si viene desde la app
+                $image = base64_decode($request->photo);
+                $imageName = 'photo' . time() . '.png';
+                $resAWS = Storage::disk('s3')->put('images/' . $imageName, $image, 'public'); // old : $file
+                if($resAWS){
+                    $id_path  = 'images/' . $imageName;
+                    $urlImg = 'https://transmiapp-bucket-s3.s3.amazonaws.com/images/'.$imageName;
+                }
+            }
 
             $biker = Biker::create([
                 'name' => $request->name,
@@ -327,7 +290,7 @@ class BikerController extends Controller
                 'active' => $request->active,
                 'auth' => $request->auth,
                 'url_img' => $urlImg,
-                'id_img' => $publicId,
+                'id_img' => $id_path
             ]);
 
             $biker->notifySignup($request->parkings_id);
@@ -346,15 +309,13 @@ class BikerController extends Controller
      */
     public function show($id)
     {
-
         try {
-            $biker = ($this->client == 'web')
-                ? Biker::find($id)->whereRaw("phone != ''")
-                : Biker::whereRaw("document = $id and phone != ''")->first();
+            $biker = ($this->client == 'web') ? Biker::find($id) : Biker::whereRaw("document = $id")->first();
             if (!$biker) {
                 return response()->json(['message' => 'Not Found', 'response' => ['errors' => ['Registro de ciclista no encontrado']]], 404);
             }
             $query = $this->client == 'web' ?  'bikers.id' : 'bikers.document';
+
             $data = DB::table('bikers')
                 ->where($query, $id,)
                 ->join('type_documents', 'bikers.type_documents_id', '=', 'type_documents.id')
@@ -372,38 +333,33 @@ class BikerController extends Controller
 
             $appUrl = config('app.url');
 
-            //?Check if localhost
-            // $appUrl = ($appUrl[strlen($appUrl) - 1] == '/') ? $appUrl : "$appUrl:8000/";
-
-            // $bikerPhotos = Storage::allFiles("public/bikers/biker{$biker->id}");
-            // $data->photo = (count($bikerPhotos)) ? $appUrl . preg_replace('/public/', 'storage', $bikerPhotos[0]) : null;
-
             $_bicies = DB::table('bicies')
                 ->where('bikers_id', $biker->id)
                 ->select('bicies.*')
                 ->get();
+
             $bicies = array();
+            if(!empty($_bicies)){
+                foreach ($_bicies as $bicy) {
+                    $existingPhotos = Storage::allFiles("public/bicies/bicy{$bicy->id}");
 
-            foreach ($_bicies as $bicy) {
+                    $frontPhoto = array_filter($existingPhotos, function ($el) {
+                        return preg_match('/front_/', $el);
+                    });
+                    $bicy->image_front = (count($frontPhoto)) ? $appUrl .  preg_replace('/public/', 'storage', array_values($frontPhoto)[0])  : null;
 
-                $existingPhotos = Storage::allFiles("public/bicies/bicy{$bicy->id}");
+                    $backPhoto = array_filter($existingPhotos, function ($el) {
+                        return preg_match('/back_/', $el);
+                    });
+                    $bicy->image_back = (count($backPhoto)) ? $appUrl .  preg_replace('/public/', 'storage', array_values($backPhoto)[0])  : null;
 
-                $frontPhoto = array_filter($existingPhotos, function ($el) {
-                    return preg_match('/front_/', $el);
-                });
-                $bicy->image_front = (count($frontPhoto)) ? $appUrl .  preg_replace('/public/', 'storage', array_values($frontPhoto)[0])  : null;
+                    $sidePhoto = array_filter($existingPhotos, function ($el) {
+                        return preg_match('/side_/', $el);
+                    });
+                    $bicy->image_side = (count($sidePhoto)) ? $appUrl .  preg_replace('/public/', 'storage', array_values($sidePhoto)[0])  : null;
 
-                $backPhoto = array_filter($existingPhotos, function ($el) {
-                    return preg_match('/back_/', $el);
-                });
-                $bicy->image_back = (count($backPhoto)) ? $appUrl .  preg_replace('/public/', 'storage', array_values($backPhoto)[0])  : null;
-
-                $sidePhoto = array_filter($existingPhotos, function ($el) {
-                    return preg_match('/side_/', $el);
-                });
-                $bicy->image_side = (count($sidePhoto)) ? $appUrl .  preg_replace('/public/', 'storage', array_values($sidePhoto)[0])  : null;
-
-                $bicies[] = $bicy;
+                    $bicies[] = $bicy;
+                }
             }
 
             $type = DB::table('type_documents')
@@ -432,13 +388,7 @@ class BikerController extends Controller
             return response()->json(
                 [
                     'message' => "Sucess",
-                    'response' => [
-                        'data' => $data,
-                        'bicies' => $bicies,
-                        'indexes' => [
-                            'type' => $type, 'gender' => $gender, 'job' => $job, 'level' => $level, 'active' => $active
-                        ]
-                    ]
+                    'response' => [ 'data' => $data, 'bicies' => $bicies, 'indexes' => [ 'type' => $type, 'gender' => $gender, 'job' => $job, 'level' => $level, 'active' => $active ] ]
                 ],
                 200
             );
@@ -470,11 +420,8 @@ class BikerController extends Controller
     {
 
         try {
-
-            Log::info('BikerUpdateRequest');
-            Log::info($request->all());
-
-            $validateImage = true;
+            //Log::info('BikerUpdateRequest');
+            //Log::info($request->all());
 
             if (!$id) {
                 $id = $request->input('id');
@@ -573,49 +520,26 @@ class BikerController extends Controller
 
             $validator = Validator::make($request->all(), $validation['rules'], $validation['messages']);
 
-
-            if ($validateImage && $request->file('photo')) {
-                // photo validation
-                $phtValidation = $this->photoValidation($request, true);
-
-                if ($validator->fails()) {
-                    return response()->json(['response' => ['errors' => array_merge($validator->errors()->all(), $phtValidation)], 'message' => 'Bad Request'], 400);
-                } else {
-                    if (count($phtValidation)) {
-                        return response()->json(['response' => ['errors' => $phtValidation], 'message' => 'Bad Request'], 400);
-                    }
-                }
-            } else {
-                if ($validator->fails()) {
-                    return response()->json(['response' => ['errors' => $validator->errors()->all()], 'message' => 'Bad Request'], 400);
-                }
+            if ($validator->fails()) { //Si hay algun error se mostrará el mensaje
+                return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $validator->errors() ]], 400);
             }
 
-            // Verification code, validated above, deleted here
-            // if ($data->phone != $request->input('phone')) {
-            //     $vef = VerificationCode::validate($request->confirmation);
-            //     if (!$vef) {
-            //         return response()->json(['message' => 'Bad Request', 'response' => ['errors' => ['El código de verificación no acerta las credenciales con las que fue registrado.']]], 400);
-            //     }
-            // }
-
-            if ($request->file('photo')) {
-                $ph     = $request->file('photo')->getRealPath();
-                $id_ph = $data->id_img;
-                try {
-                    Cloudder::upload($ph, null,  array("folder" => "biker"));
-                    $publicId = Cloudder::getPublicId();
-                    $url =  Cloudder::secureShow($publicId);
-                    $urlImg =   str_replace('_150', '_520', $url);
-
-                    Cloudder::delete($id_ph);
-                    Cloudder::destroyImage($id_ph);
-                } catch (\Throwable $th) {
-                    return response()->json(['message' => 'Bad Request', 'response' => ['msg' => 'Error al actualizar la imagen', 'error' => $th]], 500);
+            //Guardado de imagene
+            if($request->hasFile('photo')) { //Si viene desde la web
+                $image_path_front = Storage::disk('s3')->put('images', $request->file('photo'),'public');
+                $id_path    = $image_path_front;
+                $urlImg   = 'https://transmiapp-bucket-s3.s3.amazonaws.com/'. $image_path_front;
+            } else if($request->photo !== "null") { //Si viene desde la app
+                $image = base64_decode($request->photo);
+                $imageName = 'photo' . time() . '.png';
+                $resAWS = Storage::disk('s3')->put('images/' . $imageName, $image, 'public'); // old : $file
+                if($resAWS){
+                    $id_path  = 'images/' . $imageName;
+                    $urlImg = 'https://transmiapp-bucket-s3.s3.amazonaws.com/images/'.$imageName;
                 }
             } else {
                 $urlImg = $data->id_img;
-                $publicId = $data->url_img;
+                $id_path = $data->url_img;
             }
 
             $data->name = $request->name ?? $data->name;
@@ -635,7 +559,7 @@ class BikerController extends Controller
             $data->active = $request->active ?? $data->active;
             $data->auth = $request->auth ?? $data->auth;
             $data->url_img = $urlImg;
-            $data->id_img = $publicId;
+            $data->id_img = $id_path;
             $data->update();
 
             return response()->json(['message' => 'User Updated', 'response' => ["errors" => []]], 201);
@@ -659,10 +583,12 @@ class BikerController extends Controller
                 return response()->json(['message' => "Not Found", 'response' => ['errors' => ["Usuario no encontrado."]]], 404);
             }
 
-            // Eliminando imagen de Cloudinary
+            // Eliminando imagen de AWS
             try {
-                Cloudder::delete($data->id_img);
-                Cloudder::destroyImage($data->id_img);
+                //Eliminacion de imagenes
+                if(Storage::disk('s3')->exists($data->id_image_back)) {
+                    //Storage::disk('s3')->delete($data->id_image_back);
+                }
             } catch (\Throwable $th) {
                 return response()->json(['message' => 'Bad Request', 'response' => ['msg' => 'Error a eliminar la imagen del ciclista', 'error' => $th]], 500);
             }
@@ -686,9 +612,7 @@ class BikerController extends Controller
 
     public function unblockBiker($id)
     {
-
         try {
-
             $biker = Biker::find($id);
             if (!$biker) {
                 return response()->json(['message' => 'Not Found', 'response' => ['errors' => ['Usuario ciclista no encontrado']]], 404);

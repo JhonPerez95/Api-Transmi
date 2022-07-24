@@ -162,7 +162,6 @@ class BicyController extends Controller
 
         while (true) {
             $code = $Parking->code . substr("0000" . ($Parking->bike_count + $aumentar), -4, 4);
-
             $exists = Bicy::where(['code' => $code])->first();
             if ($exists) {
                 $aumentar++;
@@ -247,103 +246,49 @@ class BicyController extends Controller
             if ($validator->fails()) { //Si hay algun error se mostrará el mensaje
                 return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $validator->errors() ]], 400);
             }
-//            $files = array();
-//            $files[] = $request->file('image_back')->getRealPath();
-//            $files[] = $request->file('image_side')->getRealPath();
-//            $files[] = $request->file('image_front')->getRealPath();
 
-//            $dataServices = array();
-//            $total = count($files);
-//            for($i=0; $i < $total; $i++){
-//                $url = array();
-//                $urlImg = array();
-//                Cloudder::upload($files[$i], null,  array("folder" => "biker"));
-//                $publicId = Cloudder::getPublicId();
-//                $url =  Cloudder::secureShow($publicId);
-//                $urlImg =   str_replace('_150', '_520', $url);
-//
-//                $dataServices[] = $url;
-//                $dataServices[] = $urlImg;
-//            }
-
-            // Photos validation
-//            if($request->hasFile('image_back')) {
-//                $files = array();
-//                $files[] = $request->file('image_back')->getRealPath();
-//                foreach ($files as $file) {
-//                    Cloudder::upload($file, null,  array("folder" => "biker"));
-//                    $publicId       = Cloudder::getPublicId();
-//                    $url_image_back = Cloudder::secureShow($publicId);
-//                    $id_image_back  = str_replace('_150', '_520', $url_image_back);
-//                }
-//            }
-//            if($request->hasFile('image_side') && $url_image_back) {
-//                $files = array();
-//                $files[] = $request->file('image_side')->getRealPath();
-//                foreach ($files as $file) {
-//                    Cloudder::upload($file, null,  array("folder" => "biker"));
-//                    $publicId       = Cloudder::getPublicId();
-//                    $url_image_side = Cloudder::secureShow($publicId);
-//                    $id_image_side  = str_replace('_150', '_520', $url_image_side);
-//                }
-//            }
-//            if($request->hasFile('image_front') && $url_image_side) {
-//                $files = array();
-//                $files[] = $request->file('image_front')->getRealPath();
-//                foreach ($files as $file) {
-//                    Cloudder::upload($file, null,  array("folder" => "biker"));
-//                    $publicId        = Cloudder::getPublicId();
-//                    $url_image_front = Cloudder::secureShow($publicId);
-//                    $id_image_front  = str_replace('_150', '_520', $url_image_front);
-//                }
-//            }
-
-//            if (!empty($phtValidation[0])) {
-//                return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $phtValidation[0]] ], 400);
-//            }
-
-            if($request->image_front) {
+            //Guardado de imagenes
+            if($request->hasFile('image_front')) { //Si viene desde la web
+                $image_path_front = Storage::disk('s3')->put('images', $request->file('image_front'),'public');
+                $id_path_front    = $image_path_front;
+                $url_path_front   = 'https://transmiapp-bucket-s3.s3.amazonaws.com/'. $image_path_front;
+            } else if($request->image_front !== "null") { //Si viene desde la app
                 $image = base64_decode($request->image_front);
-                //$imageName = rand(111111111, 999999999) . '.png';
-                $imageName = 'image_front' . time() . '.png';
+                $imageName = 'image_front_' . time() . '.png';
                 $resAWS = Storage::disk('s3')->put('images/' . $imageName, $image, 'public'); // old : $file
                 if($resAWS){
-                    $image_path_front = 'https://transmiapp-bucket-s3.s3.amazonaws.com/images/'.$imageName;
+                    $id_path_front  = 'images/' . $imageName;
+                    $url_path_front = 'https://transmiapp-bucket-s3.s3.amazonaws.com/images/'.$imageName;
                 }
             }
-            if($request->image_back) {
+
+            if($request->hasFile('image_back')) { //Si viene desde la web
+                $image_path_back = Storage::disk('s3')->put('images', $request->file('image_back'),'public');
+                $id_path_back    = $image_path_back;
+                $url_path_back   = 'https://transmiapp-bucket-s3.s3.amazonaws.com/'. $image_path_back;
+            } else if($request->image_back !== "null") { //Si viene desde la app
                 $image = base64_decode($request->image_back);
-                $imageName = 'image_back' . time() . '.png';
+                $imageName = 'image_back_' . time() . '.png';
                 $resAWS = Storage::disk('s3')->put('images/' . $imageName, $image, 'public');
                 if($resAWS){
-                    $image_path_back = 'https://transmiapp-bucket-s3.s3.amazonaws.com/images/'.$imageName;
+                    $id_path_back  = 'images/' . $imageName;
+                    $url_path_back = 'https://transmiapp-bucket-s3.s3.amazonaws.com/images/'.$imageName;
                 }
             }
-            if($request->image_side) {
+
+            if($request->hasFile('image_side')) { //Si viene desde la web
+                $image_path_side = Storage::disk('s3')->put('images', $request->file('image_side'),'public');
+                $id_path_side    = $image_path_side;
+                $url_path_side   = 'https://transmiapp-bucket-s3.s3.amazonaws.com/'. $image_path_side;
+            } else if($request->image_side !== "null") { //Si viene desde la app
                 $image = base64_decode($request->image_side);
-                $imageName = 'image_side' . time() . '.png';
+                $imageName = 'image_side_' . time() . '.png';
                 $resAWS = Storage::disk('s3')->put('images/' . $imageName, $image, 'public');
                 if($resAWS){
-                    $image_path_side = 'https://transmiapp-bucket-s3.s3.amazonaws.com/images/'.$imageName;
+                    $id_path_side  = 'images/' . $imageName;
+                    $url_path_side = 'https://transmiapp-bucket-s3.s3.amazonaws.com/images/'.$imageName;
                 }
             }
-
-//          return response()->json(['message' => 'Bicy Created', 'response' => ["image_path_front" => $image_path_front, "image_path_back" => $image_path_back, "image_path_side" => $image_path_side ]], 201);
-
-            if($request->hasFile('image_back')) {
-                $image_path_back = Storage::disk('s3')->put('images/', $request->file('image_back'),'public');
-                $image_path_back = substr($image_path_side, 7);
-            }
-            if($request->hasFile('image_side')) {
-                $image_path_side = Storage::disk('s3')->put('images/', $request->file('image_side'),'public');
-                $image_path_side = substr($image_path_side, 7);
-            }
-            if($request->hasFile('image_front')) {
-                $image_path_front = Storage::disk('s3')->put('images/', $request->file('image_front'),'public');
-                $image_path_front = substr($image_path_front, 7);
-            }
-
-//          return response()->json(['message' => 'Bicy Created', 'response' => ["data" => $request->hasFile('image_back')]], 201);
 
             $Parking = Parking::find($request->parkings_id);
             $Parking->bike_count = $Parking->bike_count + 1;
@@ -360,12 +305,12 @@ class BicyController extends Controller
                 'type_bicies_id'  => $request->type_bicies_id,
                 'parkings_id'     => $request->parkings_id,
                 'active'          => $request->active,
-                'url_image_back'  => $image_path_back,
-                'url_image_side'  => $image_path_side,
-                'url_image_front' => $image_path_front,
-                'id_image_back'   => $image_path_back,
-                'id_image_side'   => $image_path_side,
-                'id_image_front'  => $image_path_front
+                'url_image_back'  => $url_path_back,
+                'url_image_side'  => $url_path_side,
+                'url_image_front' => $url_path_front,
+                'id_image_back'   => $id_path_back,
+                'id_image_side'   => $id_path_side,
+                'id_image_front'  => $id_path_front
             ]);
 
             $stickerOrder = DetailedStickerOrder::create([
@@ -451,22 +396,6 @@ class BicyController extends Controller
         ]], 200);
     }
 
-    private function updatePhotoInCloud($photo, $id_photo)
-    {
-        try {
-            Cloudder::upload($photo, null,  array("folder" => "bicy"));
-            $publicId = Cloudder::getPublicId();
-            $url =  Cloudder::secureShow($publicId);
-            $urlImg =   str_replace('_150', '_520', $url);
-
-            Cloudder::delete($id_photo);
-            Cloudder::destroyImage($id_photo);
-            return array($urlImg, $publicId);
-        } catch (\Throwable $th) {
-            return response()->json(['message' => 'Bad Request', 'response' => ['message' => 'Problema al guardar la imagen', 'error' => $th]], 500);
-        }
-    }
-
     /**
      * Update the specified resource in storage.
      *
@@ -476,8 +405,6 @@ class BicyController extends Controller
      */
     public function update(Request $request, $id = false)
     {
-        $validateImage = true;
-
         try {
             if (!$id) {
                 $id = $request->input('id');
@@ -517,49 +444,66 @@ class BicyController extends Controller
             ];
 
             $validator = Validator::make($request->all(), $validation['rules'], $validation['messages']);
-            if ($validateImage) { // photo validation
 
-                $phtValidation = $this->photoValidation($request->file('image_back'), true);
-                $phtValidation2 = $this->photoValidation($request->file('image_side'), true);
-                $phtValidation3 = $this->photoValidation($request->file('image_front'), true);
+            if ($validator->fails()) { //Si hay algun error se mostrará el mensaje
+                return response()->json(['message' => 'Bad Request', 'response' => ['errors' => $validator->errors() ]], 400);
+            }
 
-                if ($validator->fails()) {
-                    return response()->json(['response' => ['errors' => array_merge($validator->errors()->all(), $phtValidation, $phtValidation2 , $phtValidation3)], 'message' => 'Bad Request'], 400);
-                } else {
-                    if (count($phtValidation)) {
-                        return response()->json(['response' => ['errors' => $phtValidation], 'message' => 'Bad Request'], 400);
-                    }
+            //Eliminacion de imagenes
+//            if(Storage::disk('s3')->exists($data->id_image_back)) {
+//                Storage::disk('s3')->delete($data->id_image_back);
+//            }
+//            if(Storage::disk('s3')->exists($data->id_image_front)) {
+//                Storage::disk('s3')->delete($data->id_image_front);
+//            }
+//            if(Storage::disk('s3')->exists($data->id_image_side)) {
+//                Storage::disk('s3')->delete($data->id_image_side);
+//            }
+
+            //Guardado de imagenes nuevas
+            if($request->hasFile('image_front')) { //Si viene desde la web
+                $image_path_front = Storage::disk('s3')->put('images', $request->file('image_front'),'public');
+                $id_path_front    = $image_path_front;
+                $url_path_front   = 'https://transmiapp-bucket-s3.s3.amazonaws.com/'. $image_path_front;
+            } else if($request->image_front !== "null") { //Si viene desde la app
+                $image = base64_decode($request->image_front);
+                $imageName = 'image_front_' . time() . '.png';
+                $resAWS = Storage::disk('s3')->put('images/' . $imageName, $image, 'public'); // old : $file
+                if($resAWS){
+                    $id_path_front  = 'images/' . $imageName;
+                    $url_path_front = 'https://transmiapp-bucket-s3.s3.amazonaws.com/images/'.$imageName;
                 }
-            } else {
-                if ($validator->fails()) {
-                    return response()->json(['response' => ['errors' => $validator->errors()->all()], 'message' => 'Bad Request'], 400);
+            }
+
+            if($request->hasFile('image_back')) { //Si viene desde la web
+                $image_path_back = Storage::disk('s3')->put('images', $request->file('image_back'),'public');
+                $id_path_back    = $image_path_back;
+                $url_path_back   = 'https://transmiapp-bucket-s3.s3.amazonaws.com/'. $image_path_back;
+            } else if($request->image_back !== "null") { //Si viene desde la app
+                $image = base64_decode($request->image_back);
+                $imageName = 'image_back_' . time() . '.png';
+                $resAWS = Storage::disk('s3')->put('images/' . $imageName, $image, 'public');
+                if($resAWS){
+                    $id_path_back  = 'images/' . $imageName;
+                    $url_path_back = 'https://transmiapp-bucket-s3.s3.amazonaws.com/images/'.$imageName;
                 }
             }
 
-            if (!$request->file('image_back')) {
-                $url_image_back =  $data->url_image_back;
-                $id_image_back = $data->id_image_back;
-            } else {
-                $image_back = $request->file('image_back')->getRealPath();
-                list($url_image_back, $id_image_back) = $this->updatePhotoInCloud($image_back, $data->id_image_back);
+            if($request->hasFile('image_side')) { //Si viene desde la web
+                $image_path_side = Storage::disk('s3')->put('images', $request->file('image_side'),'public');
+                $id_path_side    = $image_path_side;
+                $url_path_side   = 'https://transmiapp-bucket-s3.s3.amazonaws.com/'. $image_path_side;
+            } else if($request->image_side !== "null") { //Si viene desde la app
+                $image = base64_decode($request->image_side);
+                $imageName = 'image_side_' . time() . '.png';
+                $resAWS = Storage::disk('s3')->put('images/' . $imageName, $image, 'public');
+                if($resAWS){
+                    $id_path_side  = 'images/' . $imageName;
+                    $url_path_side = 'https://transmiapp-bucket-s3.s3.amazonaws.com/images/'.$imageName;
+                }
             }
 
-            if (!$request->file('image_side')) {
-                $url_image_side =  $data->url_image_side;
-                $id_image_side = $data->id_image_side;
-            } else {
-                $image_side = $request->file('image_side')->getRealPath();
-                list($url_image_side, $id_image_side) = $this->updatePhotoInCloud($image_side, $data->id_image_side);
-            }
-
-            if (!$request->file('image_front')) {
-                $url_image_front =  $data->url_image_front;
-                $id_image_front = $data->id_image_front;
-            } else {
-                $image_front = $request->file('image_front')->getRealPath();
-                list($url_image_front, $id_image_front) = $this->updatePhotoInCloud($image_front, $data->id_image_front);
-            }
-
+            //Data a actualizar
             $data->code = $request->code ?? $data->code;
             $data->description = $request->description ?? $data->description;
             $data->brand = $request->brand ?? $data->brand;
@@ -570,12 +514,12 @@ class BicyController extends Controller
             $data->tires = $request->tires ?? $data->tires;
             $data->type_bicies_id = $request->type_bicies_id ?? $data->type_bicies_id;
             $data->active = $request->active ?? $data->active;
-            $data->url_image_back = $url_image_back;
-            $data->url_image_front = $url_image_front;
-            $data->url_image_side = $url_image_side;
-            $data->id_image_back = $id_image_back;
-            $data->id_image_front = $id_image_front;
-            $data->id_image_side = $id_image_side;
+            $data->url_image_back = $url_path_back;
+            $data->url_image_front = $url_path_front;
+            $data->url_image_side = $url_path_side;
+            $data->id_image_back = $id_path_back;
+            $data->id_image_front = $id_path_front;
+            $data->id_image_side = $id_path_side;
             $data->update();
 
             $output = [];
@@ -610,16 +554,18 @@ class BicyController extends Controller
                 $sticker->delete();
             }
 
-            // Eliminando imagen de Cloudinary
+            // Eliminando imagen en AWS
             try {
-                Cloudder::delete($data->id_image_back);
-                Cloudder::destroyImage($data->id_image_back);
-
-                Cloudder::delete($data->id_image_side);
-                Cloudder::destroyImage($data->id_image_side);
-
-                Cloudder::delete($data->id_image_front);
-                Cloudder::destroyImage($data->id_image_front);
+                //Eliminacion de imagenes
+                if(Storage::disk('s3')->exists($data->id_image_back)) {
+                    Storage::disk('s3')->delete($data->id_image_back);
+                }
+                if(Storage::disk('s3')->exists($data->id_image_front)) {
+                    Storage::disk('s3')->delete($data->id_image_front);
+                }
+                if(Storage::disk('s3')->exists($data->id_image_side)) {
+                    Storage::disk('s3')->delete($data->id_image_side);
+                }
 
             } catch (\Throwable $th) {
                 return response()->json(['message' => 'Bad Request', 'response' => ['msg' => 'Error a eliminar la imagen del ciclista', 'error' => $th]], 500);

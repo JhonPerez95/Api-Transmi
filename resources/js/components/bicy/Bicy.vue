@@ -273,8 +273,8 @@
             <div class="form-group col" data-content="Fotografia col">
               <label for="file-default">Fotografía (Frontal)</label>
                 <ValidationProvider
-                  rules="image"
-                  name="imagenes"
+                  rules="required|image|ext:png,jpg,jpeg"
+                  name="imagenes1"
                   v-slot="{ errors }"
                 >
                   <b-form-file
@@ -283,8 +283,7 @@
                     @change="addFile($event, 'front')"
                     v-model="form.image_front"
                     type="file"
-                    class="form-control-user form-control mb-4"
-                    :class="errors[0] ? 'is-invalid' : ''"
+                    class="form-control-user form-control mb-4" :class="errors[0] ? 'is-invalid' : ''"
                   ></b-form-file>
                   <span class="form-text text-danger">{{ errors[0] }}</span>
                 </ValidationProvider>
@@ -312,8 +311,8 @@
             <div class="form-group col" data-content="Fotografia col">
               <label for="file-default-back">Fotografía ( Atrás )</label>
                 <ValidationProvider
-                  rules="image"
-                  name="imagenes"
+                  rules="required|image|ext:png,jpg,jpeg"
+                  name="imagenes2"
                   v-slot="{ errors }"
                 >
                   <b-form-file
@@ -350,8 +349,8 @@
             <div class="form-group col" data-content="Fotografia col">
               <label for="file-default-side">Fotografía ( Lateral )</label>
                 <ValidationProvider
-                  rules="image"
-                  name="imagenes"
+                  rules="required|image|ext:png,jpg,jpeg"
+                  name="imagenes3"
                   v-slot="{ errors }"
                 >
                   <b-form-file
@@ -360,8 +359,7 @@
                     @change="addFile($event, 'side')"
                     v-model="form.image_side"
                     type="file"
-                    class="form-control-user form-control mb-4"
-                    :class="errors[0] ? 'is-invalid' : ''"
+                    class="form-control-user form-control mb-4" :class="errors[0] ? 'is-invalid' : ''"
                   ></b-form-file>
                   <span class="form-text text-danger">{{ errors[0] }}</span>
                 </ValidationProvider>
@@ -530,9 +528,10 @@ export default {
         return;
       }
 
+      //Para crear el consecutivo al momento de crearlo en la web
       if(!this.form.id){
         this.$api.get("web/data/bicy/" + this.form.parkings_id + "/create").then((res) => {
-          console.log(res.data.response.data);
+          //console.log(res.data.response.data);
           this.form.code = res.data.response.data.consecutive;
         });
         console.log(this.form.parkings_id);
@@ -607,7 +606,6 @@ export default {
       data.append("parkings_id", this.form.parkings_id);
       data.append("serial", this.form.serial);
       data.append("active", this.form.active);
-
       data.append("image_front", this.form.image_front);
       data.append("image_back", this.form.image_back);
       data.append("image_side", this.form.image_side);
@@ -622,7 +620,7 @@ export default {
         });
       } else {
         this.$api.post("web/data/bicy", data, { headers: { "Content-Type": "multipart/form-data" } }).then((res) => {
-            console.log(res);
+            //console.log(res);
             if (res.status == 201) {
               this.getData(false);
               toastr.success("Dato Guardado");
