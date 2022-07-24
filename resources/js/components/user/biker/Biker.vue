@@ -356,7 +356,7 @@
             <div class="form-group col" data-content="Fotografia col">
               <label for="file-default">Fotografía</label>
                 <ValidationProvider
-                  rules="image"
+                  rules="required|image|ext:png,jpg,jpeg"
                   name="imagenes"
                   v-slot="{ errors }"
                 >
@@ -569,10 +569,10 @@
       },
       sendMessage(){
         this.$api.get("web/data/biker/verificationCode/" + this.form.phone).then((res) => {
-            console.log(res);
+            //console.log(res);
           if(res.status == 200){
             toastr.success("Código de verificación enviado");
-          }else{
+          } else {
             toastr.error("Error inesperado");
           }
         });
@@ -580,7 +580,6 @@
       },
       dataSubmit() {
         var data = new FormData();
-
         let birthDate = "";
 
         if(typeof this.form.birth == 'object'){
@@ -607,7 +606,9 @@
         data.append("register", this.form.register);
         data.append("type", this.form.type_documents_id);
         data.append("active", this.form.active);
-        if(this.form.photo){data.append("photo", this.form.photo);}
+        if(this.form.photo){
+            data.append("photo", this.form.photo);
+        }
 
         if (this.form.id) {
           this.$api.post("web/data/biker/" + this.form.id, data).then((res) => {
@@ -683,7 +684,9 @@
       },
       editData(id) {
         this.previewImage = [];
+        //console.log(id);
         this.$api.get("web/data/biker/" + id).then((res) => {
+          //console.log(res);
           const data = res.data.response.data;
 
           if(data.photo && data.photo.length){
