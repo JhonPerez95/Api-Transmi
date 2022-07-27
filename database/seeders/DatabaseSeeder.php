@@ -28,7 +28,7 @@ class DatabaseSeeder extends Seeder
             //ParentsSeeder::class,
             ParametersSeeder::class,
             LevelSeeder::class,
-            BikerSeeder::class,
+            //BikerSeeder::class,
             TypeBicySeeder::class,
             BicyStatusSeeder::class,
             //BicySeeder::class,
