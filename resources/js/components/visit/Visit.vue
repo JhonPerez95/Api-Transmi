@@ -308,10 +308,6 @@ export default {
           label: "Hora Salida",
           field: "time_output",
         },
-        // {
-        //   label: "Salida",
-        //   field: "nicely_exit",
-        // },
         {
           label: "Estado",
           field: "status",
