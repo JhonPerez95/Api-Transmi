@@ -21,7 +21,7 @@ class CreateBiciesTable extends Migration
             $table->string('brand');
             $table->string('color');
             $table->string('tires');
-            $table->string('serial');
+            $table->string('serial')->unique()->nullable();
             $table->longText('description');
             $table->unsignedBigInteger('type_bicies_id');
             $table->enum('active',[1,2,3]);

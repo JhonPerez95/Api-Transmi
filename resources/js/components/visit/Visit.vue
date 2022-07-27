@@ -470,7 +470,7 @@ export default {
       });
 
       this.$api.get("web/data/visit").then((res) => {
-          console.log(res.data.response.data);
+          //console.log(res.data.response.data);
         this.rows = res.data.response.data;
         res.data.response.indexes.status.forEach((element) => {
           this.statusData.push(element);

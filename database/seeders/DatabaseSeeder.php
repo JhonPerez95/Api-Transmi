@@ -18,8 +18,8 @@ class DatabaseSeeder extends Seeder
     {
         Schema::disableForeignKeyConstraints();
         $this->call([
-            TypeParkingSeeder::class,
-            StationSeeder::class,
+            //TypeParkingSeeder::class,
+            //StationSeeder::class,
             //ParkingSeeder::class,
             TypeDocumentSeeder::class,
             GenderSeeder::class,
