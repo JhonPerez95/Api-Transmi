@@ -57,7 +57,7 @@ class VisitController extends Controller
                 $outService['bikers_id'] = $service->bikers_id;
                 $outService['created_at'] = $service->created_at;
                 $outService['date_input'] = date("d-m-Y", strtotime($service->date_input));
-                $outService['date_output'] = date("d-m-Y", strtotime($service->date_output));
+                $outService['date_output'] = $service->date_output ? date("d-m-Y", strtotime($service->date_output)) : '';
                 $outService['duration'] = $service->duration;
                 $outService['number'] = $service->number;
                 $outService['parking'] = $service->parking;
